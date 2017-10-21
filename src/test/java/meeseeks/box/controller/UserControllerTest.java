@@ -8,8 +8,7 @@ import org.junit.Test;
  */
 
 public class UserControllerTest {
-    @Test
-    public void index() throws Exception {
-    }
 
+    @Test
+    public void index() throws Exception { }
 }
