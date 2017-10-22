@@ -93,4 +93,3 @@ Temporary Items
 .idea/uiDesigner.xml
 .idea/workspace.xml
 /src/main/resources/application.properties
-/src/main/resources/hibernate.properties
