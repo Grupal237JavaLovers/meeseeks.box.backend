@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -33,35 +34,37 @@ public class SkillEntity implements Serializable {
     @ManyToMany(mappedBy = "skills")
     private Set<ProviderEntity> providers = new HashSet<>();
 
-    public SkillEntity(String name) {
+    private static final String DEFAULT = "";
+
+    public SkillEntity(final @NotNull String name) {
         this.name = name;
     }
 
     public SkillEntity() {
-        this("");
+        this(DEFAULT);
     }
 
-    public Integer getId() {
+    public @NotNull Integer getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(final @NotNull Integer id) {
         this.id = id;
     }
 
-    public String getName() {
+    public @NotNull String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(final @NotNull String name) {
         this.name = name;
     }
 
-    public Set<ProviderEntity> getProviders() {
+    public @NotNull Set<ProviderEntity> getProviders() {
         return providers;
     }
 
-    public void setProviders(Set<ProviderEntity> providers) {
+    public void setProviders(final @NotNull Set<ProviderEntity> providers) {
         this.providers = providers;
     }
 }

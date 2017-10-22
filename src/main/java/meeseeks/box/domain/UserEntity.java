@@ -1,6 +1,7 @@
 package meeseeks.box.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sun.istack.internal.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,99 +18,106 @@ import java.util.Collections;
  * @version 1.0
  */
 
+@SuppressWarnings("unused")
 @Entity
 @Table(name="User")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserEntity implements UserDetails, Serializable {
 
     @Id
-    @GeneratedValue
-    @Column
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Integer id;
 
-    @Column(unique = true)
+    @Column(name = "email", unique = true)
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String email;
 
-    @Column
+    @Column(name = "password")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String password;
 
-    @Column
+    @Column(name = "name")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private String firstName;
+    private String name;
 
-    @Column
+    @Column(name = "username")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private String lastName;
+    private String username;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column
     @CreationTimestamp
     private Calendar created;
 
+    private static final String DEFAULT = "";
+
     public UserEntity() {
-        this(null, null, null, null);
+        this(DEFAULT, DEFAULT, DEFAULT, DEFAULT);
     }
 
-    public UserEntity(final String email,
-                      final String password,
-                      final String firstName,
-                      final String lastName) {
+    public UserEntity(final @NotNull String email,
+                      final @NotNull String username,
+                      final @NotNull String password,
+                      final @NotNull String name) {
         super();
         this.id = null;
         this.email = email;
+        this.username = username;
         this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.name = name;
     }
 
     public Integer getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(final @NotNull Integer id) {
         this.id = id;
     }
 
-    public String getEmail() {
+    public @NotNull String getEmail() {
         return email;
     }
 
-    public void setEmail(String email) {
+    public void setEmail(final @NotNull String email) {
         this.email = email;
     }
 
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public @NotNull String getName() {
+        return name;
     }
 
     @Override
-    public String getPassword() {
+    public @NotNull String getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(final @NotNull String password) {
         this.password = password;
     }
 
-    public Calendar getCreated() {
+    public @NotNull Calendar getCreated() {
         return created;
+    }
+
+
+    public void setName(final @NotNull String name) {
+        this.name = name;
+    }
+
+    public void setUsername(final @NotNull String username) {
+        this.username = username;
+    }
+
+    public void setCreated(final @NotNull Calendar created) {
+        this.created = created;
     }
 
     @Override
     public String toString() {
-        return this.firstName + " " + this.lastName;
+        return this.name;
     }
 
     @Override

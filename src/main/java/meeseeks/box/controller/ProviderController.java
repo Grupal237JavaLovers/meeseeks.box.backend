@@ -31,17 +31,18 @@ public class ProviderController {
     }
 
     @RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
-    public @ResponseBody ProviderEntity getProviderById(@PathVariable("id") Integer id) {
+    public @ResponseBody ProviderEntity getProviderById(@PathVariable("id") final Integer id) {
         return providerRepository.findOne(id);
     }
 
     @RequestMapping(value = "/get/{id}/skills/all", method = RequestMethod.GET)
-    public @ResponseBody Set<SkillEntity> getProviderSkillsById(@PathVariable("id") Integer id) {
+    public @ResponseBody Set<SkillEntity> getProviderSkillsById(@PathVariable("id") final Integer id) {
         return providerRepository.findOne(id).getSkills();
     }
 
     @RequestMapping(value = "/get/{id}/skills/add/{nameSkill}", method = RequestMethod.GET)
-    public @ResponseBody Set<SkillEntity> addSkillsToProviderById(@PathVariable("id") Integer id, @PathVariable("nameSkill") String nameSkill) {
+    public @ResponseBody Set<SkillEntity> addSkillsToProviderById(@PathVariable("id") final Integer id,
+                                                                  @PathVariable("nameSkill") final String nameSkill) {
         ProviderEntity provider = providerRepository.findOne(id);
         Set<SkillEntity> skills = provider.getSkills();
         skills.add(new SkillEntity(nameSkill));
@@ -49,8 +50,4 @@ public class ProviderController {
         providerRepository.save(provider);
         return provider.getSkills();
     }
-
-
-
-
 }

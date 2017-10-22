@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,29 +18,7 @@ import java.util.Set;
 @Table(name = "Provider")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @SuppressWarnings("all")
-public class ProviderEntity implements Serializable {
-
-            @Id
-            @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private Integer id;
-
-    @Column(name = "username", unique = true)
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private String username;
-
-    @Column(name = "password")
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private String password;
-
-    @Column(name = "name")
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private String name;
-
-    @Column(name = "email", unique = true)
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private String email;
+public class ProviderEntity extends UserEntity implements Serializable {
 
     @Column(name = "profile_image")
     private String profileImageUrl;
@@ -51,17 +30,25 @@ public class ProviderEntity implements Serializable {
     private String profileVideoUrl;
 
     @JsonIgnore
+    @OneToMany(mappedBy = "provider", targetEntity = ReviewEntity.class)
+    private Set<RequestEntity> reviews = new HashSet<>();
+
+    @JsonIgnore
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "SkillList", joinColumns = @JoinColumn(name = "id_provider", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "id_skill", referencedColumnName = "id"))
     private Set<SkillEntity> skills = new HashSet<>();
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "provider", targetEntity = RequestEntity.class)
+    private Set<RequestEntity> requests = new HashSet<>();
+
     private static final String DEFAULT = "";
 
-    public ProviderEntity(final String username,
-                          final String password,
-                          final String name,
-                          final String email) {
+    public ProviderEntity(final @NotNull String username,
+                          final @NotNull String password,
+                          final @NotNull String name,
+                          final @NotNull String email) {
         this(username, password, name, email, DEFAULT, DEFAULT, DEFAULT);
     }
 
@@ -70,91 +57,64 @@ public class ProviderEntity implements Serializable {
     }
 
     @SuppressWarnings("WeakerAccess")
-    public ProviderEntity(final String username,
-                          final String password,
-                          final String name,
-                          final String email,
-                          final String profileImageUrl,
-                          final String description,
-                          final String profileVideoUrl) {
-        this.username = username;
-        this.password = password;
-        this.name = name;
-        this.email = email;
+    public ProviderEntity(final @NotNull String username,
+                          final @NotNull String password,
+                          final @NotNull String name,
+                          final @NotNull String email,
+                          final @NotNull String profileImageUrl,
+                          final @NotNull String description,
+                          final @NotNull String profileVideoUrl) {
+        super(email, username, password, name);
         this.profileImageUrl = profileImageUrl;
         this.description = description;
         this.profileVideoUrl = profileVideoUrl;
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getProfileImageUrl() {
+    public @NotNull String getProfileImageUrl() {
         return profileImageUrl;
     }
 
-    public void setProfileImageUrl(String profileImageUrl) {
+    public void setProfileImageUrl(final @NotNull String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
     }
 
-    public String getDescription() {
+    public @NotNull String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(final @NotNull String description) {
         this.description = description;
     }
 
-    public String getProfileVideoUrl() {
+    public @NotNull String getProfileVideoUrl() {
         return profileVideoUrl;
     }
 
-    public void setProfileVideoUrl(String profileVideoUrl) {
+    public void setProfileVideoUrl(final @NotNull String profileVideoUrl) {
         this.profileVideoUrl = profileVideoUrl;
     }
 
-    public Set<SkillEntity> getSkills() {
+    public @NotNull Set<SkillEntity> getSkills() {
         return skills;
     }
 
-    public void setSkills(Set<SkillEntity> skills) {
+    public void setSkills(final @NotNull Set<SkillEntity> skills) {
         this.skills = skills;
+    }
+
+    public @NotNull Set<RequestEntity> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(final @NotNull Set<RequestEntity> reviews) {
+        this.reviews = reviews;
+    }
+
+    public @NotNull Set<RequestEntity> getRequests() {
+        return requests;
+    }
+
+    public void setRequests(final @NotNull Set<RequestEntity> requests) {
+        this.requests = requests;
     }
 }
