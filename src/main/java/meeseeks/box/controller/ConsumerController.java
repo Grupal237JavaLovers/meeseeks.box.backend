@@ -1,14 +1,14 @@
 package meeseeks.box.controller;
 
 import meeseeks.box.domain.ConsumerEntity;
-import meeseeks.box.domain.dto.ConsumerDto;
 import meeseeks.box.repository.ConsumerRepository;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+
 
 /**
  * @author Tiron Andreea-Ecaterina
@@ -40,8 +40,8 @@ public class ConsumerController {
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public void registerConsumer(@RequestBody @Valid ConsumerDto consumerDto) {
-        LOGGER.log(Level.INFO, "Provider {0} try to register!", consumerDto.getUsername());
-        //consumerRepository.save(new ConsumerEntity("kate_middleton", "password", "Kate Middleton", "kate.middleton@gmail.com"));
+    public void registerConsumer(@RequestBody @Valid ConsumerEntity consumer) {
+        LOGGER.info("Provider " + consumer.getUsername() + " registers now ...");
+        consumerRepository.save(consumer);
     }
 }
