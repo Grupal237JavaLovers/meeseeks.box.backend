@@ -2,11 +2,13 @@ package meeseeks.box.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.validator.constraints.Email;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Calendar;
@@ -30,10 +32,12 @@ public class UserEntity implements UserDetails, Serializable {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Integer id;
 
+    @Email(message = "{provider.email.incorrect}")
     @Column(name = "email", unique = true)
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String email;
 
+    @Size(min = 8, message = "{provider.password.length}")
     @Column(name = "password")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String password;
@@ -42,7 +46,7 @@ public class UserEntity implements UserDetails, Serializable {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String name;
 
-    @Column(name = "username")
+    @Column(name = "username", unique = true)
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String username;
 
