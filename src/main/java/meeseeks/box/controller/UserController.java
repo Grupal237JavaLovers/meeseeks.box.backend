@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin(origins = "*")
-@RequestMapping("/user/")
+@RequestMapping("/user")
 public class UserController {
 
     private final UserRepository userRepository;
