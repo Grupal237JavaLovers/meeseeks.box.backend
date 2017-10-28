@@ -67,9 +67,7 @@ public class ConsumerEntity extends UserEntity implements Serializable {
         this.profileImageUrl = profileImageUrl;
     }
 
-    public
-    @NotNull
-    Set<JobEntity> getJobs() {
+    public @NotNull Set<JobEntity> getJobs() {
         return jobs;
     }
 
