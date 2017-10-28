@@ -44,7 +44,7 @@ public class SkillEntity implements Serializable {
         this(DEFAULT);
     }
 
-    public @NotNull Integer getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -52,7 +52,7 @@ public class SkillEntity implements Serializable {
         this.id = id;
     }
 
-    public @NotNull String getName() {
+    public String getName() {
         return name;
     }
 
@@ -60,7 +60,7 @@ public class SkillEntity implements Serializable {
         this.name = name;
     }
 
-    public @NotNull Set<ProviderEntity> getProviders() {
+    public Set<ProviderEntity> getProviders() {
         return providers;
     }
 
