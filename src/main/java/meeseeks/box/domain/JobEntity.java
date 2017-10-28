@@ -2,6 +2,7 @@ package meeseeks.box.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -73,6 +74,13 @@ public class JobEntity implements Serializable {
     @JsonIgnore
     @OneToMany(mappedBy = "job", targetEntity = ReviewEntity.class)
     private Set<RequestEntity> reviews = new HashSet<>();
+
+
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column
+    @CreationTimestamp
+    private Calendar created;
 
     private static final String DEFAULT = "";
 
@@ -187,4 +195,6 @@ public class JobEntity implements Serializable {
     public void setReviews(final @NotNull Set<RequestEntity> reviews) {
         this.reviews = reviews;
     }
+
+    public Calendar getCreated() {return created;}
 }
