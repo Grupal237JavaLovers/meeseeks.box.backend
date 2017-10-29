@@ -46,7 +46,7 @@ public class CategoryEntity implements Serializable {
         this(DEFAULT);
     }
 
-    public @NotNull Integer getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -54,7 +54,7 @@ public class CategoryEntity implements Serializable {
         this.id = id;
     }
 
-    public @NotNull String getName() {
+    public String getName() {
         return name;
     }
 
@@ -62,7 +62,7 @@ public class CategoryEntity implements Serializable {
         this.name = name;
     }
 
-    public @NotNull Set<JobEntity> getJobs() {
+    public Set<JobEntity> getJobs() {
         return jobs;
     }
 

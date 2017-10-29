@@ -92,7 +92,7 @@ public class JobEntity implements Serializable {
         this(DEFAULT, DEFAULT, DEFAULT, DEFAULT, 1.0);
     }
 
-    public @NotNull Integer getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -100,7 +100,7 @@ public class JobEntity implements Serializable {
         this.id = id;
     }
 
-    public @NotNull String getName() {
+    public String getName() {
         return name;
     }
 
@@ -108,7 +108,7 @@ public class JobEntity implements Serializable {
         this.name = name;
     }
 
-    public @NotNull String getDescription() {
+    public String getDescription() {
         return description;
     }
 
@@ -116,7 +116,7 @@ public class JobEntity implements Serializable {
         this.description = description;
     }
 
-    public @NotNull String getLocation() {
+    public String getLocation() {
         return location;
     }
 
@@ -124,7 +124,7 @@ public class JobEntity implements Serializable {
         this.location = location;
     }
 
-    public @NotNull String getType() {
+    public String getType() {
         return type;
     }
 
@@ -132,7 +132,7 @@ public class JobEntity implements Serializable {
         this.type = type;
     }
 
-    public @NotNull Double getPrice() {
+    public Double getPrice() {
         return price;
     }
 
@@ -140,7 +140,7 @@ public class JobEntity implements Serializable {
         this.price = price;
     }
 
-    public @NotNull Calendar getExpiration() {
+    public Calendar getExpiration() {
         return expiration;
     }
 
@@ -148,7 +148,7 @@ public class JobEntity implements Serializable {
         this.expiration = expiration;
     }
 
-    public @NotNull CategoryEntity getCategory() {
+    public CategoryEntity getCategory() {
         return category;
     }
 
@@ -156,7 +156,7 @@ public class JobEntity implements Serializable {
         this.category = category;
     }
 
-    public @NotNull AvailabilityEntity getAvailability() {
+    public AvailabilityEntity getAvailability() {
         return availability;
     }
 
@@ -164,7 +164,7 @@ public class JobEntity implements Serializable {
         this.availability = availability;
     }
 
-    public @NotNull ConsumerEntity getConsumer() {
+    public ConsumerEntity getConsumer() {
         return consumer;
     }
 
@@ -172,7 +172,7 @@ public class JobEntity implements Serializable {
         this.consumer = consumer;
     }
 
-    public @NotNull Set<RequestEntity> getRequests() {
+    public Set<RequestEntity> getRequests() {
         return requests;
     }
 
@@ -180,7 +180,7 @@ public class JobEntity implements Serializable {
         this.requests = requests;
     }
 
-    public @NotNull Set<RequestEntity> getReviews() {
+    public Set<RequestEntity> getReviews() {
         return reviews;
     }
 

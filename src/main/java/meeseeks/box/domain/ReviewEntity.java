@@ -71,7 +71,7 @@ public class ReviewEntity implements Serializable {
         this.rating = rating;
     }
 
-    public @NotNull Integer getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -79,7 +79,7 @@ public class ReviewEntity implements Serializable {
         this.id = id;
     }
 
-    public @NotNull String getMessage() {
+    public String getMessage() {
         return message;
     }
 
@@ -87,7 +87,7 @@ public class ReviewEntity implements Serializable {
         this.message = message;
     }
 
-    public @NotNull Calendar getDate() {
+    public Calendar getDate() {
         return date;
     }
 
@@ -95,7 +95,7 @@ public class ReviewEntity implements Serializable {
         this.date = date;
     }
 
-    public @NotNull Integer getRating() {
+    public Integer getRating() {
         return rating;
     }
 
@@ -103,7 +103,7 @@ public class ReviewEntity implements Serializable {
         this.rating = rating;
     }
 
-    public @NotNull Boolean isReceivedByProvider() {
+    public Boolean isReceivedByProvider() {
         return isReceivedByProvider;
     }
 
@@ -111,7 +111,7 @@ public class ReviewEntity implements Serializable {
         isReceivedByProvider = receivedByProvider;
     }
 
-    public @NotNull ConsumerEntity getConsumer() {
+    public ConsumerEntity getConsumer() {
         return consumer;
     }
 
@@ -119,7 +119,7 @@ public class ReviewEntity implements Serializable {
         this.consumer = consumer;
     }
 
-    public @NotNull ProviderEntity getProvider() {
+    public ProviderEntity getProvider() {
         return provider;
     }
 
@@ -127,7 +127,7 @@ public class ReviewEntity implements Serializable {
         this.provider = provider;
     }
 
-    public @NotNull JobEntity getJob() {
+    public JobEntity getJob() {
         return job;
     }
 

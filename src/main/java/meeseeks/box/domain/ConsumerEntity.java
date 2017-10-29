@@ -55,7 +55,7 @@ public class ConsumerEntity extends UserEntity implements Serializable {
         this.profileImageUrl = profileImageUrl;
     }
 
-    public @NotNull String getProfileImageUrl() {
+    public String getProfileImageUrl() {
         return profileImageUrl;
     }
 
@@ -63,7 +63,7 @@ public class ConsumerEntity extends UserEntity implements Serializable {
         this.profileImageUrl = profileImageUrl;
     }
 
-    public @NotNull Set<JobEntity> getJobs() {
+    public Set<JobEntity> getJobs() {
         return jobs;
     }
 
@@ -71,7 +71,7 @@ public class ConsumerEntity extends UserEntity implements Serializable {
         this.jobs = jobs;
     }
 
-    public @NotNull Set<RequestEntity> getReviews() {
+    public Set<RequestEntity> getReviews() {
         return reviews;
     }
 

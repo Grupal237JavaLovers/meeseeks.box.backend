@@ -59,7 +59,7 @@ public class AvailabilityEntity implements Serializable {
         this.endHour = endHour;
     }
 
-    public @NotNull Integer getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -67,7 +67,7 @@ public class AvailabilityEntity implements Serializable {
         this.id = id;
     }
 
-    public @NotNull String getDay() {
+    public String getDay() {
         return day;
     }
 
@@ -75,7 +75,7 @@ public class AvailabilityEntity implements Serializable {
         this.day = day;
     }
 
-    public @NotNull Time getStartHour() {
+    public Time getStartHour() {
         return startHour;
     }
 
@@ -83,7 +83,7 @@ public class AvailabilityEntity implements Serializable {
         this.startHour = startHour;
     }
 
-    public @NotNull Time getEndHour() {
+    public Time getEndHour() {
         return endHour;
     }
 
@@ -91,7 +91,7 @@ public class AvailabilityEntity implements Serializable {
         this.endHour = endHour;
     }
 
-    public @NotNull Set<JobEntity> getJobs() {
+    public Set<JobEntity> getJobs() {
         return jobs;
     }
 

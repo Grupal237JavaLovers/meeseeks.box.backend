@@ -45,10 +45,10 @@ public class ProviderEntity extends UserEntity implements Serializable {
 
     private static final String DEFAULT = "";
 
-    public ProviderEntity(final @NotNull String username,
-                          final @NotNull String password,
-                          final @NotNull String name,
-                          final @NotNull String email) {
+    public ProviderEntity(final String username,
+                          final String password,
+                          final String name,
+                          final String email) {
         this(username, password, name, email, DEFAULT, DEFAULT, DEFAULT);
     }
 
@@ -57,20 +57,20 @@ public class ProviderEntity extends UserEntity implements Serializable {
     }
 
     @SuppressWarnings("WeakerAccess")
-    public ProviderEntity(final @NotNull String username,
-                          final @NotNull String password,
-                          final @NotNull String name,
-                          final @NotNull String email,
-                          final @NotNull String profileImageUrl,
-                          final @NotNull String description,
-                          final @NotNull String profileVideoUrl) {
+    public ProviderEntity(final String username,
+                          final String password,
+                          final String name,
+                          final String email,
+                          final String profileImageUrl,
+                          final String description,
+                          final String profileVideoUrl) {
         super(email, username, password, name);
         this.profileImageUrl = profileImageUrl;
         this.description = description;
         this.profileVideoUrl = profileVideoUrl;
     }
 
-    public @NotNull String getProfileImageUrl() {
+    public String getProfileImageUrl() {
         return profileImageUrl;
     }
 
@@ -78,7 +78,7 @@ public class ProviderEntity extends UserEntity implements Serializable {
         this.profileImageUrl = profileImageUrl;
     }
 
-    public @NotNull String getDescription() {
+    public String getDescription() {
         return description;
     }
 
@@ -86,7 +86,7 @@ public class ProviderEntity extends UserEntity implements Serializable {
         this.description = description;
     }
 
-    public @NotNull String getProfileVideoUrl() {
+    public String getProfileVideoUrl() {
         return profileVideoUrl;
     }
 
@@ -94,7 +94,7 @@ public class ProviderEntity extends UserEntity implements Serializable {
         this.profileVideoUrl = profileVideoUrl;
     }
 
-    public @NotNull Set<SkillEntity> getSkills() {
+    public Set<SkillEntity> getSkills() {
         return skills;
     }
 
@@ -102,7 +102,7 @@ public class ProviderEntity extends UserEntity implements Serializable {
         this.skills = skills;
     }
 
-    public @NotNull Set<RequestEntity> getReviews() {
+    public Set<RequestEntity> getReviews() {
         return reviews;
     }
 
@@ -110,7 +110,7 @@ public class ProviderEntity extends UserEntity implements Serializable {
         this.reviews = reviews;
     }
 
-    public @NotNull Set<RequestEntity> getRequests() {
+    public Set<RequestEntity> getRequests() {
         return requests;
     }
 

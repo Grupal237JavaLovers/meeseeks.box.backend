@@ -1,13 +1,13 @@
 package meeseeks.box.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sun.istack.internal.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Collection;
@@ -62,7 +62,7 @@ public class UserEntity implements UserDetails, Serializable {
                       final @NotNull String password,
                       final @NotNull String name) {
         super();
-        this.id = null;
+        this.id = 0;
         this.email = email;
         this.username = username;
         this.password = password;
@@ -77,7 +77,7 @@ public class UserEntity implements UserDetails, Serializable {
         this.id = id;
     }
 
-    public @NotNull String getEmail() {
+    public String getEmail() {
         return email;
     }
 
@@ -85,12 +85,12 @@ public class UserEntity implements UserDetails, Serializable {
         this.email = email;
     }
 
-    public @NotNull String getName() {
+    public String getName() {
         return name;
     }
 
     @Override
-    public @NotNull String getPassword() {
+    public String getPassword() {
         return password;
     }
 
@@ -98,7 +98,7 @@ public class UserEntity implements UserDetails, Serializable {
         this.password = password;
     }
 
-    public @NotNull Calendar getCreated() {
+    public Calendar getCreated() {
         return created;
     }
 

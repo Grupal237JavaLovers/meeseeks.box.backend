@@ -27,7 +27,7 @@ public class ProviderController {
 
     @RequestMapping(value = "/create", method = RequestMethod.GET)
     public void create() {
-        providerRepository.save(new ProviderEntity("test", "password", "name", "email"));
+        providerRepository.save(new ProviderEntity("test", "password", "name", "email2"));
     }
 
     @RequestMapping(value = "/get/{id}", method = RequestMethod.GET)

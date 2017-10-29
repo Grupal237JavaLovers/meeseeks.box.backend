@@ -63,7 +63,7 @@ public class RequestEntity implements Serializable {
         this.accepted = isAccepted;
     }
 
-    public @NotNull Integer getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -71,7 +71,7 @@ public class RequestEntity implements Serializable {
         this.id = id;
     }
 
-    public @NotNull Calendar getDate() {
+    public Calendar getDate() {
         return date;
     }
 
@@ -79,7 +79,7 @@ public class RequestEntity implements Serializable {
         this.date = date;
     }
 
-    public @NotNull String getMessage() {
+    public String getMessage() {
         return message;
     }
 
@@ -87,7 +87,7 @@ public class RequestEntity implements Serializable {
         this.message = message;
     }
 
-    public @NotNull Boolean isAccepted() {
+    public Boolean isAccepted() {
         return accepted;
     }
 
@@ -95,7 +95,7 @@ public class RequestEntity implements Serializable {
         this.accepted = accepted;
     }
 
-    public @NotNull ProviderEntity getProvider() {
+    public ProviderEntity getProvider() {
         return provider;
     }
 
@@ -103,7 +103,7 @@ public class RequestEntity implements Serializable {
         this.provider = provider;
     }
 
-    public @NotNull JobEntity getJob() {
+    public JobEntity getJob() {
         return job;
     }
 
