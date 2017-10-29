@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.persistence.*;
+import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.HashSet;
@@ -45,6 +46,9 @@ public class ProviderEntity extends UserEntity implements Serializable {
 
     private static final String DEFAULT = "";
 
+    @Transient
+    private String confirmPassword;
+
     public ProviderEntity(final String username,
                           final String password,
                           final String name,
@@ -69,6 +73,10 @@ public class ProviderEntity extends UserEntity implements Serializable {
         this.description = description;
         this.profileVideoUrl = profileVideoUrl;
     }
+
+    public String getConfirmPassword() { return confirmPassword; }
+
+    public void setConfirmPassword(String confirmPassword) { this.confirmPassword = confirmPassword; }
 
     public String getProfileImageUrl() {
         return profileImageUrl;
@@ -116,5 +124,11 @@ public class ProviderEntity extends UserEntity implements Serializable {
 
     public void setRequests(final @NotNull Set<RequestEntity> requests) {
         this.requests = requests;
+    }
+
+    @AssertTrue(message="{provider.passwords.mismatch}")
+    public boolean isPasswordConfirmed() {
+        return super.getPassword() != null && this.confirmPassword != null
+                && super.getPassword().equals(this.confirmPassword);
     }
 }

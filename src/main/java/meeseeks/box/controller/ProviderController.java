@@ -6,7 +6,10 @@ import meeseeks.box.repository.ProviderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Alexandru Stoica
@@ -19,6 +22,8 @@ import java.util.Set;
 public class ProviderController {
 
     private final ProviderRepository providerRepository;
+
+    private final Logger LOGGER = Logger.getLogger(ProviderController.class.getName());
 
     @Autowired
     public ProviderController(final ProviderRepository providerRepository) {
@@ -49,5 +54,12 @@ public class ProviderController {
         provider.setSkills(skills);
         providerRepository.save(provider);
         return provider.getSkills();
+    }
+
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    public void registerProvider(@RequestBody @Valid ProviderEntity provider) {
+        LOGGER.log(Level.INFO, "Provider {0} try to register!", provider.getUsername());
+        //TODO add password encryption from Rares code
+        providerRepository.save(provider);
     }
 }
