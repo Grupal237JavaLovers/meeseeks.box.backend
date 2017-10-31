@@ -1,6 +1,7 @@
 package meeseeks.box.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sun.istack.internal.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.Email;
 import org.springframework.security.core.GrantedAuthority;
@@ -9,7 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Collection;
@@ -22,7 +22,7 @@ import java.util.Collections;
 
 @SuppressWarnings("unused")
 @Entity
-@Table(name="User")
+@Table(name = "User")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserEntity implements UserDetails, Serializable {
 
@@ -66,7 +66,7 @@ public class UserEntity implements UserDetails, Serializable {
                       final @NotNull String password,
                       final @NotNull String name) {
         super();
-        this.id = 0;
+        this.id = null;
         this.email = email;
         this.username = username;
         this.password = password;
@@ -81,7 +81,7 @@ public class UserEntity implements UserDetails, Serializable {
         this.id = id;
     }
 
-    public String getEmail() {
+    public @NotNull String getEmail() {
         return email;
     }
 
@@ -89,12 +89,12 @@ public class UserEntity implements UserDetails, Serializable {
         this.email = email;
     }
 
-    public String getName() {
+    public @NotNull String getName() {
         return name;
     }
 
     @Override
-    public String getPassword() {
+    public @NotNull String getPassword() {
         return password;
     }
 
@@ -102,10 +102,9 @@ public class UserEntity implements UserDetails, Serializable {
         this.password = password;
     }
 
-    public Calendar getCreated() {
+    public @NotNull Calendar getCreated() {
         return created;
     }
-
 
     public void setName(final @NotNull String name) {
         this.name = name;

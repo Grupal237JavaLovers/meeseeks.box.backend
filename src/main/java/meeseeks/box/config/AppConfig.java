@@ -8,9 +8,6 @@ import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-/**
- * Created by mt on 10/28/2017.
- */
 @Configuration
 public class AppConfig extends WebMvcConfigurerAdapter {
 
@@ -34,3 +31,4 @@ public class AppConfig extends WebMvcConfigurerAdapter {
         return validator();
     }
 }
+
