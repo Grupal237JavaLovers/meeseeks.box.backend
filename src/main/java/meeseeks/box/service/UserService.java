@@ -1,4 +1,4 @@
-package service;
+package meeseeks.box.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,14 +21,18 @@ public class UserService implements UserDetailsService
     
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return repo.findByUsername(username);
+        UserEntity user = this.repo.findByUsername(username);
+
+        if (user == null) {
+            throw new UsernameNotFoundException("User sau parola incorecta");
+        }
+
+        return user;
     }
 
-    @Override
     public void saveUser(UserEntity user) {
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user.setActive(1);
-        user.setRoles(new HashSet<Role>(Arrays.asList(userRole)));
-        userRepository.save(user);
+        
+        repo.save(user);
     }    
 }

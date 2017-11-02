@@ -22,3 +22,5 @@ spring.jpa.hibernate.naming-strategy = org.hibernate.cfg.ImprovedNamingStrategy
 spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.MySQL5Dialect
 
 security.basic.enabled=false
+
+app.security.secret=5b520eaf9a2067a98de258ec8a3a3f3e8b64f219

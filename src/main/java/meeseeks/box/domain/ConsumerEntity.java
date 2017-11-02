@@ -16,9 +16,7 @@ import java.util.Set;
  * @version 1.0
  */
 
-@SuppressWarnings("unused")
 @Entity
-@Table(name = "Consumer")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ConsumerEntity extends UserEntity implements Serializable {
