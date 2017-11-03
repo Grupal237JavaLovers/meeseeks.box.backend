@@ -3,6 +3,7 @@ package meeseeks.box.controller;
 import meeseeks.box.domain.ProviderEntity;
 import meeseeks.box.domain.SkillEntity;
 import meeseeks.box.repository.ProviderRepository;
+import meeseeks.box.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,11 +24,14 @@ public class ProviderController {
 
     private final ProviderRepository providerRepository;
 
+    private final UserService userService;
+
     private final Logger LOGGER = Logger.getLogger(ProviderController.class.getName());
 
     @Autowired
-    public ProviderController(final ProviderRepository providerRepository) {
+    public ProviderController(final ProviderRepository providerRepository, UserService userService) {
         this.providerRepository = providerRepository;
+        this.userService = userService;
     }
 
     @RequestMapping(value = "/create", method = RequestMethod.GET)
@@ -59,7 +63,6 @@ public class ProviderController {
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public void registerProvider(@RequestBody @Valid ProviderEntity provider) {
         LOGGER.log(Level.INFO, "Provider {0} try to register!", provider.getUsername());
-        //TODO add password encryption from Rares code
-        providerRepository.save(provider);
+        userService.saveUser(provider);
     }
 }

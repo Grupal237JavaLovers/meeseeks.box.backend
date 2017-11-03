@@ -2,6 +2,7 @@ package meeseeks.box.controller;
 
 import meeseeks.box.domain.ConsumerEntity;
 import meeseeks.box.repository.ConsumerRepository;
+import meeseeks.box.service.UserService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -22,11 +23,14 @@ public class ConsumerController {
 
     private final ConsumerRepository consumerRepository;
 
+    private final UserService userService;
+
     private final Logger LOGGER = Logger.getLogger(ProviderController.class.getName());
 
     @Autowired
-    public ConsumerController(final ConsumerRepository consumerRepository) {
+    public ConsumerController(final ConsumerRepository consumerRepository, UserService userService) {
         this.consumerRepository = consumerRepository;
+        this.userService = userService;
     }
 
     @RequestMapping(value = "/create", method = RequestMethod.GET)
@@ -42,6 +46,6 @@ public class ConsumerController {
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public void registerConsumer(@RequestBody @Valid ConsumerEntity consumer) {
         LOGGER.info("Provider " + consumer.getUsername() + " registers now ...");
-        consumerRepository.save(consumer);
+        userService.saveUser(consumer);
     }
 }
