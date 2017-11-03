@@ -1,22 +1,13 @@
 package meeseeks.box.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
-import javax.persistence.Transient;
-import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.NotNull;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * @author Alexandru Stoica
@@ -28,33 +19,24 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @SuppressWarnings("all")
 public class ProviderEntity extends UserEntity implements Serializable {
 
+    private static final String DEFAULT = "";
     @Column(name = "profile_image")
     private String profileImageUrl;
-
     @Column(name = "description")
     private String description;
-
     @Column(name = "video_url")
     private String profileVideoUrl;
-
     @JsonIgnore
     @OneToMany(mappedBy = "provider", targetEntity = ReviewEntity.class)
     private Set<RequestEntity> reviews = new HashSet<>();
-
     @JsonIgnore
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "SkillList", joinColumns = @JoinColumn(name = "id_provider", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "id_skill", referencedColumnName = "id"))
     private Set<SkillEntity> skills = new HashSet<>();
-
     @JsonIgnore
     @OneToMany(mappedBy = "provider", targetEntity = RequestEntity.class)
     private Set<RequestEntity> requests = new HashSet<>();
-
-    private static final String DEFAULT = "";
-
-    @Transient
-    private String confirmPassword;
 
     public ProviderEntity(final String username,
                           final String password,
@@ -80,10 +62,6 @@ public class ProviderEntity extends UserEntity implements Serializable {
         this.description = description;
         this.profileVideoUrl = profileVideoUrl;
     }
-
-    public String getConfirmPassword() { return confirmPassword; }
-
-    public void setConfirmPassword(String confirmPassword) { this.confirmPassword = confirmPassword; }
 
     public String getProfileImageUrl() {
         return profileImageUrl;
@@ -133,9 +111,4 @@ public class ProviderEntity extends UserEntity implements Serializable {
         this.requests = requests;
     }
 
-    @AssertTrue(message="{provider.passwords.mismatch}")
-    public boolean isPasswordConfirmed() {
-        return super.getPassword() != null && this.confirmPassword != null
-                && super.getPassword().equals(this.confirmPassword);
-    }
 }

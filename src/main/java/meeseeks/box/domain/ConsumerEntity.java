@@ -4,8 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import javax.persistence.*;
-import javax.validation.constraints.AssertTrue;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.HashSet;
@@ -21,21 +22,15 @@ import java.util.Set;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ConsumerEntity extends UserEntity implements Serializable {
 
+    private static final String DEFAULT = "";
     @Column(name = "profile_image")
     private String profileImageUrl;
-
     @JsonIgnore
     @OneToMany(mappedBy = "consumer", targetEntity = JobEntity.class)
     private Set<JobEntity> jobs = new HashSet<>();
-
     @JsonIgnore
     @OneToMany(mappedBy = "consumer", targetEntity = ReviewEntity.class)
     private Set<RequestEntity> reviews = new HashSet<>();
-
-    @Transient
-    private String confirmPassword;
-
-    private static final String DEFAULT = "";
 
     public ConsumerEntity(final @NotNull String username,
                           final @NotNull String password,
@@ -79,19 +74,5 @@ public class ConsumerEntity extends UserEntity implements Serializable {
 
     public void setReviews(final @NotNull Set<RequestEntity> reviews) {
         this.reviews = reviews;
-    }
-
-    public String getConfirmPassword() {
-        return confirmPassword;
-    }
-
-    public void setConfirmPassword(String confirmPassword) {
-        this.confirmPassword = confirmPassword;
-    }
-
-    @AssertTrue(message = "{provider.passwords.mismatch}")
-    public boolean isPasswordConfirmed() {
-        return super.getPassword() != null && this.confirmPassword != null
-                && super.getPassword().equals(this.confirmPassword);
     }
 }
