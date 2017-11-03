@@ -1,26 +1,38 @@
 package meeseeks.box.domain;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sun.istack.internal.NotNull;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.Email;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.persistence.*;
-import javax.validation.constraints.Size;
-import java.io.Serializable;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * @author Alexandru Stoica
  * @version 1.0
  */
 
-@SuppressWarnings("unused")
 @Entity
 @Table(name = "User")
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -39,7 +51,7 @@ public class UserEntity implements UserDetails, Serializable {
 
     @Size(min = 8, message = "{provider.password.length}")
     @Column(name = "password")
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonIgnore
     private String password;
 
     @Column(name = "name")
@@ -49,6 +61,10 @@ public class UserEntity implements UserDetails, Serializable {
     @Column(name = "username", unique = true)
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String username;
+
+    @Enumerated(EnumType.STRING)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private UserRole role;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column
@@ -102,7 +118,7 @@ public class UserEntity implements UserDetails, Serializable {
         this.password = password;
     }
 
-    public @NotNull Calendar getCreated() {
+    public Calendar getCreated() {
         return created;
     }
 
@@ -114,23 +130,39 @@ public class UserEntity implements UserDetails, Serializable {
         this.username = username;
     }
 
-    public void setCreated(final @NotNull Calendar created) {
-        this.created = created;
-    }
+    public UserRole getRole() {
+		return role;
+	}
 
-    @Override
+	public void setRole(UserRole role) {
+		this.role = role;
+	}
+
+	@Override
     public String toString() {
         return this.name;
     }
 
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+    	List<GrantedAuthority> auths = new ArrayList<>();
+
+    	if (this.getRole() != null) {
+    	    auths.add(new SimpleGrantedAuthority(this.getRole().toString()));
+    	}
+
+        // All users should also have the default user role
+        if (this.getRole() != UserRole.user) {
+            auths.add(new SimpleGrantedAuthority(UserRole.user.toString()));
+        }
+
+        return auths;
     }
 
     @Override
     public String getUsername() {
-        return this.email;
+        return this.username;
     }
 
     @Override
@@ -151,5 +183,22 @@ public class UserEntity implements UserDetails, Serializable {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public static enum UserRole {
+    	user("ROLE_USER"),
+        provider("ROLE_PROVIDER"),
+        consumer("ROLE_CONSUMER");
+
+        private String nume;
+
+        UserRole(String nume) {
+            this.nume = nume;
+        }
+
+        @Override
+        public String toString() {
+            return this.nume;
+        }
     }
 }
