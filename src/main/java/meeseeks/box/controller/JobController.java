@@ -4,18 +4,15 @@ import meeseeks.box.domain.ConsumerEntity;
 import meeseeks.box.domain.JobEntity;
 import meeseeks.box.domain.ProviderEntity;
 import meeseeks.box.domain.ReviewEntity;
-import meeseeks.box.exception.NotFoundException;
-import meeseeks.box.model.JobModel;
 import meeseeks.box.repository.ConsumerRepository;
 import meeseeks.box.repository.JobRepository;
 import meeseeks.box.repository.ProviderRepository;
+import meeseeks.box.repository.RequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,89 +20,62 @@ import java.util.List;
 /**
  * Created by nicof on 10/28/2017.
  */
-
 @RestController
-@RequestMapping("/job")
+@CrossOrigin(origins = "*")
+@RequestMapping("/jobs")
 public class JobController {
-
-    private final JobRepository jobRepository;
-    private final ProviderRepository providerRepository;
-    private final ConsumerRepository consumerRepository;
-
     @Autowired
-    public JobController(final JobRepository jobRepository,
-                         final ProviderRepository providerRepository,
-                         final ConsumerRepository consumerRepository) {
-        this.jobRepository = jobRepository;
-        this.providerRepository = providerRepository;
-        this.consumerRepository = consumerRepository;
+    private JobRepository repo;
+    @Autowired
+    private ProviderRepository repoProv;
+    @Autowired
+    private ConsumerRepository repoConsumer;
+
+
+    @RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
+    public @ResponseBody JobEntity get(@PathVariable("id") final Integer id) {
+        return repo.findOne(id);
     }
 
-    @ResponseBody
-    @RequestMapping("/insert")
-    public JobEntity insert(@RequestBody JobModel job) {
-        return jobRepository.save(job.build());
+    @RequestMapping("/latest/provider/{id}/{nr}")
+    public List<JobEntity> getLatestByProvider(@PathVariable("id") final Integer id,@PathVariable("nr") final Integer nr){
+        ProviderEntity p = repoProv.findOne(id);
+        List<JobEntity> latestJobByProvider = repo.findLatestJobByProvider(p);
+        if (latestJobByProvider.size()>nr) {
+            return latestJobByProvider.subList(0, nr);
+        } else {
+            return latestJobByProvider;
+        }
     }
 
-    @Secured({"ROLE_CONSUMER"})
-    @RequestMapping("/delete/id")
-    public ResponseEntity delete(@PathVariable("id") final Integer id,
-                                 final Authentication authentication) {
-        ConsumerEntity consumer = (ConsumerEntity) authentication.getPrincipal();
-        return jobRepository.deleteIfCreatedBy(consumer.getId(), id) > 0 ?
-                new ResponseEntity<>(HttpStatus.ACCEPTED) :
-                new ResponseEntity(HttpStatus.NOT_FOUND);
+    @RequestMapping("/latest/consumer/{id}/{nr}")
+    public List<JobEntity> getLatestByConsumer(@PathVariable("id") final Integer id,@PathVariable("nr") final Integer nr){
+        ConsumerEntity c = repoConsumer.findOne(id);
+        List<JobEntity> latestJobByProvider = repo.findLatestJobByConsumer(c);
+        if (latestJobByProvider.size()>nr) {
+            return latestJobByProvider.subList(0, nr);
+        } else {
+            return latestJobByProvider;
+        }
     }
 
-    @Secured({"ROLE_CONSUMER"})
-    @RequestMapping("/update")
-    public ResponseEntity<JobEntity> update(@RequestBody JobModel updated,
-                                            final Authentication authentication) {
-        ConsumerEntity consumer = (ConsumerEntity) authentication.getPrincipal();
-        return jobRepository.updateIfCreatedBy(consumer.getId(), updated.getJob().getId(), updated.build()) > 0 ?
-                new ResponseEntity<>(jobRepository.findById(updated.getJob().getId())
-                        .orElseThrow(() -> new NotFoundException("Updated Job Not Found!")), HttpStatus.OK) :
-                new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+
+    @RequestMapping(value = "/reviews/provider/{id}/{nr}", method = RequestMethod.GET)
+    public @ResponseBody List<ReviewEntity> getTopReviewsForProvider(@PathVariable("id") final Integer id, @PathVariable("nr") final Integer nr) {
+        ProviderEntity provider = repoProv.findOne(id);
+        List<ReviewEntity> reviews = new ArrayList<>(provider.getReviews());
+        reviews.sort((r1, r2) -> r2.getRating() - r1.getRating());
+
+        return reviews.subList(0, nr);
     }
 
-    @ResponseBody
-    @RequestMapping("/latest/provider/{id}/{limit}")
-    public List<JobEntity> getLatestJobsRequestedByProvider(@PathVariable("id") final Integer id,
-                                                            @PathVariable("limit") final Integer limit) throws NotFoundException {
-        return jobRepository.findLatestJobsRequestedByProvider(getProviderById(id), new PageRequest(0, limit));
-    }
+    @RequestMapping(value = "/reviews/consumer/{id}/{nr}", method = RequestMethod.GET)
+    public @ResponseBody List<ReviewEntity> getTopReviewsForConsumer(@PathVariable("id") final Integer id, @PathVariable("nr") final Integer nr) {
+        ConsumerEntity consumer = repoConsumer.findOne(id);
+        List<ReviewEntity> reviews = new ArrayList<>(consumer.getReviews());
+        reviews.sort((r1, r2) -> r2.getRating() - r1.getRating());
 
-    @ResponseBody
-    @RequestMapping("/latest/consumer/{id}/{limit}")
-    public List<JobEntity> getLatestJobsCreatedByConsumer(@PathVariable("id") final Integer id,
-                                                          @PathVariable("limit") final Integer limit) throws NotFoundException {
-        return jobRepository.findLatestJobsCreatedByConsumer(getConsumerById(id), new PageRequest(0, limit));
-    }
-
-    private ProviderEntity getProviderById(final Integer id) {
-        return providerRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Provider not found"));
-    }
-
-    private ConsumerEntity getConsumerById(final Integer id) {
-        return consumerRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Consumer not found"));
-    }
-
-    @RequestMapping(value = "/provider/reviews/{id}/{limit}", method = RequestMethod.GET)
-    public @ResponseBody List<ReviewEntity> getTopReviewsForProvider(@PathVariable("id") final Integer id, @PathVariable("limit") final Integer limit) {
-        return providerRepository.findTopReviewsForProvider(
-                providerRepository.findOne(id),
-                new PageRequest(0, limit)
-        );
-    }
-
-    @RequestMapping(value = "/consumer/reviews/{id}/{limit}", method = RequestMethod.GET)
-    public @ResponseBody List<ReviewEntity> getTopReviewsForConsumer(@PathVariable("id") final Integer id, @PathVariable("limit") final Integer limit) {
-        return consumerRepository.findTopReviewsForConsumer(
-                consumerRepository.findOne(id),
-                new PageRequest(0, limit)
-        );
+        return reviews.subList(0, nr);
     }
 }
 
