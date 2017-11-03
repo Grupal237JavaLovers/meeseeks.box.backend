@@ -90,3 +90,24 @@ public class JobController {
                 .orElseThrow(() -> new NotFoundException("Consumer not found"));
     }
 }
+
+    @RequestMapping(value = "/reviews/provider/{id}/{nr}", method = RequestMethod.GET)
+    public @ResponseBody List<ReviewEntity> getTopReviewsForProvider(@PathVariable("id") final Integer id, @PathVariable("nr") final Integer nr) {
+        ProviderEntity provider = repoProv.findOne(id);
+        List<ReviewEntity> reviews = new ArrayList<>(provider.getReviews());
+        reviews.sort((r1, r2) -> r2.getRating() - r1.getRating());
+
+        return reviews.subList(0, nr);
+    }
+
+    @RequestMapping(value = "/reviews/consumer/{id}/{nr}", method = RequestMethod.GET)
+    public @ResponseBody List<ReviewEntity> getTopReviewsForConsumer(@PathVariable("id") final Integer id, @PathVariable("nr") final Integer nr) {
+        ConsumerEntity consumer = repoConsumer.findOne(id);
+        List<ReviewEntity> reviews = new ArrayList<>(consumer.getReviews());
+        reviews.sort((r1, r2) -> r2.getRating() - r1.getRating());
+
+        return reviews.subList(0, nr);
+    }
+}
+
+
