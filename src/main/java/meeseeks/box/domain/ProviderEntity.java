@@ -28,7 +28,7 @@ public class ProviderEntity extends UserEntity implements Serializable {
     private String profileVideoUrl;
     @JsonIgnore
     @OneToMany(mappedBy = "provider", targetEntity = ReviewEntity.class)
-    private Set<RequestEntity> reviews = new HashSet<>();
+    private Set<ReviewEntity> reviews = new HashSet<>();
     @JsonIgnore
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "SkillList", joinColumns = @JoinColumn(name = "id_provider", referencedColumnName = "id"),
@@ -95,11 +95,11 @@ public class ProviderEntity extends UserEntity implements Serializable {
         this.skills = skills;
     }
 
-    public Set<RequestEntity> getReviews() {
+    public Set<ReviewEntity> getReviews() {
         return reviews;
     }
 
-    public void setReviews(final @NotNull Set<RequestEntity> reviews) {
+    public void setReviews(final @NotNull Set<ReviewEntity> reviews) {
         this.reviews = reviews;
     }
 

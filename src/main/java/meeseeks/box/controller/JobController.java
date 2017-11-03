@@ -3,18 +3,18 @@ package meeseeks.box.controller;
 import meeseeks.box.domain.ConsumerEntity;
 import meeseeks.box.domain.JobEntity;
 import meeseeks.box.domain.ProviderEntity;
+import meeseeks.box.domain.ReviewEntity;
 import meeseeks.box.repository.ConsumerRepository;
 import meeseeks.box.repository.JobRepository;
 import meeseeks.box.repository.ProviderRepository;
+import meeseeks.box.repository.RequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,6 +31,11 @@ public class JobController {
     @Autowired
     private ConsumerRepository repoConsumer;
 
+
+    @RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
+    public @ResponseBody JobEntity get(@PathVariable("id") final Integer id) {
+        return repo.findOne(id);
+    }
 
     @RequestMapping("/latest/provider/{id}/{nr}")
     public List<JobEntity> getLatestByProvider(@PathVariable("id") final Integer id,@PathVariable("nr") final Integer nr){
@@ -54,4 +59,24 @@ public class JobController {
         }
     }
 
+
+    @RequestMapping(value = "/reviews/provider/{id}/{nr}", method = RequestMethod.GET)
+    public @ResponseBody List<ReviewEntity> getTopReviewsForProvider(@PathVariable("id") final Integer id, @PathVariable("nr") final Integer nr) {
+        ProviderEntity provider = repoProv.findOne(id);
+        List<ReviewEntity> reviews = new ArrayList<>(provider.getReviews());
+        reviews.sort((r1, r2) -> r2.getRating() - r1.getRating());
+
+        return reviews.subList(0, nr);
+    }
+
+    @RequestMapping(value = "/reviews/consumer/{id}/{nr}", method = RequestMethod.GET)
+    public @ResponseBody List<ReviewEntity> getTopReviewsForConsumer(@PathVariable("id") final Integer id, @PathVariable("nr") final Integer nr) {
+        ConsumerEntity consumer = repoConsumer.findOne(id);
+        List<ReviewEntity> reviews = new ArrayList<>(consumer.getReviews());
+        reviews.sort((r1, r2) -> r2.getRating() - r1.getRating());
+
+        return reviews.subList(0, nr);
+    }
 }
+
+
