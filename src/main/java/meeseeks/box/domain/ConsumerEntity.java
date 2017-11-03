@@ -33,7 +33,7 @@ public class ConsumerEntity extends UserEntity implements Serializable {
 
     @JsonIgnore
     @OneToMany(mappedBy = "consumer", targetEntity = ReviewEntity.class)
-    private Set<RequestEntity> reviews = new HashSet<>();
+    private Set<ReviewEntity> reviews = new HashSet<>();
 
     public ConsumerEntity(final @NotNull String username,
                           final String password,
@@ -72,11 +72,11 @@ public class ConsumerEntity extends UserEntity implements Serializable {
         this.jobs = jobs;
     }
 
-    public @NotNull Set<RequestEntity> getReviews() {
+    public @NotNull Set<ReviewEntity> getReviews() {
         return reviews;
     }
 
-    public void setReviews(final @NotNull Set<RequestEntity> reviews) {
+    public void setReviews(final @NotNull Set<ReviewEntity> reviews) {
         this.reviews = reviews;
     }
 }
