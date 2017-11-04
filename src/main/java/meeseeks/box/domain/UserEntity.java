@@ -29,32 +29,40 @@ import java.util.List;
 public class UserEntity implements UserDetails, Serializable {
 
     private static final String DEFAULT = "";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Integer id;
+
     @Email(message = "{provider.email.incorrect}")
     @Column(name = "email", unique = true)
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String email;
+
     @Size(min = 8, message = "{provider.password.length}")
     @Column(name = "password")
 //    @JsonIgnore
     private String password;
+
     @Column(name = "name")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String name;
+
     @Column(name = "username", unique = true)
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String username;
+
     @Enumerated(EnumType.STRING)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private UserRole role;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column
     @CreationTimestamp
     private Calendar created;
+
     @Transient
     private String confirmPassword;
 
