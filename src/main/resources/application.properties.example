@@ -1,5 +1,5 @@
 # Connection URL for the Database
-spring.datasource.url = jdbc:mysql://localhost:3306/meeseeks?useSSL=false
+spring.datasource.url = jdbc:mysql://localhost:3306/meeseeks?useSSL=false?createDatabaseIfNotExist=true
 
 # Username and password
 spring.datasource.username = root
