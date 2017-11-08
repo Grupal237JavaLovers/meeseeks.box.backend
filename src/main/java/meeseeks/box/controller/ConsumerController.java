@@ -39,11 +39,9 @@ public class ConsumerController {
 
     @RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
     public @ResponseBody ConsumerEntity getConsumerById(@PathVariable("id") final Integer id) throws NotFoundException {
-        ConsumerEntity consumer = consumerRepository.findOne(id);
-
-        if (consumer == null) {
-            throw new NotFoundException("Consumer not found");
-        }
+        ConsumerEntity consumer = consumerRepository.findById(id).orElseThrow(() -> {
+            return new NotFoundException("Consumer not found");
+        });
 
         return consumer;
     }

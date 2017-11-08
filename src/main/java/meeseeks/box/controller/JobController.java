@@ -35,22 +35,18 @@ public class JobController {
 
     @RequestMapping("/latest/provider/{id}/{nr}")
     public List<JobEntity> getLatestByProvider(@PathVariable("id") final Integer id, @PathVariable("nr") final Integer nr) throws NotFoundException{
-        ProviderEntity provider = providerRepo.findOne(id);
-
-        if (provider == null) {
-            throw new NotFoundException("Provider not found");
-        }
+        ProviderEntity provider = providerRepo.findById(id).orElseThrow(() -> {
+            return new NotFoundException("Provider not found");
+        });
 
         return jobRepo.findLatestJobByProvider(provider, new PageRequest(0, nr));
     }
 
     @RequestMapping("/latest/consumer/{id}/{nr}")
     public List<JobEntity> getLatestByConsumer(@PathVariable("id") final Integer id, @PathVariable("nr") final Integer nr) throws NotFoundException{
-        ConsumerEntity consumer = consumerRepo.findOne(id);
-
-        if (consumer == null) {
-            throw new NotFoundException("Consumer not found");
-        }
+        ConsumerEntity consumer = consumerRepo.findById(id).orElseThrow(() -> {
+            return new NotFoundException("Consumer not found");
+        });
 
         return jobRepo.findLatestJobByConsumer(consumer, new PageRequest(0, nr));
     }

@@ -43,34 +43,29 @@ public class ProviderController {
 
     @RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
     public @ResponseBody ProviderEntity getProviderById(@PathVariable("id") final Integer id) throws NotFoundException {
-        ProviderEntity provider = providerRepository.findOne(id);
-
-        if (provider == null) {
-            throw new NotFoundException("Provider not found");
-        }
+        ProviderEntity provider = providerRepository.findById(id).orElseThrow(() -> {
+            return new NotFoundException("Provider not found");
+        });
 
         return provider;
     }
 
     @RequestMapping(value = "/get/{id}/skills/all", method = RequestMethod.GET)
     public @ResponseBody Set<SkillEntity> getProviderSkillsById(@PathVariable("id") final Integer id) throws NotFoundException {
-        ProviderEntity provider = providerRepository.findOne(id);
-
-        if (provider == null) {
-            throw new NotFoundException("Provider not found");
-        }
+        ProviderEntity provider = providerRepository.findById(id).orElseThrow(() -> {
+            return new NotFoundException("Provider not found");
+        });
 
         return provider.getSkills();
     }
 
     @RequestMapping(value = "/get/{id}/skills/add/{nameSkill}", method = RequestMethod.GET)
     public @ResponseBody Set<SkillEntity> addSkillsToProviderById(@PathVariable("id") final Integer id,
-                                                                  @PathVariable("nameSkill") final String skillName) throws NotFoundException {
-        ProviderEntity provider = providerRepository.findOne(id);
-
-        if (provider == null) {
-            throw new NotFoundException("Provider not found");
-        }
+        @PathVariable("nameSkill") final String skillName
+    ) throws NotFoundException {
+        ProviderEntity provider = providerRepository.findById(id).orElseThrow(() -> {
+            return new NotFoundException("Provider not found");
+        });
 
         SkillEntity skill = skillRepo.findByName(skillName).orElse(new SkillEntity(skillName));
 
