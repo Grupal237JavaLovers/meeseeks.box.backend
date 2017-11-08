@@ -4,6 +4,9 @@ import javax.validation.Valid;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,5 +54,23 @@ public class ConsumerController {
         LOGGER.info("Consumer " + consumer.getUsername() + " registers now ...");
 
         userService.saveUser(consumer);
+    }
+    
+    @Secured({"ROLE_CONSUMER"})
+    @RequestMapping(value = "/edit", method = RequestMethod.PATCH)
+    public void editConsumer(@RequestBody @Validated() ConsumerEntity consumer, Authentication auth) {
+        ConsumerEntity oldConsumer = (ConsumerEntity) auth.getPrincipal();
+
+        oldConsumer.setEmail(consumer.getEmail());
+
+        if (consumer.getPassword() != null) {
+            oldConsumer.setPassword(consumer.getPassword());
+        }
+
+        oldConsumer.setName(consumer.getName());
+        oldConsumer.setUsername(consumer.getUsername());
+        oldConsumer.setProfileImageUrl(consumer.getProfileImageUrl());
+
+        userService.saveUser(oldConsumer);
     }
 }
