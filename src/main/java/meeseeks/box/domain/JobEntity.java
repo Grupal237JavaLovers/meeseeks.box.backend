@@ -15,8 +15,6 @@ import java.util.Set;
  * @author Alexandru Stoica
  * @version 1.0
  */
-
-@SuppressWarnings("unused")
 @Entity
 @Table(name = "Job")
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -74,8 +72,6 @@ public class JobEntity implements Serializable {
     @JsonIgnore
     @OneToMany(mappedBy = "job", targetEntity = ReviewEntity.class)
     private Set<RequestEntity> reviews = new HashSet<>();
-
-
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column

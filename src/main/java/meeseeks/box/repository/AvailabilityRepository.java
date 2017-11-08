@@ -1,7 +1,8 @@
 package meeseeks.box.repository;
 
-import meeseeks.box.domain.AvailabilityEntity;
 import org.springframework.data.repository.CrudRepository;
+
+import meeseeks.box.domain.AvailabilityEntity;
 
 /**
  * @author Alexandru Stoica

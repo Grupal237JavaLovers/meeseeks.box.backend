@@ -23,11 +23,14 @@ import java.util.Set;
 public class ConsumerEntity extends UserEntity implements Serializable {
 
     private static final String DEFAULT = "";
+
     @Column(name = "profile_image")
     private String profileImageUrl;
+
     @JsonIgnore
     @OneToMany(mappedBy = "consumer", targetEntity = JobEntity.class)
     private Set<JobEntity> jobs = new HashSet<>();
+
     @JsonIgnore
     @OneToMany(mappedBy = "consumer", targetEntity = ReviewEntity.class)
     private Set<RequestEntity> reviews = new HashSet<>();
@@ -50,6 +53,7 @@ public class ConsumerEntity extends UserEntity implements Serializable {
                           final @NotNull String profileImageUrl) {
         super(email, username, password, name);
         this.profileImageUrl = profileImageUrl;
+        this.setRole(UserRole.consumer);
     }
 
     public @NotNull String getProfileImageUrl() {

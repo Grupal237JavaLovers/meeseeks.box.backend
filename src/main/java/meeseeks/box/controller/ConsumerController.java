@@ -1,13 +1,20 @@
 package meeseeks.box.controller;
 
-import meeseeks.box.domain.ConsumerEntity;
-import meeseeks.box.repository.ConsumerRepository;
-import meeseeks.box.service.UserService;
+import javax.validation.Valid;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
+import meeseeks.box.domain.ConsumerEntity;
+import meeseeks.box.exception.NotFoundException;
+import meeseeks.box.repository.ConsumerRepository;
+import meeseeks.box.service.UserService;
 
 
 
@@ -17,12 +24,9 @@ import javax.validation.Valid;
  */
 
 @RestController
-@CrossOrigin(origins = "*")
 @RequestMapping("/consumer")
 public class ConsumerController {
-
     private final ConsumerRepository consumerRepository;
-
     private final UserService userService;
 
     private final Logger LOGGER = Logger.getLogger(ProviderController.class.getName());
@@ -33,19 +37,19 @@ public class ConsumerController {
         this.userService = userService;
     }
 
-    @RequestMapping(value = "/create", method = RequestMethod.GET)
-    public void create() {
-        consumerRepository.save(new ConsumerEntity("andrew_dale", "password", "Andrew Dale", "andrew.dale@gmail.com"));
-    }
-
     @RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
-    public @ResponseBody ConsumerEntity getConsumerById(@PathVariable("id") final Integer id) {
-        return consumerRepository.findOne(id);
+    public @ResponseBody ConsumerEntity getConsumerById(@PathVariable("id") final Integer id) throws NotFoundException {
+        ConsumerEntity consumer = consumerRepository.findById(id).orElseThrow(() -> {
+            return new NotFoundException("Consumer not found");
+        });
+
+        return consumer;
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public void registerConsumer(@RequestBody @Valid ConsumerEntity consumer) {
-        LOGGER.info("Provider " + consumer.getUsername() + " registers now ...");
+        LOGGER.info("Consumer " + consumer.getUsername() + " registers now ...");
+
         userService.saveUser(consumer);
     }
 }

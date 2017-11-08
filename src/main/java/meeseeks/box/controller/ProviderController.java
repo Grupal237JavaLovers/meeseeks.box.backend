@@ -1,16 +1,24 @@
 package meeseeks.box.controller;
 
-import meeseeks.box.domain.ProviderEntity;
-import meeseeks.box.domain.SkillEntity;
-import meeseeks.box.repository.ProviderRepository;
-import meeseeks.box.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import java.util.Set;
 
 import javax.validation.Valid;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import meeseeks.box.domain.ProviderEntity;
+import meeseeks.box.domain.SkillEntity;
+import meeseeks.box.exception.NotFoundException;
+import meeseeks.box.repository.ProviderRepository;
+import meeseeks.box.repository.SkillRepository;
+import meeseeks.box.service.UserService;
 
 /**
  * @author Alexandru Stoica
@@ -18,51 +26,60 @@ import java.util.logging.Logger;
  */
 
 @RestController
-@CrossOrigin(origins = "*")
 @RequestMapping("/provider")
 public class ProviderController {
-
     private final ProviderRepository providerRepository;
-
     private final UserService userService;
+    private final SkillRepository skillRepo;
 
     private final Logger LOGGER = Logger.getLogger(ProviderController.class.getName());
 
     @Autowired
-    public ProviderController(final ProviderRepository providerRepository, UserService userService) {
+    public ProviderController(ProviderRepository providerRepository, UserService userService, SkillRepository skillRepo) {
         this.providerRepository = providerRepository;
         this.userService = userService;
-    }
-
-    @RequestMapping(value = "/create", method = RequestMethod.GET)
-    public void create() {
-        providerRepository.save(new ProviderEntity("test", "password", "name", "email2"));
+        this.skillRepo = skillRepo;
     }
 
     @RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
-    public @ResponseBody ProviderEntity getProviderById(@PathVariable("id") final Integer id) {
-        return providerRepository.findOne(id);
+    public @ResponseBody ProviderEntity getProviderById(@PathVariable("id") final Integer id) throws NotFoundException {
+        ProviderEntity provider = providerRepository.findById(id).orElseThrow(() -> {
+            return new NotFoundException("Provider not found");
+        });
+
+        return provider;
     }
 
     @RequestMapping(value = "/get/{id}/skills/all", method = RequestMethod.GET)
-    public @ResponseBody Set<SkillEntity> getProviderSkillsById(@PathVariable("id") final Integer id) {
-        return providerRepository.findOne(id).getSkills();
+    public @ResponseBody Set<SkillEntity> getProviderSkillsById(@PathVariable("id") final Integer id) throws NotFoundException {
+        ProviderEntity provider = providerRepository.findById(id).orElseThrow(() -> {
+            return new NotFoundException("Provider not found");
+        });
+
+        return provider.getSkills();
     }
 
     @RequestMapping(value = "/get/{id}/skills/add/{nameSkill}", method = RequestMethod.GET)
     public @ResponseBody Set<SkillEntity> addSkillsToProviderById(@PathVariable("id") final Integer id,
-                                                                  @PathVariable("nameSkill") final String nameSkill) {
-        ProviderEntity provider = providerRepository.findOne(id);
-        Set<SkillEntity> skills = provider.getSkills();
-        skills.add(new SkillEntity(nameSkill));
-        provider.setSkills(skills);
+        @PathVariable("nameSkill") final String skillName
+    ) throws NotFoundException {
+        ProviderEntity provider = providerRepository.findById(id).orElseThrow(() -> {
+            return new NotFoundException("Provider not found");
+        });
+
+        SkillEntity skill = skillRepo.findByName(skillName).orElse(new SkillEntity(skillName));
+
+        provider.getSkills().add(skill);
+
         providerRepository.save(provider);
+
         return provider.getSkills();
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public void registerProvider(@RequestBody @Valid ProviderEntity provider) {
-        LOGGER.log(Level.INFO, "Provider {0} try to register!", provider.getUsername());
+        LOGGER.info("Provider " + provider.getUsername() + " registers now ...");
+
         userService.saveUser(provider);
     }
 }

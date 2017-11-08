@@ -20,20 +20,26 @@ import java.util.Set;
 public class ProviderEntity extends UserEntity implements Serializable {
 
     private static final String DEFAULT = "";
+
     @Column(name = "profile_image")
     private String profileImageUrl;
+
     @Column(name = "description")
     private String description;
+
     @Column(name = "video_url")
     private String profileVideoUrl;
+
     @JsonIgnore
     @OneToMany(mappedBy = "provider", targetEntity = ReviewEntity.class)
     private Set<RequestEntity> reviews = new HashSet<>();
+
     @JsonIgnore
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "SkillList", joinColumns = @JoinColumn(name = "id_provider", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "id_skill", referencedColumnName = "id"))
     private Set<SkillEntity> skills = new HashSet<>();
+
     @JsonIgnore
     @OneToMany(mappedBy = "provider", targetEntity = RequestEntity.class)
     private Set<RequestEntity> requests = new HashSet<>();
@@ -61,6 +67,7 @@ public class ProviderEntity extends UserEntity implements Serializable {
         this.profileImageUrl = profileImageUrl;
         this.description = description;
         this.profileVideoUrl = profileVideoUrl;
+        this.setRole(UserRole.provider);
     }
 
     public String getProfileImageUrl() {
