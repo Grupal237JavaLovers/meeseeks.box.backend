@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class SecurityConstants {
+
     @Value("${app.security.secret}")
     public String SECRET = "ThisIsASecret";
 
