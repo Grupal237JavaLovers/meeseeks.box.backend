@@ -54,7 +54,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
              // We filter the api/login requests
             .addFilter(new JWTAuthorizationFilter(authenticationManager(), securityConstants, userRepo))
             // And filter other requests to check the presence of JWT in header
-            .addFilter(new JWTAuthenticationFilter(authenticationManager(), securityConstants));
+            .addFilter(new JWTAuthenticationFilter(authenticationManager(), securityConstants, userService));
     }
 
     @Override
