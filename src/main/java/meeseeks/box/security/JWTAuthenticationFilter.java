@@ -2,7 +2,6 @@ package meeseeks.box.security;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -17,18 +16,21 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import meeseeks.box.domain.UserEntity;
+import meeseeks.box.service.UserService;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private AuthenticationManager authenticationManager;
     private SecurityConstants securityConstants;
+    private UserService userService;
 
-    public JWTAuthenticationFilter(AuthenticationManager authenticationManager, SecurityConstants securityConstants) {
+    public JWTAuthenticationFilter(AuthenticationManager authenticationManager,
+        SecurityConstants securityConstants, UserService userService
+    ) {
         this.authenticationManager = authenticationManager;
         this.securityConstants = securityConstants;
+        this.userService = userService;
     }
 
     @Override
@@ -51,15 +53,11 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     @Override
     protected void successfulAuthentication(HttpServletRequest req,
-                                            HttpServletResponse res,
-                                            FilterChain chain,
-                                            Authentication auth) throws IOException, ServletException {
-
-        String token = Jwts.builder()
-                .setSubject(((UserEntity) auth.getPrincipal()).getUsername())
-                .setExpiration(new Date(System.currentTimeMillis() + securityConstants.EXPIRATION_TIME))
-                .signWith(SignatureAlgorithm.HS512, securityConstants.SECRET.getBytes())
-                .compact();
+        HttpServletResponse res,
+        FilterChain chain,
+        Authentication auth
+    ) throws IOException, ServletException {
+        String token = userService.getJWTToken((UserEntity) auth.getPrincipal());
 
         res.addHeader(securityConstants.HEADER_STRING, securityConstants.TOKEN_PREFIX + token);
     }

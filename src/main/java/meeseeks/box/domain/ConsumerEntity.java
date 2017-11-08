@@ -36,7 +36,7 @@ public class ConsumerEntity extends UserEntity implements Serializable {
     private Set<RequestEntity> reviews = new HashSet<>();
 
     public ConsumerEntity(final @NotNull String username,
-                          final @NotNull String password,
+                          final String password,
                           final @NotNull String name,
                           final @NotNull String email) {
         this(username, password, name, email, DEFAULT);
@@ -47,7 +47,7 @@ public class ConsumerEntity extends UserEntity implements Serializable {
     }
 
     public ConsumerEntity(final @NotNull String username,
-                          final @NotNull String password,
+                          final String password,
                           final @NotNull String name,
                           final @NotNull String email,
                           final @NotNull String profileImageUrl) {

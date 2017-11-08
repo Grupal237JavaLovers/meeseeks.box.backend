@@ -48,12 +48,12 @@ public class UserEntity implements UserDetails, Serializable {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Integer id;
 
-    @Email(message = "{provider.email.incorrect}")
+    @Email(message = "{provider.email.incorrect}", groups={ValidationRegister.class, ValidationEdit.class})
     @Column(name = "email", unique = true)
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String email;
 
-    @Size(min = 8, message = "{provider.password.length}")
+    @Size(min = 8, message = "{provider.password.length}", groups={ValidationRegister.class})
     @Column(name = "password")
     private String password;
 
@@ -73,7 +73,7 @@ public class UserEntity implements UserDetails, Serializable {
     @Column
     @CreationTimestamp
     private Calendar created;
-
+    
     @Transient
     private String confirmPassword;
 
@@ -83,7 +83,7 @@ public class UserEntity implements UserDetails, Serializable {
 
     public UserEntity(final @NotNull String email,
                       final @NotNull String username,
-                      final @NotNull String password,
+                      final String password,
                       final @NotNull String name) {
         super();
         this.id = null;
@@ -118,11 +118,11 @@ public class UserEntity implements UserDetails, Serializable {
     }
 
     @Override
-    public @NotNull String getPassword() {
+    public String getPassword() {
         return password;
     }
 
-    public void setPassword(final @NotNull String password) {
+    public void setPassword(final String password) {
         this.password = password;
     }
 
@@ -197,7 +197,7 @@ public class UserEntity implements UserDetails, Serializable {
         this.confirmPassword = confirmPassword;
     }
 
-    @AssertTrue(message = "{provider.passwords.mismatch}")
+    @AssertTrue(message = "{provider.passwords.mismatch}", groups={ValidationRegister.class})
     public boolean isPasswordConfirmed() {
         return getPassword() != null && this.confirmPassword != null
                 && getPassword().equals(this.confirmPassword);
@@ -220,4 +220,6 @@ public class UserEntity implements UserDetails, Serializable {
         }
     }
 
+    public interface ValidationRegister {}
+    public interface ValidationEdit {}
 }
