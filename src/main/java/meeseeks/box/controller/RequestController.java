@@ -30,8 +30,8 @@ public class RequestController {
     @ResponseBody
     @Secured({"ROLE_PROVIDER"})
     @RequestMapping("/insert")
-    public ResponseEntity<RequestEntity> insert(@Valid @RequestBody RequestEntity request,
-                                                final Authentication authentication) {
+    public ResponseEntity<RequestEntity> findRequestsWithDateInRange(@Valid @RequestBody RequestEntity request,
+                                                                     final Authentication authentication) {
         ProviderEntity user = (ProviderEntity) authentication.getPrincipal();
         return user.equals(request.getProvider()) ?
                 new ResponseEntity<>(requestRepository.save(request), HttpStatus.OK) :
@@ -71,8 +71,8 @@ public class RequestController {
 
     @ResponseBody
     @RequestMapping("/find/between/{limit}")
-    public List<RequestEntity> insert(@RequestBody DateRange range,
-                                      @PathVariable("limit") Integer limit) {
+    public List<RequestEntity> findRequestsWithDateInRange(@RequestBody DateRange range,
+                                                           @PathVariable("limit") Integer limit) {
         return requestRepository.findByDateBetween(range.getStart(), range.getEnd(), new PageRequest(0, limit));
     }
 
