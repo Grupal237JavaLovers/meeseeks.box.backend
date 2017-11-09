@@ -3,20 +3,20 @@ package meeseeks.box.model;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Size;
 
-public class ChangePasswordModel
-{
-    private String currentPassword;
+public class ChangePasswordModel {
 
+    private String currentPassword;
     @Size(min = 8, message = "{provider.password.length}")
     private String password;
-
     private String confirmPassword;
 
     public ChangePasswordModel() {
         this(null, null, null);
     }
 
-    public ChangePasswordModel(String currentPassword, String password, String confirmPassword) {
+    public ChangePasswordModel(final String currentPassword,
+                               final String password,
+                               final String confirmPassword) {
         this.currentPassword = currentPassword;
         this.password = password;
         this.confirmPassword = confirmPassword;

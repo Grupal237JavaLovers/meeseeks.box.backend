@@ -4,13 +4,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.FORBIDDEN)
-public class AccessDeniedException extends RuntimeException
-{
+public class AccessDeniedException extends RuntimeException {
+
     public AccessDeniedException() {
         super();
     }
 
-    public AccessDeniedException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public AccessDeniedException(final String message,
+                                 final Throwable cause,
+                                 final boolean enableSuppression,
+                                 final boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 

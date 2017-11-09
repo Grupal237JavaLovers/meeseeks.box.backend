@@ -1,6 +1,8 @@
 package meeseeks.box.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -21,17 +23,21 @@ import meeseeks.box.service.UserService;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
     private final UserService userService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final SecurityConstants securityConstants;
-    private final UserRepository userRepo;
+    private final UserRepository userRepository;
 
     @Autowired
-    public SecurityConfig(UserService userService, BCryptPasswordEncoder bCryptPasswordEncoder, SecurityConstants securityConstants, UserRepository userRepo) {
+    public SecurityConfig(UserService userService,
+                          BCryptPasswordEncoder bCryptPasswordEncoder,
+                          SecurityConstants securityConstants,
+                          UserRepository userRepository) {
         this.userService = userService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.securityConstants = securityConstants;
-        this.userRepo = userRepo;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -52,7 +58,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .authenticated()
             .and()
              // We filter the api/login requests
-            .addFilter(new JWTAuthorizationFilter(authenticationManager(), securityConstants, userRepo))
+            .addFilter(new JWTAuthorizationFilter(authenticationManager(), securityConstants, userRepository))
             // And filter other requests to check the presence of JWT in header
             .addFilter(new JWTAuthenticationFilter(authenticationManager(), securityConstants, userService));
     }

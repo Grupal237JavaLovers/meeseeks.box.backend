@@ -1,23 +1,20 @@
 package meeseeks.box.security;
 
-import java.io.IOException;
-import java.util.ArrayList;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import meeseeks.box.domain.UserEntity;
+import meeseeks.box.service.UserService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import meeseeks.box.domain.UserEntity;
-import meeseeks.box.service.UserService;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
@@ -26,8 +23,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private UserService userService;
 
     public JWTAuthenticationFilter(AuthenticationManager authenticationManager,
-        SecurityConstants securityConstants, UserService userService
-    ) {
+                                   SecurityConstants securityConstants,
+                                   UserService userService) {
         this.authenticationManager = authenticationManager;
         this.securityConstants = securityConstants;
         this.userService = userService;
@@ -37,28 +34,24 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     public Authentication attemptAuthentication(HttpServletRequest req,
                                                 HttpServletResponse res) throws AuthenticationException {
         try {
-            AccountCredentials creds = new ObjectMapper()
+            AccountCredentials credentials = new ObjectMapper()
                     .readValue(req.getInputStream(), AccountCredentials.class);
-
             return authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            creds.getUsername(),
-                            creds.getPassword(),
-                            new ArrayList<>())
-            );
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+                            credentials.getUsername(),
+                            credentials.getPassword(),
+                            new ArrayList<>()));
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
         }
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest req,
-        HttpServletResponse res,
-        FilterChain chain,
-        Authentication auth
-    ) throws IOException, ServletException {
-        String token = userService.getJWTToken((UserEntity) auth.getPrincipal());
-
-        res.addHeader(securityConstants.HEADER_STRING, securityConstants.TOKEN_PREFIX + token);
+    protected void successfulAuthentication(HttpServletRequest request,
+                                            HttpServletResponse response,
+                                            FilterChain filterChain,
+                                            Authentication authentication) throws IOException, ServletException {
+        String token = userService.getJWTToken((UserEntity) authentication.getPrincipal());
+        response.addHeader(securityConstants.HEADER_STRING, securityConstants.TOKEN_PREFIX + token);
     }
 }
