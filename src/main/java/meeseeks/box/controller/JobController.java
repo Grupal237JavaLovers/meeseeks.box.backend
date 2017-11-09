@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -35,12 +36,14 @@ public class JobController {
         this.consumerRepository = consumerRepository;
     }
 
+    @ResponseBody
     @RequestMapping("/latest/provider/{id}/{limit}")
     public List<JobEntity> getLatestByProvider(@PathVariable("id") final Integer id,
                                                @PathVariable("limit") final Integer limit) throws NotFoundException {
         return jobRepository.findLatestJobByProvider(getProviderById(id), new PageRequest(0, limit));
     }
 
+    @ResponseBody
     @RequestMapping("/latest/consumer/{id}/{limit}")
     public List<JobEntity> getLatestByConsumer(@PathVariable("id") final Integer id,
                                                @PathVariable("limit") final Integer limit) throws NotFoundException {

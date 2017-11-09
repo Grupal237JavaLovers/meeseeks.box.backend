@@ -37,11 +37,16 @@ public class SkillEntity implements Serializable {
     private static final String DEFAULT = "";
 
     public SkillEntity(final @NotNull String name) {
-        this.name = name;
+        this(0, name);
     }
 
     public SkillEntity() {
         this(DEFAULT);
+    }
+
+    public SkillEntity(final Integer id, final String name) {
+        this.id = id;
+        this.name = name;
     }
 
     public Integer getId() {

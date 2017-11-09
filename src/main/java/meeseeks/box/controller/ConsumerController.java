@@ -53,10 +53,11 @@ public class ConsumerController {
     }
 
     @Secured({"ROLE_CONSUMER"})
-    @RequestMapping(value = "/edit", method = RequestMethod.PATCH)
-    public void editConsumer(@RequestBody @Validated(UserEntity.ValidationEdit.class) final ConsumerEntity consumer, Authentication auth,
-                             final HttpServletResponse response) {
-        ConsumerEntity oldConsumer = (ConsumerEntity) auth.getPrincipal();
+    @RequestMapping(value = "/update", method = RequestMethod.PATCH)
+    public void updateConsumer(@RequestBody @Validated(UserEntity.ValidationEdit.class) final ConsumerEntity consumer,
+                               final Authentication authentication,
+                               final HttpServletResponse response) {
+        ConsumerEntity oldConsumer = (ConsumerEntity) authentication.getPrincipal();
         if (consumer.getEmail() != null && !consumer.getEmail().isEmpty()) {
             oldConsumer.setEmail(consumer.getEmail());
         }
