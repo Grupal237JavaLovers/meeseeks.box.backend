@@ -5,18 +5,23 @@ import meeseeks.box.domain.CategoryEntity;
 import meeseeks.box.domain.ConsumerEntity;
 import meeseeks.box.domain.JobEntity;
 
+import java.io.Serializable;
+
 /**
  * @author Alexandru Stoica
  * @version 1.0
  */
 
-public class JobModel {
+public class JobModel implements Serializable {
 
     private final JobEntity job;
     private final AvailabilityEntity availability;
     private final CategoryEntity category;
     private final ConsumerEntity consumer;
 
+    public JobModel() {
+        this(null, null, null, null);
+    }
     public JobModel(final JobEntity job,
                     final AvailabilityEntity availability,
                     final CategoryEntity category,

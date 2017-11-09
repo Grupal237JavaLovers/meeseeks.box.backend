@@ -93,7 +93,7 @@ public class ProviderController {
     @Secured({"ROLE_PROVIDER"})
     @RequestMapping(value = "/update", method = RequestMethod.PATCH)
     public void editConsumer(@RequestBody @Validated(UserEntity.ValidationEdit.class)
-                                     ProviderEntity provider, Authentication auth, HttpServletResponse response) {
+                                         ProviderEntity provider, Authentication auth, HttpServletResponse response) {
         ProviderEntity oldProvider = (ProviderEntity) auth.getPrincipal();
         if (provider.getEmail() != null && !provider.getEmail().isEmpty()) {
             oldProvider.setEmail(provider.getEmail());
