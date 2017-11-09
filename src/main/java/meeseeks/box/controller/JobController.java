@@ -39,14 +39,12 @@ public class JobController {
         this.consumerRepository = consumerRepository;
     }
 
-    // TODO: Test
     @ResponseBody
     @RequestMapping("/insert")
     public JobEntity insert(@RequestBody JobModel job) {
         return jobRepository.save(job.build());
     }
 
-    // TODO: Test
     @Secured({"ROLE_CONSUMER"})
     @RequestMapping("/delete/id")
     public ResponseEntity delete(@PathVariable("id") final Integer id,
@@ -57,15 +55,15 @@ public class JobController {
                 new ResponseEntity(HttpStatus.NOT_FOUND);
     }
 
-    // TODO: Test
     @Secured({"ROLE_CONSUMER"})
     @RequestMapping("/update")
-    public JobEntity update(@RequestBody JobModel updated,
-                            final Authentication authentication) {
+    public ResponseEntity<JobEntity> update(@RequestBody JobModel updated,
+                                            final Authentication authentication) {
         ConsumerEntity consumer = (ConsumerEntity) authentication.getPrincipal();
-        jobRepository.updateIfCreatedBy(consumer.getId(), updated.getJob().getId(), updated.build());
-        return jobRepository.findById(updated.getJob().getId())
-                .orElseThrow(() -> new NotFoundException("Job Not Found"));
+        return jobRepository.updateIfCreatedBy(consumer.getId(), updated.getJob().getId(), updated.build()) > 0 ?
+                new ResponseEntity<>(jobRepository.findById(updated.getJob().getId())
+                        .orElseThrow(() -> new NotFoundException("Updated Job Not Found!")), HttpStatus.OK) :
+                new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
     @ResponseBody

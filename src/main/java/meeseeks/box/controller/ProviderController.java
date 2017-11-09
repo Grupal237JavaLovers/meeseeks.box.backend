@@ -61,28 +61,6 @@ public class ProviderController {
                 .orElseThrow(() -> new NotFoundException("Provider Not Found!")).getSkills();
     }
 
-    @ResponseBody
-    @RequestMapping(value = "/get/{id}/skills/add/{name}", method = RequestMethod.GET)
-    public Set<SkillEntity> addSkillsToProviderByName(@PathVariable("id") final Integer id,
-                                                      @PathVariable("name") final String name) throws NotFoundException {
-        ProviderEntity provider = providerRepository.findById(id).
-                orElseThrow(() -> new NotFoundException("Provider not found"));
-        SkillEntity skill = skillRepository.findByName(name).orElse(new SkillEntity(name));
-        provider.getSkills().add(skill);
-        return providerRepository.save(provider).getSkills();
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/get/{idUser}/skills/delete/{idSkill}", method = RequestMethod.GET)
-    public Set<SkillEntity> deleteSkillFromProviderById(@PathVariable("idUser") final Integer idUser,
-                                                        @PathVariable("idSkill") final Integer idSkill) throws NotFoundException {
-        ProviderEntity provider = providerRepository.findById(idUser)
-                .orElseThrow(() -> new NotFoundException("Provider Not Found!"));
-        SkillEntity skill = skillRepository.findById(idSkill)
-                .orElseThrow(() -> new NotFoundException("Skill Not Found!"));
-        provider.getSkills().remove(skill);
-        return providerRepository.save(provider).getSkills();
-    }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public void registerProvider(@RequestBody @Validated(UserEntity.ValidationRegister.class) ProviderEntity provider) {

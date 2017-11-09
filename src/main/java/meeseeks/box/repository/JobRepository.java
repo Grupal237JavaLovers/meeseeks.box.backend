@@ -28,7 +28,7 @@ public interface JobRepository extends BaseCrudRepository<JobEntity, Integer> {
     @Transactional
     @Modifying
     @Query("update JobEntity job set job = ?3 where job.id = ?2 and job.consumer = ?1")
-    void updateIfCreatedBy(final Integer idConsumer, final Integer idJob, final JobEntity job);
+    Long updateIfCreatedBy(final Integer idConsumer, final Integer idJob, final JobEntity job);
 
     @Query("select j from JobEntity j join j.requests r join r.provider p where p=?1 order by j.created desc")
     List<JobEntity> findLatestJobsRequestedByProvider(final @NotNull ProviderEntity provider, Pageable pageable);
