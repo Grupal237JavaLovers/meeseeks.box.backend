@@ -30,8 +30,8 @@ public class RequestController {
     @ResponseBody
     @Secured({"ROLE_PROVIDER"})
     @RequestMapping("/insert")
-    public ResponseEntity<RequestEntity> findRequestsWithDateInRange(@Valid @RequestBody RequestEntity request,
-                                                                     final Authentication authentication) {
+    public ResponseEntity<RequestEntity> insert(@Valid @RequestBody RequestEntity request,
+                                                final Authentication authentication) {
         ProviderEntity user = (ProviderEntity) authentication.getPrincipal();
         return user.equals(request.getProvider()) ?
                 new ResponseEntity<>(requestRepository.save(request), HttpStatus.OK) :
