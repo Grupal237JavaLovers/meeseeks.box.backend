@@ -50,18 +50,21 @@ public class JobEntity implements Serializable {
     @Column(name = "expiration_date")
     private Calendar expiration;
 
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, targetEntity = CategoryEntity.class)
+    @ManyToOne(fetch = FetchType.LAZY,
+            targetEntity = CategoryEntity.class,
+            cascade = CascadeType.PERSIST)
     @JoinColumn(name = "category")
     private CategoryEntity category;
 
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, targetEntity = AvailabilityEntity.class)
+    @ManyToOne(fetch = FetchType.LAZY,
+            targetEntity = AvailabilityEntity.class,
+            cascade = CascadeType.PERSIST)
     @JoinColumn(name = "availability")
     private AvailabilityEntity availability;
 
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, targetEntity = ConsumerEntity.class)
+    @ManyToOne(fetch = FetchType.LAZY,
+            targetEntity = ConsumerEntity.class,
+            cascade = CascadeType.PERSIST)
     @JoinColumn(name = "id_consumer")
     private ConsumerEntity consumer;
 
