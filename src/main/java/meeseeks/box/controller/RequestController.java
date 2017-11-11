@@ -4,6 +4,8 @@ import meeseeks.box.domain.ProviderEntity;
 import meeseeks.box.domain.RequestEntity;
 import meeseeks.box.exception.NotFoundException;
 import meeseeks.box.model.DateRange;
+import meeseeks.box.repository.JobRepository;
+import meeseeks.box.repository.ProviderRepository;
 import meeseeks.box.repository.RequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -21,10 +23,16 @@ import java.util.List;
 public class RequestController {
 
     private final RequestRepository requestRepository;
+    private final JobRepository jobRepository;
+    private final ProviderRepository providerRepository;
 
     @Autowired
-    public RequestController(final RequestRepository requestRepository) {
+    public RequestController(final RequestRepository requestRepository,
+                             final JobRepository jobRepository,
+                             final ProviderRepository providerRepository) {
         this.requestRepository = requestRepository;
+        this.jobRepository = jobRepository;
+        this.providerRepository = providerRepository;
     }
 
     @ResponseBody
@@ -80,21 +88,24 @@ public class RequestController {
     @RequestMapping("/latest/job/{idJob}/{limit}")
     public List<RequestEntity> getLatestRequestsFromJob(@PathVariable("idJob") Integer id,
                                                         @PathVariable("limit") Integer limit) {
-        return requestRepository.findLatestRequestsFromJob(id, new PageRequest(0, limit));
+        return requestRepository.findLatestRequestsFromJob(jobRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Job Not Found!")), new PageRequest(0, limit));
     }
 
     @ResponseBody
     @RequestMapping("/latest/provider/{idProvider}/{limit}")
     public List<RequestEntity> getLatestRequestsForProvider(@PathVariable("idProvider") Integer id,
                                                             @PathVariable("limit") Integer limit) {
-        return requestRepository.findLatestRequestsForProvider(id, new PageRequest(0, limit));
+        return requestRepository.findLatestRequestsForProvider(providerRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Provider Not Found")), new PageRequest(0, limit));
     }
 
     @ResponseBody
     @RequestMapping("/latest/provider/accepted/{idProvider}/{limit}")
     public List<RequestEntity> getLatestAcceptedRequestsForProvider(@PathVariable("idProvider") Integer id,
                                                                     @PathVariable("limit") Integer limit) {
-        return requestRepository.findLatestAcceptedRequestsForProvider(id, new PageRequest(0, limit));
+        return requestRepository.findLatestAcceptedRequestsForProvider(providerRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Provider Not Found!")), new PageRequest(0, limit));
     }
 
     private RequestEntity findRequestById(@PathVariable("id") Integer id) {
