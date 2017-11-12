@@ -30,6 +30,10 @@ public class UserService implements UserDetailsService {
         this.securityConstants = securityConstants;
     }
 
+    public UserRepository getUserRepository() {
+        return userRepository;
+    }
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return this.userRepository.findByUsername(username)
