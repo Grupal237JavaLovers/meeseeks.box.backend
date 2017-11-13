@@ -3,6 +3,7 @@ package meeseeks.box.controller;
 import meeseeks.box.domain.ConsumerEntity;
 import meeseeks.box.domain.JobEntity;
 import meeseeks.box.domain.ProviderEntity;
+import meeseeks.box.domain.ReviewEntity;
 import meeseeks.box.exception.NotFoundException;
 import meeseeks.box.model.JobModel;
 import meeseeks.box.repository.ConsumerRepository;
@@ -16,6 +17,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -89,24 +91,21 @@ public class JobController {
         return consumerRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Consumer not found"));
     }
-}
 
-    @RequestMapping(value = "/reviews/provider/{id}/{nr}", method = RequestMethod.GET)
-    public @ResponseBody List<ReviewEntity> getTopReviewsForProvider(@PathVariable("id") final Integer id, @PathVariable("nr") final Integer nr) {
-        ProviderEntity provider = repoProv.findOne(id);
-        List<ReviewEntity> reviews = new ArrayList<>(provider.getReviews());
-        reviews.sort((r1, r2) -> r2.getRating() - r1.getRating());
-
-        return reviews.subList(0, nr);
+    @RequestMapping(value = "/provider/reviews/{id}/{limit}", method = RequestMethod.GET)
+    public @ResponseBody List<ReviewEntity> getTopReviewsForProvider(@PathVariable("id") final Integer id, @PathVariable("limit") final Integer limit) {
+        return providerRepository.findTopReviewsForProvider(
+                providerRepository.findOne(id),
+                new PageRequest(0, limit)
+        );
     }
 
-    @RequestMapping(value = "/reviews/consumer/{id}/{nr}", method = RequestMethod.GET)
-    public @ResponseBody List<ReviewEntity> getTopReviewsForConsumer(@PathVariable("id") final Integer id, @PathVariable("nr") final Integer nr) {
-        ConsumerEntity consumer = repoConsumer.findOne(id);
-        List<ReviewEntity> reviews = new ArrayList<>(consumer.getReviews());
-        reviews.sort((r1, r2) -> r2.getRating() - r1.getRating());
-
-        return reviews.subList(0, nr);
+    @RequestMapping(value = "/consumer/reviews/{id}/{limit}", method = RequestMethod.GET)
+    public @ResponseBody List<ReviewEntity> getTopReviewsForConsumer(@PathVariable("id") final Integer id, @PathVariable("limit") final Integer limit) {
+        return consumerRepository.findTopReviewsForConsumer(
+                consumerRepository.findOne(id),
+                new PageRequest(0, limit)
+        );
     }
 }
 
