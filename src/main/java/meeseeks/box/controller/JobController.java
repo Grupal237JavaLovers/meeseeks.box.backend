@@ -9,6 +9,7 @@ import meeseeks.box.model.JobModel;
 import meeseeks.box.repository.ConsumerRepository;
 import meeseeks.box.repository.JobRepository;
 import meeseeks.box.repository.ProviderRepository;
+import meeseeks.box.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -31,14 +32,17 @@ public class JobController {
     private final JobRepository jobRepository;
     private final ProviderRepository providerRepository;
     private final ConsumerRepository consumerRepository;
+    private final ReviewRepository reviewRepository;
 
     @Autowired
     public JobController(final JobRepository jobRepository,
                          final ProviderRepository providerRepository,
-                         final ConsumerRepository consumerRepository) {
+                         final ConsumerRepository consumerRepository,
+                         final ReviewRepository reviewRepository) {
         this.jobRepository = jobRepository;
         this.providerRepository = providerRepository;
         this.consumerRepository = consumerRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     @ResponseBody
@@ -93,17 +97,17 @@ public class JobController {
     }
 
     @RequestMapping(value = "/provider/reviews/{id}/{limit}", method = RequestMethod.GET)
-    public @ResponseBody List<ReviewEntity> getTopReviewsForProvider(@PathVariable("id") final Integer id, @PathVariable("limit") final Integer limit) {
-        return providerRepository.findTopReviewsForProvider(
-                providerRepository.findOne(id),
+    public @ResponseBody List<ReviewEntity> getLatestReviewsForProvider(@PathVariable("id") final Integer id, @PathVariable("limit") final Integer limit) {
+        return reviewRepository.findReviewsByDateForProvider(
+                getProviderById(id),
                 new PageRequest(0, limit)
         );
     }
 
     @RequestMapping(value = "/consumer/reviews/{id}/{limit}", method = RequestMethod.GET)
-    public @ResponseBody List<ReviewEntity> getTopReviewsForConsumer(@PathVariable("id") final Integer id, @PathVariable("limit") final Integer limit) {
-        return consumerRepository.findTopReviewsForConsumer(
-                consumerRepository.findOne(id),
+    public @ResponseBody List<ReviewEntity> getLatestReviewsForConsumer(@PathVariable("id") final Integer id, @PathVariable("limit") final Integer limit) {
+        return reviewRepository.findReviewsByDateForConsumer(
+                getConsumerById(id),
                 new PageRequest(0, limit)
         );
     }
