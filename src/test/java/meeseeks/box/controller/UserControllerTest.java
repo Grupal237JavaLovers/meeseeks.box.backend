@@ -1,36 +1,29 @@
 package meeseeks.box.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import meeseeks.box.domain.*;
-import meeseeks.box.model.JobModel;
-import meeseeks.box.repository.ConsumerRepository;
-import meeseeks.box.repository.JobRepository;
-import meeseeks.box.repository.ProviderRepository;
-import meeseeks.box.repository.UserRepository;
-import meeseeks.box.service.UserService;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.sql.Time;
-import java.util.Optional;
-
-import static java.util.Collections.singletonList;
-import static org.mockito.Matchers.notNull;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import meeseeks.box.domain.ProviderEntity;
+import meeseeks.box.repository.UserRepository;
+import meeseeks.box.service.UserService;
 
 /**
  * Created by nicof on 11/12/2017.
@@ -49,11 +42,17 @@ public class UserControllerTest {
     @MockBean
     private BCryptPasswordEncoder encoder;
 
-    @Autowired
-    private ObjectMapper mapper;
+    private ProviderEntity principal;
 
+    @Before
+    public void setupAuthentication() {
+        this.principal = new ProviderEntity("test", "test", "Test", "test@test.com");
+        Authentication authentication = new UsernamePasswordAuthenticationToken(principal, AuthorityUtils.createAuthorityList("ROLE_PROVIDER"));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+    
     @Test
-    @WithMockUser(username = "test", roles = {"ROLE_PROVIDER"})
+    @WithMockUser(username = "test", roles = {"PROVIDER"})
     public void deleteUser() throws Exception {
         // when:
         UserRepository userRepository = Mockito.mock(UserRepository.class);
