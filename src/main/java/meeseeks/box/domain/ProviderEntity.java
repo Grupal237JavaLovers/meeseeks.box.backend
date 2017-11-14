@@ -31,7 +31,7 @@ public class ProviderEntity extends UserEntity implements Serializable {
     private String profileVideoUrl;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "provider", targetEntity = ReviewEntity.class)
+    @OneToMany(mappedBy = "provider", targetEntity = ReviewEntity.class, cascade = CascadeType.REMOVE)
     private Set<RequestEntity> reviews = new HashSet<>();
 
     @JsonIgnore
@@ -41,7 +41,7 @@ public class ProviderEntity extends UserEntity implements Serializable {
     private Set<SkillEntity> skills = new HashSet<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "provider", targetEntity = RequestEntity.class)
+    @OneToMany(mappedBy = "provider", targetEntity = RequestEntity.class, cascade = CascadeType.REMOVE)
     private Set<RequestEntity> requests = new HashSet<>();
 
     public ProviderEntity(final String username,

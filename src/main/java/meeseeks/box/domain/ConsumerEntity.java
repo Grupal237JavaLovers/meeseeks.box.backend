@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
@@ -28,11 +29,11 @@ public class ConsumerEntity extends UserEntity implements Serializable {
     private String profileImageUrl;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "consumer", targetEntity = JobEntity.class)
+    @OneToMany(mappedBy = "consumer", targetEntity = JobEntity.class, cascade = CascadeType.REMOVE)
     private Set<JobEntity> jobs = new HashSet<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "consumer", targetEntity = ReviewEntity.class)
+    @OneToMany(mappedBy = "consumer", targetEntity = ReviewEntity.class, cascade = CascadeType.REMOVE)
     private Set<RequestEntity> reviews = new HashSet<>();
 
     public ConsumerEntity(final @NotNull String username,

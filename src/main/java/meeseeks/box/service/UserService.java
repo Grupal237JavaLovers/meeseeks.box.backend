@@ -49,4 +49,11 @@ public class UserService implements UserDetailsService {
                 .signWith(SignatureAlgorithm.HS512, securityConstants.SECRET.getBytes())
                 .compact();
     }
+
+    public boolean delete(String username){
+        if (userRepository.deleteUser(username) > 0){
+            return true;
+        }
+        return false;
+    }
 }
