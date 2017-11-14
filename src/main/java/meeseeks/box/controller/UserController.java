@@ -53,7 +53,7 @@ public class UserController {
     @RequestMapping("/delete")
     public ResponseEntity delete() {
         UserEntity user =(UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return userService.getUserRepository().deleteUser(user.getUsername()) > 0 ?
+        return userService.delete(user.getUsername()) ?
                 new ResponseEntity<>(HttpStatus.ACCEPTED) :
                 new ResponseEntity(HttpStatus.NOT_FOUND);
     }

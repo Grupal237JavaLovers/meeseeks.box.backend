@@ -30,10 +30,6 @@ public class UserService implements UserDetailsService {
         this.securityConstants = securityConstants;
     }
 
-    public UserRepository getUserRepository() {
-        return userRepository;
-    }
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return this.userRepository.findByUsername(username)
@@ -52,5 +48,12 @@ public class UserService implements UserDetailsService {
                 .setExpiration(new Date(System.currentTimeMillis() + securityConstants.EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS512, securityConstants.SECRET.getBytes())
                 .compact();
+    }
+
+    public boolean delete(String username){
+        if (userRepository.deleteUser(username) > 0){
+            return true;
+        }
+        return false;
     }
 }

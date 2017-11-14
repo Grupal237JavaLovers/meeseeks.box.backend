@@ -55,10 +55,7 @@ public class UserControllerTest {
     @WithMockUser(username = "test", roles = {"PROVIDER"})
     public void deleteUser() throws Exception {
         // when:
-        UserRepository userRepository = Mockito.mock(UserRepository.class);
-        Mockito.when(userRepository.deleteUser("test")).thenReturn(1);
-        Mockito.when(userService.getUserRepository()).thenReturn(userRepository);
-
+        Mockito.when(userService.delete("test")).thenReturn(true);
         // then:
         mockMvc.perform(get("/user/delete"))
                 .andDo(print()).andExpect(status().isAccepted());
