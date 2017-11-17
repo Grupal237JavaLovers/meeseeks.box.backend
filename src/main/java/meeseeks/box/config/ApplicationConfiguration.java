@@ -14,7 +14,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 
 @Configuration
 @EnableWebMvc
-public class AppConfig extends WebMvcConfigurerAdapter {
+public class ApplicationConfiguration extends WebMvcConfigurerAdapter {
     @Value("${app.cors.origins}")
     private String corsOrigins;
 

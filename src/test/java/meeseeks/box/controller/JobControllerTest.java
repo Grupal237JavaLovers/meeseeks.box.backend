@@ -20,7 +20,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.sql.Time;
+import java.util.HashSet;
 
+import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.notNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -53,7 +55,7 @@ public class JobControllerTest {
         AvailabilityEntity availability = new AvailabilityEntity("Monday", new Time(0), new Time(0));
         ConsumerEntity consumer = new ConsumerEntity("test", "password", "Name", "test@test.com");
         CategoryEntity category = new CategoryEntity("Testing");
-        JobModel model = new JobModel(job, availability, category, consumer);
+        JobModel model = new JobModel(job, new HashSet<>(singletonList(availability)), category, consumer);
         JobEntity expected = model.build();
         // when:
         Mockito.when(jobRepository.save((JobEntity) notNull())).thenReturn(expected);

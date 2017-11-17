@@ -15,6 +15,7 @@ import java.util.Set;
  * @author Alexandru Stoica
  * @version 1.0
  */
+
 @Entity
 @Table(name = "Job")
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -57,16 +58,16 @@ public class JobEntity implements Serializable {
     private CategoryEntity category;
 
     @ManyToOne(fetch = FetchType.LAZY,
-            targetEntity = AvailabilityEntity.class,
-            cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "availability")
-    private AvailabilityEntity availability;
-
-    @ManyToOne(fetch = FetchType.LAZY,
             targetEntity = ConsumerEntity.class,
             cascade = CascadeType.PERSIST)
     @JoinColumn(name = "id_consumer")
     private ConsumerEntity consumer;
+
+    @JsonIgnore
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "AvailabilityList", joinColumns = @JoinColumn(name = "id_job", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "id_availability", referencedColumnName = "id"))
+    private Set<AvailabilityEntity> availabilities = new HashSet<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "job", targetEntity = RequestEntity.class)
@@ -163,12 +164,12 @@ public class JobEntity implements Serializable {
         this.category = category;
     }
 
-    public AvailabilityEntity getAvailability() {
-        return availability;
+    public Set<AvailabilityEntity> getAvailabilities() {
+        return availabilities;
     }
 
-    public void setAvailability(final @NotNull AvailabilityEntity availability) {
-        this.availability = availability;
+    public void setAvailabilities(final Set<AvailabilityEntity> availabilities) {
+        this.availabilities = availabilities;
     }
 
     public ConsumerEntity getConsumer() {

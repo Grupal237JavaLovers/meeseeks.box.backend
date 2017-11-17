@@ -41,7 +41,7 @@ public class AvailabilityEntity implements Serializable {
     private Time endHour;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "availability", targetEntity = JobEntity.class)
+    @ManyToMany(mappedBy = "availabilities")
     private Set<JobEntity> jobs = new HashSet<>();
 
     private static final Time DEFAULT_HOUR = new Time(0);
