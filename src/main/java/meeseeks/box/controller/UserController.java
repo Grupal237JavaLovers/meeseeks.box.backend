@@ -1,11 +1,16 @@
 package meeseeks.box.controller;
 
+import meeseeks.box.domain.ConsumerEntity;
 import meeseeks.box.domain.UserEntity;
 import meeseeks.box.exception.AccessDeniedException;
 import meeseeks.box.model.ChangePasswordModel;
 import meeseeks.box.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,5 +48,13 @@ public class UserController {
         }
         user.setPassword(model.getPassword());
         userService.saveUser(user);
+    }
+
+    @RequestMapping("/delete")
+    public ResponseEntity delete() {
+        UserEntity user =(UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return userService.delete(user.getUsername()) ?
+                new ResponseEntity<>(HttpStatus.ACCEPTED) :
+                new ResponseEntity(HttpStatus.NOT_FOUND);
     }
 }

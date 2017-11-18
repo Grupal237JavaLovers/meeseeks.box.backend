@@ -1,7 +1,5 @@
 package meeseeks.box.model;
 
-import jdk.nashorn.internal.ir.annotations.Immutable;
-
 import java.io.Serializable;
 import java.util.Calendar;
 
@@ -10,7 +8,6 @@ import java.util.Calendar;
  * @version 1.0
  */
 
-@Immutable
 public class DateRange implements Serializable {
 
     private Calendar start;
