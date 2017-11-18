@@ -6,6 +6,7 @@ import meeseeks.box.domain.ConsumerEntity;
 import meeseeks.box.domain.JobEntity;
 
 import java.io.Serializable;
+import java.util.Set;
 
 /**
  * @author Alexandru Stoica
@@ -15,7 +16,7 @@ import java.io.Serializable;
 public class JobModel implements Serializable {
 
     private final JobEntity job;
-    private final AvailabilityEntity availability;
+    private final Set<AvailabilityEntity> availabilities;
     private final CategoryEntity category;
     private final ConsumerEntity consumer;
 
@@ -23,11 +24,11 @@ public class JobModel implements Serializable {
         this(null, null, null, null);
     }
     public JobModel(final JobEntity job,
-                    final AvailabilityEntity availability,
+                    final Set<AvailabilityEntity> availabilities,
                     final CategoryEntity category,
                     final ConsumerEntity consumer) {
         this.job = job;
-        this.availability = availability;
+        this.availabilities = availabilities;
         this.category = category;
         this.consumer = consumer;
     }
@@ -36,8 +37,8 @@ public class JobModel implements Serializable {
         return job;
     }
 
-    public AvailabilityEntity getAvailability() {
-        return availability;
+    public Set<AvailabilityEntity> getAvailabilities() {
+        return availabilities;
     }
 
     public CategoryEntity getCategory() {
@@ -50,7 +51,7 @@ public class JobModel implements Serializable {
 
     public JobEntity build() {
         job.setCategory(category);
-        job.setAvailability(availability);
+        job.setAvailabilities(availabilities);
         job.setConsumer(consumer);
         return job;
     }
