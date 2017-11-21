@@ -55,10 +55,11 @@ public class JobControllerTest {
         AvailabilityEntity availability = new AvailabilityEntity("Monday", new Time(0), new Time(0));
         ConsumerEntity consumer = new ConsumerEntity("test", "password", "Name", "test@test.com");
         CategoryEntity category = new CategoryEntity("Testing");
-        JobModel model = new JobModel(job, new HashSet<>(singletonList(availability)), category, consumer);
-        JobEntity expected = model.build();
+        JobModel model = new JobModel(job, new HashSet<>(singletonList(availability)), category);
+        JobEntity expected = model.build(consumer);
         // when:
         Mockito.when(jobRepository.save((JobEntity) notNull())).thenReturn(expected);
+        String asdf = mapper.writeValueAsString(model);
         // then:
         mockMvc.perform(post("/job/insert")
                 .contentType(MediaType.APPLICATION_JSON)

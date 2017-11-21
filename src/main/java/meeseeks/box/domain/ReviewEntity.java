@@ -14,8 +14,6 @@ import java.util.Calendar;
  * @author Alexandru Stoica
  * @version 1.0
  */
-
-@SuppressWarnings({"WeakerAccess", "unused"})
 @Entity
 @Table(name = "Review")
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -50,7 +48,6 @@ public class ReviewEntity implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY, targetEntity = ConsumerEntity.class)
     @JoinColumn(name = "id_consumer")
     private ConsumerEntity consumer;
-
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, targetEntity = ProviderEntity.class)

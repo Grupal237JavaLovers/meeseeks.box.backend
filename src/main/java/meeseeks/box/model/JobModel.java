@@ -8,6 +8,8 @@ import meeseeks.box.domain.JobEntity;
 import java.io.Serializable;
 import java.util.Set;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * @author Alexandru Stoica
  * @version 1.0
@@ -15,41 +17,45 @@ import java.util.Set;
 
 public class JobModel implements Serializable {
 
+    @NotNull
     private final JobEntity job;
-    private final Set<AvailabilityEntity> availabilities;
-    private final CategoryEntity category;
-    private final ConsumerEntity consumer;
+    @NotNull
+    private Set<AvailabilityEntity> availabilities;
+    @NotNull
+    private CategoryEntity category;
 
     public JobModel() {
-        this(null, null, null, null);
+        this(null, null, null);
     }
     public JobModel(final JobEntity job,
                     final Set<AvailabilityEntity> availabilities,
-                    final CategoryEntity category,
-                    final ConsumerEntity consumer) {
+                    final CategoryEntity category) {
         this.job = job;
         this.availabilities = availabilities;
         this.category = category;
-        this.consumer = consumer;
     }
 
     public JobEntity getJob() {
         return job;
     }
 
+    public void setAvailabilities(Set<AvailabilityEntity> availabilities) {
+        this.availabilities = availabilities;
+    }
+
     public Set<AvailabilityEntity> getAvailabilities() {
         return availabilities;
+    }
+
+    public void setCategory(CategoryEntity category) {
+        this.category = category;
     }
 
     public CategoryEntity getCategory() {
         return category;
     }
 
-    public ConsumerEntity getConsumer() {
-        return consumer;
-    }
-
-    public JobEntity build() {
+    public JobEntity build(ConsumerEntity consumer) {
         job.setCategory(category);
         job.setAvailabilities(availabilities);
         job.setConsumer(consumer);
