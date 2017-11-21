@@ -42,15 +42,17 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
         String token = request.getHeader(securityConstants.HEADER_STRING);
         if (token != null) {
-            // parse the token.
-            String username = Jwts.parser()
-                    .setSigningKey(securityConstants.SECRET.getBytes())
-                    .parseClaimsJws(token.replace(securityConstants.TOKEN_PREFIX, ""))
-                    .getBody().getSubject();
-            if (username != null) {
-                return userRepository.findByUsername(username)
-                        .map(user -> new UsernamePasswordAuthenticationToken(user, user.getConfirmPassword(), user.getAuthorities())).orElse(null);
-            }
+            try {
+                // parse the token.
+                String username = Jwts.parser()
+                        .setSigningKey(securityConstants.SECRET.getBytes())
+                        .parseClaimsJws(token.replace(securityConstants.TOKEN_PREFIX, ""))
+                        .getBody().getSubject();
+                if (username != null) {
+                    return userRepository.findByUsername(username)
+                            .map(user -> new UsernamePasswordAuthenticationToken(user, user.getConfirmPassword(), user.getAuthorities())).orElse(null);
+                }
+            } catch (Exception ex) {}
             return null;
         }
         return null;
