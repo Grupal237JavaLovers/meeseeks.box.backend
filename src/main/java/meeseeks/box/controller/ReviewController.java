@@ -2,15 +2,13 @@ package meeseeks.box.controller;
 
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,9 +35,6 @@ public class ReviewController {
     private final ConsumerRepository consumerRepository;
     private final JobRepository jobRepository;
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
     @Autowired
     public ReviewController(final ReviewRepository reviewRepository,
             final ProviderRepository providerRepository,
@@ -56,12 +51,13 @@ public class ReviewController {
     @RequestMapping(value = "/insert/{job}/provider/{id}", method={RequestMethod.POST})
     @Transactional
     public ReviewEntity insertForProvider(@PathVariable("job") final Integer job, @PathVariable("id") final Integer id,
-            @RequestBody @Valid ReviewEntity review, @AuthenticationPrincipal ConsumerEntity consumer) {
+            @RequestBody @Valid ReviewEntity review) {
         JobEntity jobEntity = jobRepository.findById(job).orElseThrow(() -> new NotFoundException("Job not found"));
         ProviderEntity provider = getProviderById(id);
 
-        // Re-attach the consumer to be managed by Hibernate. Weird Hibernate stuff, just leave it as it is.
-        consumer = entityManager.merge(consumer);
+        ConsumerEntity consumer = (ConsumerEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        // Get the managed consumer from the database because Hibernate weirdness
+        consumer = consumerRepository.findOne(consumer.getId());
 
         review.setProvider(provider);
         review.setConsumer(consumer);
@@ -76,12 +72,13 @@ public class ReviewController {
     @RequestMapping(value = "/insert/{job}/consumer/{id}", method={RequestMethod.POST})
     @Transactional
     public ReviewEntity insertForConsumer(@PathVariable("job") final Integer job, @PathVariable("id") final Integer id,
-            @RequestBody @Valid ReviewEntity review, @AuthenticationPrincipal ProviderEntity provider) {
+            @RequestBody @Valid ReviewEntity review) {
         JobEntity jobEntity = jobRepository.findById(job).orElseThrow(() -> new NotFoundException("Job not found"));
         ConsumerEntity consumer = getConsumerById(id);
 
-        // Re-attach the consumer to be managed by Hibernate. Weird Hibernate stuff, just leave it as it is.
-        provider = entityManager.merge(provider);
+        ProviderEntity provider = (ProviderEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        // Get the managed provider from the database because Hibernate weirdness
+        provider = providerRepository.findOne(provider.getId());
 
         review.setProvider(provider);
         review.setConsumer(consumer);

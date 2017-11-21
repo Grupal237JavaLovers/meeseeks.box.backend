@@ -4,8 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
@@ -15,7 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,9 +47,6 @@ public class JobController {
     private final CategoryRepository categoryRepository;
     private final AvailabilityRepository availabilityRepository;
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
     @Autowired
     public JobController(final JobRepository jobRepository,
             final ProviderRepository providerRepository,
@@ -69,9 +64,10 @@ public class JobController {
     @ResponseBody
     @RequestMapping(value = "/insert", method={RequestMethod.POST})
     @Transactional
-    public JobEntity insert(@RequestBody @Valid JobModel job, @AuthenticationPrincipal ConsumerEntity consumer) {
-        // Re-attach the consumer to be managed by Hibernate. Weird Hibernate stuff, just leave it as it is.
-        consumer = entityManager.merge(consumer);
+    public JobEntity insert(@RequestBody @Valid JobModel job) {
+         ConsumerEntity consumer = (ConsumerEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        // Get the managed consumer from the database because Hibernate weirdness
+        consumer = consumerRepository.findOne(consumer.getId());
 
         // Link to existing category
         job.setCategory(categoryRepository.findByName(job.getCategory().getName()).orElse(job.getCategory()));
