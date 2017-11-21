@@ -42,20 +42,18 @@ public class ReviewEntity implements Serializable {
 
     @Column(name = "received_provider")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private Boolean isReceivedByProvider;
+    private Boolean receivedByProvider;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, targetEntity = ConsumerEntity.class)
     @JoinColumn(name = "id_consumer")
     private ConsumerEntity consumer;
 
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, targetEntity = ProviderEntity.class)
+    @ManyToOne(fetch = FetchType.EAGER, targetEntity = ProviderEntity.class)
     @JoinColumn(name = "id_provider")
     private ProviderEntity provider;
 
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, targetEntity = JobEntity.class)
+    @ManyToOne(fetch = FetchType.EAGER, targetEntity = JobEntity.class)
     @JoinColumn(name = "id_job")
     private JobEntity job;
 
@@ -101,11 +99,11 @@ public class ReviewEntity implements Serializable {
     }
 
     public Boolean isReceivedByProvider() {
-        return isReceivedByProvider;
+        return receivedByProvider;
     }
 
     public void setReceivedByProvider(final @NotNull Boolean receivedByProvider) {
-        isReceivedByProvider = receivedByProvider;
+        this.receivedByProvider = receivedByProvider;
     }
 
     public ConsumerEntity getConsumer() {

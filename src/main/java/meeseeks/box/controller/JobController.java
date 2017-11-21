@@ -19,6 +19,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -66,7 +67,7 @@ public class JobController {
 
     @Secured({"ROLE_CONSUMER"})
     @ResponseBody
-    @RequestMapping("/insert")
+    @RequestMapping(value = "/insert", method={RequestMethod.POST})
     @Transactional
     public JobEntity insert(@RequestBody @Valid JobModel job, @AuthenticationPrincipal ConsumerEntity consumer) {
         // Re-attach the consumer to be managed by Hibernate. Weird Hibernate stuff, just leave it as it is.
@@ -87,7 +88,7 @@ public class JobController {
     }
 
     @Secured({"ROLE_CONSUMER"})
-    @RequestMapping("/delete/id")
+    @RequestMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") final Integer id,
                                  final Authentication authentication) {
         ConsumerEntity consumer = (ConsumerEntity) authentication.getPrincipal();
