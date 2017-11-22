@@ -40,20 +40,20 @@ public class ConsumerController {
         this.securityConstants = securityConstants;
     }
 
-    @RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
+    @GetMapping("/get/{id}")
     public @ResponseBody
     ConsumerEntity getConsumerById(@PathVariable("id") final Integer id) throws NotFoundException {
         return consumerRepository.findById(id).orElseThrow(() -> new NotFoundException("Consumer not found"));
     }
 
-    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    @PostMapping("/register")
     public void registerConsumer(@RequestBody @Validated(UserEntity.ValidationRegister.class) ConsumerEntity consumer) {
         LOGGER.info("Consumer " + consumer.getUsername() + " registers now ...");
         userService.saveUser(consumer);
     }
 
     @Secured({"ROLE_CONSUMER"})
-    @RequestMapping(value = "/update", method = RequestMethod.PATCH)
+    @PatchMapping("/update")
     public void updateConsumer(@RequestBody @Validated(UserEntity.ValidationEdit.class) final ConsumerEntity consumer,
                                final Authentication authentication,
                                final HttpServletResponse response) {

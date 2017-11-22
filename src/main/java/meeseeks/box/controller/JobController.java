@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +13,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -62,10 +64,9 @@ public class JobController {
 
     @Secured({"ROLE_CONSUMER"})
     @ResponseBody
-    @RequestMapping(value = "/insert", method={RequestMethod.POST})
-    @Transactional
+    @PostMapping("/insert")
     public JobEntity insert(@RequestBody @Valid JobModel job) {
-         ConsumerEntity consumer = (ConsumerEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ConsumerEntity consumer = (ConsumerEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         // Get the managed consumer from the database because Hibernate weirdness
         consumer = consumerRepository.findOne(consumer.getId());
 
@@ -84,7 +85,7 @@ public class JobController {
     }
 
     @Secured({"ROLE_CONSUMER"})
-    @RequestMapping("/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") final Integer id,
                                  final Authentication authentication) {
         ConsumerEntity consumer = (ConsumerEntity) authentication.getPrincipal();
@@ -94,7 +95,7 @@ public class JobController {
     }
 
     @Secured({"ROLE_CONSUMER"})
-    @RequestMapping("/update")
+    @PatchMapping("/update")
     public ResponseEntity<JobEntity> update(@RequestBody JobModel updated,
                                             final Authentication authentication) {
         ConsumerEntity consumer = (ConsumerEntity) authentication.getPrincipal();
@@ -105,14 +106,14 @@ public class JobController {
     }
 
     @ResponseBody
-    @RequestMapping("/latest/provider/{id}/{limit}")
+    @GetMapping("/latest/provider/{id}/{limit}")
     public List<JobEntity> getLatestJobsRequestedByProvider(@PathVariable("id") final Integer id,
                                                             @PathVariable("limit") final Integer limit) throws NotFoundException {
         return jobRepository.findLatestJobsRequestedByProvider(getProviderById(id), new PageRequest(0, limit));
     }
 
     @ResponseBody
-    @RequestMapping("/latest/consumer/{id}/{limit}")
+    @GetMapping("/latest/consumer/{id}/{limit}")
     public List<JobEntity> getLatestJobsCreatedByConsumer(@PathVariable("id") final Integer id,
                                                           @PathVariable("limit") final Integer limit) throws NotFoundException {
         return jobRepository.findLatestJobsCreatedByConsumer(getConsumerById(id), new PageRequest(0, limit));

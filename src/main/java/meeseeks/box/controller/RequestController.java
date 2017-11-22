@@ -37,7 +37,7 @@ public class RequestController {
 
     @ResponseBody
     @Secured({"ROLE_PROVIDER"})
-    @RequestMapping("/insert")
+    @PostMapping("/insert")
     public ResponseEntity<RequestEntity> insert(@Valid @RequestBody RequestEntity request,
                                                 final Authentication authentication) {
         ProviderEntity user = (ProviderEntity) authentication.getPrincipal();
@@ -48,7 +48,7 @@ public class RequestController {
 
     @ResponseBody
     @Secured({"ROLE_PROVIDER"})
-    @RequestMapping("/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<RequestEntity> delete(@PathVariable("id") Integer id,
                                                 final Authentication authentication) {
         ProviderEntity user = (ProviderEntity) authentication.getPrincipal();
@@ -62,7 +62,7 @@ public class RequestController {
 
     @ResponseBody
     @Secured({"ROLE_PROVIDER"})
-    @RequestMapping("/update")
+    @PatchMapping("/update")
     public ResponseEntity<RequestEntity> update(@Valid @RequestBody RequestEntity updated,
                                                 final Authentication authentication) {
         ProviderEntity user = (ProviderEntity) authentication.getPrincipal();
@@ -72,20 +72,20 @@ public class RequestController {
     }
 
     @ResponseBody
-    @RequestMapping("/get/{id}")
+    @GetMapping("/get/{id}")
     public RequestEntity getRequestById(@PathVariable("id") Integer id) {
         return findRequestById(id);
     }
 
     @ResponseBody
-    @RequestMapping("/find/between/{limit}")
+    @GetMapping("/find/between/{limit}")
     public List<RequestEntity> findRequestsWithDateInRange(@RequestBody DateRange range,
                                                            @PathVariable("limit") Integer limit) {
         return requestRepository.findByDateBetween(range.getStart(), range.getEnd(), new PageRequest(0, limit));
     }
 
     @ResponseBody
-    @RequestMapping("/latest/job/{idJob}/{limit}")
+    @GetMapping("/latest/job/{idJob}/{limit}")
     public List<RequestEntity> getLatestRequestsFromJob(@PathVariable("idJob") Integer id,
                                                         @PathVariable("limit") Integer limit) {
         return requestRepository.findLatestRequestsFromJob(jobRepository.findById(id)
@@ -93,7 +93,7 @@ public class RequestController {
     }
 
     @ResponseBody
-    @RequestMapping("/latest/provider/{idProvider}/{limit}")
+    @GetMapping("/latest/provider/{idProvider}/{limit}")
     public List<RequestEntity> getLatestRequestsForProvider(@PathVariable("idProvider") Integer id,
                                                             @PathVariable("limit") Integer limit) {
         return requestRepository.findLatestRequestsForProvider(providerRepository.findById(id)
@@ -101,7 +101,7 @@ public class RequestController {
     }
 
     @ResponseBody
-    @RequestMapping("/latest/provider/accepted/{idProvider}/{limit}")
+    @GetMapping("/latest/provider/accepted/{idProvider}/{limit}")
     public List<RequestEntity> getLatestAcceptedRequestsForProvider(@PathVariable("idProvider") Integer id,
                                                                     @PathVariable("limit") Integer limit) {
         return requestRepository.findLatestAcceptedRequestsForProvider(providerRepository.findById(id)
