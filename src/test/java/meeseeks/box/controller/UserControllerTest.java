@@ -22,7 +22,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import meeseeks.box.domain.ProviderEntity;
-import meeseeks.box.repository.UserRepository;
 import meeseeks.box.service.UserService;
 
 /**
@@ -50,7 +49,7 @@ public class UserControllerTest {
         Authentication authentication = new UsernamePasswordAuthenticationToken(principal, AuthorityUtils.createAuthorityList("ROLE_PROVIDER"));
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
-    
+
     @Test
     @WithMockUser(username = "test", roles = {"PROVIDER"})
     public void deleteUser() throws Exception {
@@ -59,5 +58,5 @@ public class UserControllerTest {
         // then:
         mockMvc.perform(get("/user/delete"))
                 .andDo(print()).andExpect(status().isAccepted());
-    } 
+    }
 }

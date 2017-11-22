@@ -53,5 +53,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                             Authentication authentication) throws IOException, ServletException {
         String token = userService.getJWTToken((UserEntity) authentication.getPrincipal());
         response.addHeader(securityConstants.HEADER_STRING, securityConstants.TOKEN_PREFIX + token);
+        response.setContentType("application/json");
+        response.getWriter().println("{\"token\": \"Bearer " + token + "\"}");
     }
 }
