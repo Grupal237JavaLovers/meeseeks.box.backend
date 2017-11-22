@@ -11,6 +11,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -20,6 +21,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(securedEnabled = true)
 @ComponentScan(basePackages = {"meeseeks.box.config", "meeseeks.box.service",
         "meeseeks.box.security", "meeseeks.box.repository"})
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
@@ -57,6 +59,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/provider/register").permitAll()
                 .antMatchers(HttpMethod.POST, "/consumer/register").permitAll()
                 .antMatchers("/account/provider/**").hasAuthority(UserRole.provider.toString())
+                .antMatchers("/account/consumer/**").hasAuthority(UserRole.consumer.toString())
                 .anyRequest().authenticated().and()
                 .addFilter(new JWTAuthorizationFilter(authenticationManager(), securityConstants, userRepository))
                 .addFilter(new JWTAuthenticationFilter(authenticationManager(), securityConstants, userService));
@@ -65,5 +68,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.ignoring().antMatchers("/images/**");
+        web.ignoring().antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources", "/configuration/security", "/swagger-ui.html", "/webjars/**", "/swagger-resources/configuration/ui", "/swagger-resources/configuration/security");
     }
 }

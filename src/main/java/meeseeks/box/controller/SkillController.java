@@ -43,21 +43,21 @@ public class SkillController {
      * @return - list of skills where skill's name contains @name.
      */
     @ResponseBody
-    @RequestMapping("/get/{name}/{limit}")
+    @GetMapping("/get/{name}/{limit}")
     public List<SkillEntity> getSkillsByName(@PathVariable("name") final String name,
                                              @PathVariable("limit") final Integer limit) {
         return skillRepository.findAllByNameContaining(name, new PageRequest(0, limit));
     }
 
     @ResponseBody
-    @RequestMapping("/get/{id}")
+    @GetMapping("/get/{id}")
     public SkillEntity getSkillById(@PathVariable("id") final Integer id) throws NotFoundException {
         return skillRepository.findById(id).orElseThrow(() -> new NotFoundException("Skill Not Found!"));
     }
 
     @ResponseBody
     @Secured({"ROLE_PROVIDER"})
-    @RequestMapping(value = "/insert/{name}", method = RequestMethod.GET)
+    @PostMapping("/insert/{name}")
     public Set<SkillEntity> addSkillsToProviderByName(@PathVariable("name") final String name) throws NotFoundException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         ProviderEntity provider = (ProviderEntity) authentication.getPrincipal();
@@ -68,7 +68,7 @@ public class SkillController {
 
     @ResponseBody
     @Secured({"ROLE_PROVIDER"})
-    @RequestMapping(value = "/delete/{id}", method = RequestMethod.GET)
+    @DeleteMapping("/delete/{id}")
     public Set<SkillEntity> deleteSkillFromProviderById(@PathVariable("id") final Integer id) throws NotFoundException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         ProviderEntity provider = (ProviderEntity) authentication.getPrincipal();
@@ -79,6 +79,4 @@ public class SkillController {
         }
         return providerRepository.save(provider).getSkills();
     }
-
-
 }
