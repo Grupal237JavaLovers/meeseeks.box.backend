@@ -10,6 +10,8 @@ import meeseeks.box.security.SecurityConstants;
 import meeseeks.box.service.UserService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -101,13 +103,14 @@ public class ProviderController {
     @ResponseBody
     @Secured({"ROLE_PROVIDER"})
     @PutMapping("/apply/{jobId}/{message}")
-    public RequestEntity applyToJob(@AuthenticationPrincipal ProviderEntity provider,
-                                   @PathVariable(value = "message") final String message,
-                                   @PathVariable(value = "jobId") final Integer id) throws NotFoundException, DataAlreadyExists {
-        JobEntity job = jobRepository.findById(id).orElseThrow(() -> new NotFoundException("404 Job Not Found!"));
+    public ResponseEntity<RequestEntity> applyToJob(@AuthenticationPrincipal ProviderEntity provider,
+                                     @PathVariable(value = "message") final String message,
+                                     @PathVariable(value = "jobId") final Integer id) throws NotFoundException, DataAlreadyExists {
+        JobEntity job = jobRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("404 Job Not Found!"));
         requestRepository.getRequestByProviderAndJob(provider, job)
                 .orElseThrow(() -> new DataAlreadyExists("Provider's application already exists!"));
         RequestEntity request = new RequestEntity(provider, job, message);
-        return requestRepository.save(request);
+        return new ResponseEntity<>(requestRepository.save(request), HttpStatus.ACCEPTED);
     }
 }
