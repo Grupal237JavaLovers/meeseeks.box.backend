@@ -1,23 +1,28 @@
 package meeseeks.box.security;
 
-import io.jsonwebtoken.Jwts;
-import meeseeks.box.repository.UserRepository;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import java.io.IOException;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import org.apache.log4j.Logger;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+
+import io.jsonwebtoken.Jwts;
+import meeseeks.box.repository.UserRepository;
 
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
     private SecurityConstants securityConstants;
     private UserRepository userRepository;
 
+    private final Logger LOGGER = Logger.getLogger(JWTAuthorizationFilter.class.getName());
+    
     public JWTAuthorizationFilter(AuthenticationManager authManager, SecurityConstants securityConstants, UserRepository userRepo) {
         super(authManager);
         this.securityConstants = securityConstants;
@@ -52,7 +57,9 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
                     return userRepository.findByUsername(username)
                             .map(user -> new UsernamePasswordAuthenticationToken(user, user.getConfirmPassword(), user.getAuthorities())).orElse(null);
                 }
-            } catch (Exception ex) {}
+            } catch (Exception ex) {
+                LOGGER.error("Invalid JWT: " + ex.getMessage());
+            }
             return null;
         }
         return null;
