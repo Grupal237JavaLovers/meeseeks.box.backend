@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Alexandru Stoica
@@ -29,4 +30,8 @@ public interface RequestRepository extends BaseCrudRepository<RequestEntity, Int
 
     @Query("select request from RequestEntity request where request.provider = ?1 and request.accepted = true order by request.date desc")
     List<RequestEntity> findLatestAcceptedRequestsForProvider(final ProviderEntity provider, final Pageable pageable);
+
+    @Query("select request from RequestEntity request where request.provider = ?1 and request.job = ?2")
+    Optional<RequestEntity> getRequestByProviderAndJob(final ProviderEntity provider, final JobEntity job);
+
 }

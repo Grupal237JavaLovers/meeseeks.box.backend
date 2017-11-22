@@ -1,30 +1,23 @@
 package meeseeks.box.controller;
 
-import java.util.Set;
-
-import javax.servlet.http.HttpServletResponse;
-
+import meeseeks.box.domain.*;
+import meeseeks.box.exception.DataAlreadyExists;
+import meeseeks.box.exception.NotFoundException;
+import meeseeks.box.repository.JobRepository;
+import meeseeks.box.repository.ProviderRepository;
+import meeseeks.box.repository.RequestRepository;
+import meeseeks.box.security.SecurityConstants;
+import meeseeks.box.service.UserService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import meeseeks.box.domain.ProviderEntity;
-import meeseeks.box.domain.SkillEntity;
-import meeseeks.box.domain.UserEntity;
-import meeseeks.box.exception.NotFoundException;
-import meeseeks.box.repository.ProviderRepository;
-import meeseeks.box.security.SecurityConstants;
-import meeseeks.box.service.UserService;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Set;
 
 /**
  * @author Alexandru Stoica
@@ -38,16 +31,22 @@ public class ProviderController {
     private final ProviderRepository providerRepository;
     private final UserService userService;
     private final SecurityConstants securityConstants;
+    private final JobRepository jobRepository;
+    private final RequestRepository requestRepository;
 
     private final Logger LOGGER = Logger.getLogger(ProviderController.class.getName());
 
     @Autowired
     public ProviderController(final ProviderRepository providerRepository,
-            final UserService userService,
-            final SecurityConstants securityConstants) {
+                              final UserService userService,
+                              final SecurityConstants securityConstants,
+                              final JobRepository jobRepository,
+                              final RequestRepository requestRepository) {
         this.providerRepository = providerRepository;
         this.userService = userService;
         this.securityConstants = securityConstants;
+        this.jobRepository = jobRepository;
+        this.requestRepository = requestRepository;
     }
 
     @ResponseBody
@@ -97,5 +96,18 @@ public class ProviderController {
         response.addHeader(securityConstants.HEADER_STRING,
                 securityConstants.TOKEN_PREFIX + userService.getJWTToken(oldProvider)
         );
+    }
+
+    @ResponseBody
+    @Secured({"ROLE_PROVIDER"})
+    @PutMapping("/apply/{jobId}/{message}")
+    public RequestEntity applyToJob(@AuthenticationPrincipal ProviderEntity provider,
+                                   @PathVariable(value = "message") final String message,
+                                   @PathVariable(value = "jobId") final Integer id) throws NotFoundException, DataAlreadyExists {
+        JobEntity job = jobRepository.findById(id).orElseThrow(() -> new NotFoundException("404 Job Not Found!"));
+        requestRepository.getRequestByProviderAndJob(provider, job)
+                .orElseThrow(() -> new DataAlreadyExists("Provider's application already exists!"));
+        RequestEntity request = new RequestEntity(provider, job, message);
+        return requestRepository.save(request);
     }
 }
