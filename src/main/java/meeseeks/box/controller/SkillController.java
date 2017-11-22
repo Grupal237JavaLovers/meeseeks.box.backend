@@ -7,10 +7,12 @@ import meeseeks.box.repository.ProviderRepository;
 import meeseeks.box.repository.SkillRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 import java.util.Set;
@@ -34,16 +36,8 @@ public class SkillController {
         this.providerRepository = providerRepository;
     }
 
-    /**
-     * Endpoint used for skill searching.
-     * The provider will be able to see a live list of skills from the system as he's typing.
-     *
-     * @param name  - the skill approximately name
-     * @param limit - the limit of the search results
-     * @return - list of skills where skill's name contains @name.
-     */
-    @ResponseBody
     @GetMapping("/get/{name}/{limit}")
+    @Secured({"ROLE_PROVIDER", "ROLE_CONSUMER"})
     public List<SkillEntity> getSkillsByName(@PathVariable("name") final String name,
                                              @PathVariable("limit") final Integer limit) {
         return skillRepository.findAllByNameContaining(name, new PageRequest(0, limit));
@@ -51,6 +45,7 @@ public class SkillController {
 
     @ResponseBody
     @GetMapping("/get/{id}")
+    @Secured({"ROLE_PROVIDER", "ROLE_CONSUMER"})
     public SkillEntity getSkillById(@PathVariable("id") final Integer id) throws NotFoundException {
         return skillRepository.findById(id).orElseThrow(() -> new NotFoundException("Skill Not Found!"));
     }
@@ -58,25 +53,22 @@ public class SkillController {
     @ResponseBody
     @Secured({"ROLE_PROVIDER"})
     @PostMapping("/insert/{name}")
-    public Set<SkillEntity> addSkillsToProviderByName(@PathVariable("name") final String name) throws NotFoundException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        ProviderEntity provider = (ProviderEntity) authentication.getPrincipal();
-        SkillEntity skill = skillRepository.findByName(name).orElse(new SkillEntity(name));
-        provider.getSkills().add(skill);
-        return providerRepository.save(provider).getSkills();
+    public ResponseEntity<ProviderEntity> addSkillsToProviderByName(@PathVariable("name") final String name,
+                                                    @AuthenticationPrincipal @ApiIgnore ProviderEntity provider) throws NotFoundException {
+        Set<SkillEntity> skills = skillRepository.findALlByProvider(provider);
+        skills.add(skillRepository.findByName(name).orElse(new SkillEntity(name)));
+        provider.setSkills(skills);
+        return new ResponseEntity<>(providerRepository.save(provider), HttpStatus.ACCEPTED);
     }
 
     @ResponseBody
     @Secured({"ROLE_PROVIDER"})
     @DeleteMapping("/delete/{id}")
-    public Set<SkillEntity> deleteSkillFromProviderById(@PathVariable("id") final Integer id) throws NotFoundException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        ProviderEntity provider = (ProviderEntity) authentication.getPrincipal();
-        SkillEntity skill = skillRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Skill Not Found!"));
-        if (skill.getProviders().contains(provider)) {
-            provider.getSkills().remove(skill);
-        }
-        return providerRepository.save(provider).getSkills();
+    public ResponseEntity<ProviderEntity> deleteSkillFromProviderById(@PathVariable("id") final Integer id,
+                                                        @AuthenticationPrincipal @ApiIgnore ProviderEntity provider) throws NotFoundException {
+        Set<SkillEntity> skills = skillRepository.findALlByProvider(provider);
+        skills.remove(skillRepository.findById(id).orElseThrow(() -> new NotFoundException("Skill Not Found")));
+        provider.setSkills(skills);
+        return new ResponseEntity<>(providerRepository.save(provider), HttpStatus.ACCEPTED);
     }
 }

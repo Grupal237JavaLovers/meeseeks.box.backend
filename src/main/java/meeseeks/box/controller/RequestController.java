@@ -12,7 +12,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -51,10 +50,9 @@ public class RequestController {
     @Secured({"ROLE_PROVIDER"})
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<RequestEntity> delete(@PathVariable("id") Integer id,
-                                                final Authentication authentication) {
-        ProviderEntity user = (ProviderEntity) authentication.getPrincipal();
+                                                @AuthenticationPrincipal @ApiIgnore ProviderEntity provider) {
         RequestEntity request = findRequestById(id);
-        if (user.equals(request.getProvider())) {
+        if (provider.getId().equals(request.getProvider().getId())) {
             requestRepository.delete(request);
             return new ResponseEntity<>(HttpStatus.OK);
         }
@@ -65,21 +63,22 @@ public class RequestController {
     @Secured({"ROLE_PROVIDER"})
     @PatchMapping("/update")
     public ResponseEntity<RequestEntity> update(@Valid @RequestBody RequestEntity updated,
-                                                final Authentication authentication) {
-        ProviderEntity user = (ProviderEntity) authentication.getPrincipal();
-        return user.equals(updated.getProvider()) ?
+                                                @AuthenticationPrincipal @ApiIgnore ProviderEntity provider) {
+        return provider.getId().equals(updated.getProvider().getId()) ?
                 new ResponseEntity<>(requestRepository.save(updated), HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
     @ResponseBody
     @GetMapping("/get/{id}")
+    @Secured({"ROLE_PROVIDER", "ROLE_CONSUMER"})
     public RequestEntity getRequestById(@PathVariable("id") Integer id) {
         return findRequestById(id);
     }
 
     @ResponseBody
     @GetMapping("/find/between/{limit}")
+    @Secured({"ROLE_PROVIDER", "ROLE_CONSUMER"})
     public List<RequestEntity> findRequestsWithDateInRange(@RequestBody DateRange range,
                                                            @PathVariable("limit") Integer limit) {
         return requestRepository.findByDateBetween(range.getStart(), range.getEnd(), new PageRequest(0, limit));
@@ -87,6 +86,7 @@ public class RequestController {
 
     @ResponseBody
     @GetMapping("/latest/job/{idJob}/{limit}")
+    @Secured({"ROLE_PROVIDER", "ROLE_CONSUMER"})
     public List<RequestEntity> getLatestRequestsFromJob(@PathVariable("idJob") Integer id,
                                                         @PathVariable("limit") Integer limit) {
         return requestRepository.findLatestRequestsFromJob(jobRepository.findById(id)
@@ -95,6 +95,7 @@ public class RequestController {
 
     @ResponseBody
     @GetMapping("/latest/provider/{idProvider}/{limit}")
+    @Secured({"ROLE_PROVIDER", "ROLE_CONSUMER"})
     public List<RequestEntity> getLatestRequestsForProvider(@PathVariable("idProvider") Integer id,
                                                             @PathVariable("limit") Integer limit) {
         return requestRepository.findLatestRequestsForProvider(providerRepository.findById(id)
@@ -103,6 +104,7 @@ public class RequestController {
 
     @ResponseBody
     @GetMapping("/latest/provider/accepted/{idProvider}/{limit}")
+    @Secured({"ROLE_PROVIDER", "ROLE_CONSUMER"})
     public List<RequestEntity> getLatestAcceptedRequestsForProvider(@PathVariable("idProvider") Integer id,
                                                                     @PathVariable("limit") Integer limit) {
         return requestRepository.findLatestAcceptedRequestsForProvider(providerRepository.findById(id)
