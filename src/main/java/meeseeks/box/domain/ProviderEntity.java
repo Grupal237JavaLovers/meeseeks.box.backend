@@ -70,6 +70,10 @@ public class ProviderEntity extends UserEntity implements Serializable {
         this.setRole(UserRole.provider);
     }
 
+    public ProviderEntity(final String username, final String password) {
+        this(username, password, "default", "default@test.com");
+    }
+
     public String getProfileImageUrl() {
         return profileImageUrl;
     }
