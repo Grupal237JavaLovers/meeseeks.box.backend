@@ -2,6 +2,9 @@ package meeseeks.box.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.Email;
 import org.springframework.security.core.GrantedAuthority;
@@ -34,6 +37,7 @@ public class UserEntity implements UserDetails, Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonProperty(access = Access.READ_ONLY)
     private Integer id;
 
     @Email(message = "{provider.email.incorrect}", groups={ValidationRegister.class, ValidationEdit.class})
@@ -43,6 +47,7 @@ public class UserEntity implements UserDetails, Serializable {
 
     @Size(min = 8, message = "{provider.password.length}", groups={ValidationRegister.class})
     @Column(name = "password")
+    @JsonProperty(access = Access.WRITE_ONLY)
     private String password;
 
     @Column(name = "name")
@@ -55,14 +60,17 @@ public class UserEntity implements UserDetails, Serializable {
 
     @Enumerated(EnumType.STRING)
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonProperty(access = Access.READ_ONLY)
     private UserRole role;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column
     @CreationTimestamp
+    @JsonProperty(access = Access.READ_ONLY)
     private Calendar created;
-    
+
     @Transient
+    @JsonProperty(access = Access.WRITE_ONLY)
     private String confirmPassword;
 
     public UserEntity() {
@@ -157,21 +165,25 @@ public class UserEntity implements UserDetails, Serializable {
         this.username = username;
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isEnabled() {
         return true;
@@ -185,6 +197,7 @@ public class UserEntity implements UserDetails, Serializable {
         this.confirmPassword = confirmPassword;
     }
 
+    @JsonIgnore
     @AssertTrue(message = "{provider.passwords.mismatch}", groups={ValidationRegister.class})
     public boolean isPasswordConfirmed() {
         return getPassword() != null && this.confirmPassword != null

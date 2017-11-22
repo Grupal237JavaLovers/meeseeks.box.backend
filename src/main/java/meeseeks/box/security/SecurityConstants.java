@@ -9,7 +9,7 @@ public class SecurityConstants {
     @Value("${app.security.secret}")
     public String SECRET = "ThisIsASecret";
 
-    public final long EXPIRATION_TIME = 864_000_000; // 10 days
+    public final long EXPIRATION_TIME = 7889238000L; // 3 months in miliseconds
 
     public final String TOKEN_PREFIX = "Bearer ";
 

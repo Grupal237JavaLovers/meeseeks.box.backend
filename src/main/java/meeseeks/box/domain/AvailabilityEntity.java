@@ -1,24 +1,29 @@
 package meeseeks.box.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.sql.Time;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * @author Alexandru Stoica
  * @version 1.0
  */
-
-
-@SuppressWarnings("unused")
 @Entity
-@Table(name = "Availability")
+@Table(name = "Availability", uniqueConstraints=@UniqueConstraint(columnNames={"day", "start_hour", "end_hour"}))
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AvailabilityEntity implements Serializable {
 
@@ -28,7 +33,7 @@ public class AvailabilityEntity implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Integer id;
 
-    @Column(name = "day", unique = true)
+    @Column(name = "day")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String day;
 
