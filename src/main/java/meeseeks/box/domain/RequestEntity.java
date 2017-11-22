@@ -94,7 +94,7 @@ public class RequestEntity implements Serializable {
         this.message = message;
     }
 
-    public Boolean isAccepted() {
+    public Boolean getAccepted() {
         return accepted;
     }
 

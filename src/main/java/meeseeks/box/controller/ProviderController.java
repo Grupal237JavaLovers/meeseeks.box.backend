@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Set;
@@ -74,7 +75,7 @@ public class ProviderController {
     @Secured({"ROLE_PROVIDER"})
     @PatchMapping("/update")
     public void editConsumer(@RequestBody @Validated(UserEntity.ValidationEdit.class)
-                                         ProviderEntity provider, Authentication auth, HttpServletResponse response) {
+                                     ProviderEntity provider, Authentication auth, HttpServletResponse response) {
         ProviderEntity oldProvider = (ProviderEntity) auth.getPrincipal();
         if (provider.getEmail() != null && !provider.getEmail().isEmpty()) {
             oldProvider.setEmail(provider.getEmail());
@@ -102,14 +103,15 @@ public class ProviderController {
 
     @ResponseBody
     @Secured({"ROLE_PROVIDER"})
-    @PutMapping("/apply/{jobId}/{message}")
-    public ResponseEntity<RequestEntity> applyToJob(@AuthenticationPrincipal ProviderEntity provider,
-                                     @PathVariable(value = "message") final String message,
-                                     @PathVariable(value = "jobId") final Integer id) throws NotFoundException, DataAlreadyExists {
+    @PostMapping("/apply/{jobId}/{message}")
+    public ResponseEntity<RequestEntity> applyToJob(@AuthenticationPrincipal @ApiIgnore ProviderEntity provider,
+                                                    @PathVariable(value = "jobId") final Integer id,
+                                                    @PathVariable(value = "message") final String message) throws NotFoundException, DataAlreadyExists {
         JobEntity job = jobRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("404 Job Not Found!"));
-        requestRepository.getRequestByProviderAndJob(provider, job)
-                .orElseThrow(() -> new DataAlreadyExists("Provider's application already exists!"));
+        requestRepository.getRequestByProviderAndJob(provider, job).ifPresent(item -> {
+            throw new DataAlreadyExists("Provider's application already exists!");
+        });
         RequestEntity request = new RequestEntity(provider, job, message);
         return new ResponseEntity<>(requestRepository.save(request), HttpStatus.ACCEPTED);
     }

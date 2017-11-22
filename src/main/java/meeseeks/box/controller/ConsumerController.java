@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -92,10 +93,10 @@ public class ConsumerController {
 
     @Secured({"ROLE_CONSUMER"})
     @ResponseBody
-    @PutMapping("/accept/{idJob}/{idProvider}")
-    public ResponseEntity<RequestEntity> acceptProviderForJob(@PathVariable("idJob") final Integer idJob,
-                                                              @PathVariable("idProvider") final Integer idProvider,
-                                                              @AuthenticationPrincipal ConsumerEntity consumer) {
+    @PostMapping("/accept/{idJob}/{idProvider}")
+    public ResponseEntity<?> acceptProviderForJob(@PathVariable("idJob") final Integer idJob,
+                                                  @PathVariable("idProvider") final Integer idProvider,
+                                                  @AuthenticationPrincipal @ApiIgnore ConsumerEntity consumer) {
         JobEntity job = jobRepository.findById(idJob).
                 orElseThrow(() -> new NotFoundException("Job Not Found!"));
         ProviderEntity provider = providerRepository.findById(idProvider)
@@ -103,7 +104,7 @@ public class ConsumerController {
         RequestEntity request = requestRepository.getRequestByProviderAndJob(provider, job)
                 .orElseThrow(() -> new NotFoundException("Request Not Found!"));
         request.setAccepted(Boolean.TRUE);
-        return job.getConsumer().equals(consumer) ?
+        return job.getConsumer().getId().equals(consumer.getId()) ?
                 new ResponseEntity<>(requestRepository.save(request), HttpStatus.ACCEPTED) :
                 new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }

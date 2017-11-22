@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.util.Calendar;
@@ -93,20 +94,20 @@ public class JobController {
     @Secured({"ROLE_PROVIDER"})
     @ResponseBody
     @GetMapping("/latest/provider/{limit}")
-    public List<JobEntity> getLatestJobsRequestedByProvider(@AuthenticationPrincipal ProviderEntity provider,
-                                                            @PathVariable("limit") final Integer limit) {
+    public List<JobEntity> getLatestJobsRequestedByProvider(@AuthenticationPrincipal @ApiIgnore ProviderEntity provider,
+                                                            @PathVariable("limit") final Integer limit)  {
         return jobRepository.findLatestJobsRequestedByProvider(provider, new PageRequest(0, limit));
     }
 
     @Secured({"ROLE_CONSUMER"})
     @ResponseBody
     @GetMapping("/latest/consumer/{limit}")
-    public List<JobEntity> getLatestJobsCreatedByConsumer(@AuthenticationPrincipal ConsumerEntity consumer,
+    public List<JobEntity> getLatestJobsCreatedByConsumer(@AuthenticationPrincipal @ApiIgnore ConsumerEntity consumer,
                                                           @PathVariable("limit") final Integer limit) {
         return jobRepository.findLatestJobsCreatedByConsumer(consumer, new PageRequest(0, limit));
     }
 
-    @Secured({"ROLE_CONSUMER, ROLE_PROVIDER"})
+    @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})
     @ResponseBody
     @GetMapping("/find/location/{location}/{limit}")
     public List<JobEntity> getLatestJobsByLocation(@PathVariable("location") final String location,
@@ -114,15 +115,15 @@ public class JobController {
         return jobRepository.findLatestByLocation(location, new PageRequest(0, limit));
     }
 
-    @Secured({"ROLE_CONSUMER, ROLE_PROVIDER"})
+    @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})
     @ResponseBody
-    @GetMapping("/find/category/{category}/{limit}")
+    @GetMapping("/find/category/{limit}")
     public List<JobEntity> getLatestJobsByCategory(@RequestBody final CategoryEntity category,
                                                    @PathVariable("limit") final Integer limit) {
         return jobRepository.findLatestByCategory(category, new PageRequest(0, limit));
     }
 
-    @Secured({"ROLE_CONSUMER, ROLE_PROVIDER"})
+    @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})
     @ResponseBody
     @GetMapping("/find/price_between/{low}/{high}/{limit}")
     public List<JobEntity> getLatestJobByPriceBetween(@PathVariable("low") final Double low,
@@ -131,7 +132,7 @@ public class JobController {
         return jobRepository.findLatestByPriceBetween(low, high, new PageRequest(0, limit));
     }
 
-    @Secured({"ROLE_CONSUMER, ROLE_PROVIDER"})
+    @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})
     @ResponseBody
     @GetMapping("/find/expiration_before/{date}/{limit}")
     public List<JobEntity> getLatestJobsByExpirationDateBefore(@PathVariable("date") final Calendar date,
@@ -139,7 +140,7 @@ public class JobController {
         return jobRepository.findLatestByExpirationBefore(date, new PageRequest(0, limit));
     }
 
-    @Secured({"ROLE_CONSUMER, ROLE_PROVIDER"})
+    @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})
     @ResponseBody
     @GetMapping("/find/type/{type}/{limit}")
     public List<JobEntity> getLatestJobsByType(@PathVariable("type") final String type,

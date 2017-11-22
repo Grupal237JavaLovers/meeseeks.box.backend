@@ -50,7 +50,7 @@ public interface JobRepository extends BaseCrudRepository<JobEntity, Integer> {
     @Query("select job from JobEntity job where job.category = ?1 order by job.created desc")
     List<JobEntity> findLatestByCategory(final CategoryEntity category, final Pageable pageable);
 
-    @Query("select job from JobEntity job where job.price >= ?1 and job.price < ?2 order by job.created desc")
+    @Query("select job from JobEntity job where job.price > ?1 and job.price < ?2 order by job.created desc")
     List<JobEntity> findLatestByPriceBetween(final Double low, final Double high, final Pageable pageable);
 
 }

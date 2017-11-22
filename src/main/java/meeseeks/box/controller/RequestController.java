@@ -13,7 +13,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -39,9 +41,8 @@ public class RequestController {
     @Secured({"ROLE_PROVIDER"})
     @PostMapping("/insert")
     public ResponseEntity<RequestEntity> insert(@Valid @RequestBody RequestEntity request,
-                                                final Authentication authentication) {
-        ProviderEntity user = (ProviderEntity) authentication.getPrincipal();
-        return user.equals(request.getProvider()) ?
+                                                @AuthenticationPrincipal @ApiIgnore ProviderEntity provider) {
+        return provider.getId().equals(request.getProvider().getId()) ?
                 new ResponseEntity<>(requestRepository.save(request), HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
