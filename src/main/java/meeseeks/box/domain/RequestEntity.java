@@ -63,6 +63,13 @@ public class RequestEntity implements Serializable {
         this.accepted = isAccepted;
     }
 
+    public RequestEntity(final ProviderEntity provider, final JobEntity job, final String message) {
+        this.provider = provider;
+        this.job = job;
+        this.message = message;
+        this.accepted = false;
+    }
+
     public Integer getId() {
         return id;
     }
@@ -87,7 +94,7 @@ public class RequestEntity implements Serializable {
         this.message = message;
     }
 
-    public Boolean isAccepted() {
+    public Boolean getAccepted() {
         return accepted;
     }
 
