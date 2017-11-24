@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.Email;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,7 +12,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -40,12 +38,14 @@ public class UserEntity implements UserDetails, Serializable {
     @JsonProperty(access = Access.READ_ONLY)
     private Integer id;
 
-    @Email(message = "{provider.email.incorrect}", groups={ValidationRegister.class, ValidationEdit.class})
+    @Email(message = "{provider.email.incorrect}",
+            groups = {ValidationRegister.class, ValidationEdit.class})
     @Column(name = "email", unique = true)
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String email;
 
-    @Size(min = 8, message = "{provider.password.length}", groups={ValidationRegister.class})
+    @Size(min = 8, message = "{provider.password.length}",
+            groups = {ValidationRegister.class})
     @Column(name = "password")
     @JsonProperty(access = Access.WRITE_ONLY)
     private String password;
@@ -77,10 +77,10 @@ public class UserEntity implements UserDetails, Serializable {
         this(DEFAULT, DEFAULT, DEFAULT, DEFAULT);
     }
 
-    public UserEntity(final @NotNull String email,
-                      final @NotNull String username,
+    public UserEntity(final String email,
+                      final String username,
                       final String password,
-                      final @NotNull String name) {
+                      final String name) {
         super();
         this.id = null;
         this.email = email;
@@ -93,23 +93,23 @@ public class UserEntity implements UserDetails, Serializable {
         return id;
     }
 
-    public void setId(final @NotNull Integer id) {
+    public void setId(final Integer id) {
         this.id = id;
     }
 
-    public @NotNull String getEmail() {
+    public String getEmail() {
         return email;
     }
 
-    public void setEmail(final @NotNull String email) {
+    public void setEmail(final String email) {
         this.email = email;
     }
 
-    public @NotNull String getName() {
+    public String getName() {
         return name;
     }
 
-    public void setName(final @NotNull String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
@@ -127,14 +127,14 @@ public class UserEntity implements UserDetails, Serializable {
     }
 
     public UserRole getRole() {
-		return role;
-	}
+        return role;
+    }
 
-	public void setRole(UserRole role) {
-		this.role = role;
-	}
+    public void setRole(UserRole role) {
+        this.role = role;
+    }
 
-	@Override
+    @Override
     public String toString() {
         return this.name;
     }
@@ -142,18 +142,14 @@ public class UserEntity implements UserDetails, Serializable {
     @Override
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
-    	List<GrantedAuthority> auths = new ArrayList<>();
-
-    	if (this.getRole() != null) {
-    	    auths.add(new SimpleGrantedAuthority(this.getRole().toString()));
-    	}
-
-        // All users should also have the default user role
-        if (this.getRole() != UserRole.user) {
-            auths.add(new SimpleGrantedAuthority(UserRole.user.toString()));
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        if (getRole() != null) {
+            authorities.add(new SimpleGrantedAuthority(this.getRole().toString()));
         }
-
-        return auths;
+        if (getRole() != UserRole.user) {
+            authorities.add(new SimpleGrantedAuthority(UserRole.user.toString()));
+        }
+        return authorities;
     }
 
     @Override
@@ -161,7 +157,7 @@ public class UserEntity implements UserDetails, Serializable {
         return this.username;
     }
 
-    public void setUsername(final @NotNull String username) {
+    public void setUsername(final String username) {
         this.username = username;
     }
 
@@ -198,7 +194,7 @@ public class UserEntity implements UserDetails, Serializable {
     }
 
     @JsonIgnore
-    @AssertTrue(message = "{provider.passwords.mismatch}", groups={ValidationRegister.class})
+    @AssertTrue(message = "{provider.passwords.mismatch}", groups = {ValidationRegister.class})
     public boolean isPasswordConfirmed() {
         return getPassword() != null && this.confirmPassword != null
                 && getPassword().equals(this.confirmPassword);
@@ -206,7 +202,7 @@ public class UserEntity implements UserDetails, Serializable {
 
     public static enum UserRole {
 
-    	user("ROLE_USER"),
+        user("ROLE_USER"),
         provider("ROLE_PROVIDER"),
         consumer("ROLE_CONSUMER");
 
@@ -222,6 +218,9 @@ public class UserEntity implements UserDetails, Serializable {
         }
     }
 
-    public interface ValidationRegister {}
-    public interface ValidationEdit {}
+    public interface ValidationRegister {
+    }
+
+    public interface ValidationEdit {
+    }
 }

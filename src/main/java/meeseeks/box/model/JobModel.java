@@ -6,9 +6,7 @@ import meeseeks.box.domain.ConsumerEntity;
 import meeseeks.box.domain.JobEntity;
 
 import java.io.Serializable;
-import java.util.Set;
-
-import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * @author Alexandru Stoica
@@ -17,18 +15,16 @@ import javax.validation.constraints.NotNull;
 
 public class JobModel implements Serializable {
 
-    @NotNull
     private final JobEntity job;
-    @NotNull
-    private Set<AvailabilityEntity> availabilities;
-    @NotNull
+    private List<AvailabilityEntity> availabilities;
     private CategoryEntity category;
 
     public JobModel() {
         this(null, null, null);
     }
+
     public JobModel(final JobEntity job,
-                    final Set<AvailabilityEntity> availabilities,
+                    final List<AvailabilityEntity> availabilities,
                     final CategoryEntity category) {
         this.job = job;
         this.availabilities = availabilities;
@@ -39,11 +35,11 @@ public class JobModel implements Serializable {
         return job;
     }
 
-    public void setAvailabilities(Set<AvailabilityEntity> availabilities) {
+    public void setAvailabilities(List<AvailabilityEntity> availabilities) {
         this.availabilities = availabilities;
     }
 
-    public Set<AvailabilityEntity> getAvailabilities() {
+    public List<AvailabilityEntity> getAvailabilities() {
         return availabilities;
     }
 

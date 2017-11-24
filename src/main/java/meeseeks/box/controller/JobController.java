@@ -16,10 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by nicof on 10/28/2017.
@@ -55,18 +52,14 @@ public class JobController {
         ConsumerEntity consumer = (ConsumerEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         // Get the managed consumer from the database because Hibernate weirdness
         consumer = consumerRepository.findOne(consumer.getId());
-
         // Link to existing category
         job.setCategory(categoryRepository.findByName(job.getCategory().getName()).orElse(job.getCategory()));
-
         // Link to existing availabilities
-        Set<AvailabilityEntity> availabilities = new HashSet<>();
+        List<AvailabilityEntity> availabilities = new ArrayList<>();
         for (AvailabilityEntity entity : job.getAvailabilities()) {
             availabilities.add(availabilityRepository.findByDayAndStartHourAndEndHour(entity.getDay(), entity.getStartHour(), entity.getEndHour()).orElse(entity));
         }
-
         job.setAvailabilities(availabilities);
-
         return jobRepository.save(job.build(consumer));
     }
 
