@@ -78,7 +78,7 @@ public class ReviewController {
 
     @ResponseBody
     @Secured("ROLE_PROVIDER")
-    @PostMapping("/update/consumer/{id}/{rating}/{message}")
+    @PostMapping("/update/consumer/{id}")
     public ResponseEntity<ReviewEntity> updateRatingReviewForConsumer(@PathVariable("id") final Integer id,
                                                                       @RequestParam(required = false, value = "rating") final Integer rating,
                                                                       @RequestParam(required = false, value = "message") final String message) {
@@ -92,7 +92,7 @@ public class ReviewController {
 
     @ResponseBody
     @Secured("ROLE_PROVIDER")
-    @PostMapping("/update/provider/{id}/{rating}/{message}")
+    @PostMapping("/update/provider/{id}")
     public ResponseEntity<ReviewEntity> updateRatingReviewForProvider(@PathVariable("id") final Integer id,
                                                                       @RequestParam(required = false, value = "rating") final Integer rating,
                                                                       @RequestParam(required = false, value = "message") final String message) {

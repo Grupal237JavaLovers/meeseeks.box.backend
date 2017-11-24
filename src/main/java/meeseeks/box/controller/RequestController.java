@@ -1,6 +1,5 @@
 package meeseeks.box.controller;
 
-import meeseeks.box.domain.ProviderEntity;
 import meeseeks.box.domain.RequestEntity;
 import meeseeks.box.exception.NotFoundException;
 import meeseeks.box.model.DateRange;
@@ -12,9 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 
@@ -48,8 +45,7 @@ public class RequestController {
     @Secured({"ROLE_PROVIDER"})
     @PatchMapping("/update/{id}/{message}")
     public ResponseEntity<RequestEntity> update(@PathVariable("id") Integer id,
-                                                @PathVariable("description") final String message,
-                                                @AuthenticationPrincipal @ApiIgnore ProviderEntity provider) {
+                                                @PathVariable("message") final String message) {
         return requestRepository.updateRequestFromCurrentProvider(id, message) > 0?
                 new ResponseEntity<>(requestRepository.findById(id)
                         .orElseThrow(() -> new NotFoundException("Request Not Found!")), HttpStatus.OK) :
