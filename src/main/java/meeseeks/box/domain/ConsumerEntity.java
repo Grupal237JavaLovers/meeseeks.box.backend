@@ -4,14 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.validation.constraints.NotNull;
+import javax.persistence.*;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Alexandru Stoica
@@ -29,17 +25,19 @@ public class ConsumerEntity extends UserEntity implements Serializable {
     private String profileImageUrl;
 
     @JsonIgnore
+    @OrderBy("id")
     @OneToMany(mappedBy = "consumer", targetEntity = JobEntity.class, cascade = CascadeType.REMOVE)
-    private Set<JobEntity> jobs = new HashSet<>();
+    private List<JobEntity> jobs = new ArrayList<>();
 
     @JsonIgnore
+    @OrderBy("id")
     @OneToMany(mappedBy = "consumer", targetEntity = ReviewEntity.class, cascade = CascadeType.REMOVE)
-    private Set<RequestEntity> reviews = new HashSet<>();
+    private List<RequestEntity> reviews = new ArrayList<>();
 
-    public ConsumerEntity(final @NotNull String username,
+    public ConsumerEntity(final String username,
                           final String password,
-                          final @NotNull String name,
-                          final @NotNull String email) {
+                          final String name,
+                          final String email) {
         this(username, password, name, email, DEFAULT);
     }
 
@@ -47,37 +45,37 @@ public class ConsumerEntity extends UserEntity implements Serializable {
         this(DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT);
     }
 
-    public ConsumerEntity(final @NotNull String username,
+    public ConsumerEntity(final String username,
                           final String password,
-                          final @NotNull String name,
-                          final @NotNull String email,
-                          final @NotNull String profileImageUrl) {
+                          final String name,
+                          final String email,
+                          final String profileImageUrl) {
         super(email, username, password, name);
         this.profileImageUrl = profileImageUrl;
         this.setRole(UserRole.consumer);
     }
 
-    public @NotNull String getProfileImageUrl() {
+    public String getProfileImageUrl() {
         return profileImageUrl;
     }
 
-    public void setProfileImageUrl(final @NotNull String profileImageUrl) {
+    public void setProfileImageUrl(final String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
     }
 
-    public @NotNull Set<JobEntity> getJobs() {
+    public List<JobEntity> getJobs() {
         return jobs;
     }
 
-    public void setJobs(final @NotNull Set<JobEntity> jobs) {
+    public void setJobs(final List<JobEntity> jobs) {
         this.jobs = jobs;
     }
 
-    public @NotNull Set<RequestEntity> getReviews() {
+    public List<RequestEntity> getReviews() {
         return reviews;
     }
 
-    public void setReviews(final @NotNull Set<RequestEntity> reviews) {
+    public void setReviews(final List<RequestEntity> reviews) {
         this.reviews = reviews;
     }
 }

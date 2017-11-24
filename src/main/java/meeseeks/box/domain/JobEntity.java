@@ -5,11 +5,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 /**
  * @author Alexandru Stoica
@@ -64,18 +63,21 @@ public class JobEntity implements Serializable {
     private ConsumerEntity consumer;
 
     @JsonIgnore
+    @OrderBy("id")
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "AvailabilityList", joinColumns = @JoinColumn(name = "id_job", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "id_availability", referencedColumnName = "id"))
-    private Set<AvailabilityEntity> availabilities = new HashSet<>();
+    private List<AvailabilityEntity> availabilities = new ArrayList<>();
 
     @JsonIgnore
+    @OrderBy("id")
     @OneToMany(mappedBy = "job", targetEntity = RequestEntity.class)
-    private Set<RequestEntity> requests = new HashSet<>();
+    private List<RequestEntity> requests = new ArrayList<>();
 
     @JsonIgnore
+    @OrderBy("id")
     @OneToMany(mappedBy = "job", targetEntity = ReviewEntity.class)
-    private Set<RequestEntity> reviews = new HashSet<>();
+    private List<RequestEntity> reviews = new ArrayList<>();
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column
@@ -84,11 +86,11 @@ public class JobEntity implements Serializable {
 
     private static final String DEFAULT = "";
 
-    public JobEntity(final @NotNull String name,
-                     final @NotNull String description,
-                     final @NotNull String location,
-                     final @NotNull String type,
-                     final @NotNull Double price) {
+    public JobEntity(final String name,
+                     final String description,
+                     final String location,
+                     final String type,
+                     final Double price) {
         this.name = name;
         this.description = description;
         this.location = location;
@@ -104,7 +106,7 @@ public class JobEntity implements Serializable {
         return id;
     }
 
-    public void setId(final @NotNull Integer id) {
+    public void setId(final Integer id) {
         this.id = id;
     }
 
@@ -112,7 +114,7 @@ public class JobEntity implements Serializable {
         return name;
     }
 
-    public void setName(final @NotNull String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
@@ -120,7 +122,7 @@ public class JobEntity implements Serializable {
         return description;
     }
 
-    public void setDescription(final @NotNull String description) {
+    public void setDescription(final String description) {
         this.description = description;
     }
 
@@ -128,7 +130,7 @@ public class JobEntity implements Serializable {
         return location;
     }
 
-    public void setLocation(final @NotNull String location) {
+    public void setLocation(final String location) {
         this.location = location;
     }
 
@@ -136,7 +138,7 @@ public class JobEntity implements Serializable {
         return type;
     }
 
-    public void setType(final @NotNull String type) {
+    public void setType(final String type) {
         this.type = type;
     }
 
@@ -144,7 +146,7 @@ public class JobEntity implements Serializable {
         return price;
     }
 
-    public void setPrice(final @NotNull Double price) {
+    public void setPrice(final Double price) {
         this.price = price;
     }
 
@@ -152,7 +154,7 @@ public class JobEntity implements Serializable {
         return expiration;
     }
 
-    public void setExpiration(final @NotNull Calendar expiration) {
+    public void setExpiration(final Calendar expiration) {
         this.expiration = expiration;
     }
 
@@ -160,15 +162,15 @@ public class JobEntity implements Serializable {
         return category;
     }
 
-    public void setCategory(final @NotNull CategoryEntity category) {
+    public void setCategory(final CategoryEntity category) {
         this.category = category;
     }
 
-    public Set<AvailabilityEntity> getAvailabilities() {
+    public List<AvailabilityEntity> getAvailabilities() {
         return availabilities;
     }
 
-    public void setAvailabilities(final Set<AvailabilityEntity> availabilities) {
+    public void setAvailabilities(final List<AvailabilityEntity> availabilities) {
         this.availabilities = availabilities;
     }
 
@@ -176,25 +178,27 @@ public class JobEntity implements Serializable {
         return consumer;
     }
 
-    public void setConsumer(final @NotNull ConsumerEntity consumer) {
+    public void setConsumer(final ConsumerEntity consumer) {
         this.consumer = consumer;
     }
 
-    public Set<RequestEntity> getRequests() {
+    public List<RequestEntity> getRequests() {
         return requests;
     }
 
-    public void setRequests(final @NotNull Set<RequestEntity> requests) {
+    public void setRequests(final List<RequestEntity> requests) {
         this.requests = requests;
     }
 
-    public Set<RequestEntity> getReviews() {
+    public List<RequestEntity> getReviews() {
         return reviews;
     }
 
-    public void setReviews(final @NotNull Set<RequestEntity> reviews) {
+    public void setReviews(final List<RequestEntity> reviews) {
         this.reviews = reviews;
     }
 
-    public Calendar getCreated() {return created;}
+    public Calendar getCreated() {
+        return created;
+    }
 }

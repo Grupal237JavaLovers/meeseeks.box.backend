@@ -1,29 +1,20 @@
 package meeseeks.box.domain;
 
-import java.io.Serializable;
-import java.sql.Time;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.sql.Time;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Alexandru Stoica
  * @version 1.0
  */
 @Entity
-@Table(name = "Availability", uniqueConstraints=@UniqueConstraint(columnNames={"day", "start_hour", "end_hour"}))
+@Table(name = "Availability", uniqueConstraints = @UniqueConstraint(columnNames = {"day", "start_hour", "end_hour"}))
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AvailabilityEntity implements Serializable {
 
@@ -46,8 +37,9 @@ public class AvailabilityEntity implements Serializable {
     private Time endHour;
 
     @JsonIgnore
+    @OrderBy("id")
     @ManyToMany(mappedBy = "availabilities")
-    private Set<JobEntity> jobs = new HashSet<>();
+    private List<JobEntity> jobs = new ArrayList<>();
 
     private static final Time DEFAULT_HOUR = new Time(0);
     private static final String DEFAULT_DAY = "";
@@ -56,9 +48,9 @@ public class AvailabilityEntity implements Serializable {
         this(DEFAULT_DAY, DEFAULT_HOUR, DEFAULT_HOUR);
     }
 
-    public AvailabilityEntity(final @NotNull String day,
-                              final @NotNull Time startHour,
-                              final @NotNull Time endHour) {
+    public AvailabilityEntity(final String day,
+                              final Time startHour,
+                              final Time endHour) {
         this.day = day;
         this.startHour = startHour;
         this.endHour = endHour;
@@ -68,7 +60,7 @@ public class AvailabilityEntity implements Serializable {
         return id;
     }
 
-    public void setId(final @NotNull Integer id) {
+    public void setId(final Integer id) {
         this.id = id;
     }
 
@@ -76,7 +68,7 @@ public class AvailabilityEntity implements Serializable {
         return day;
     }
 
-    public void setDay(final @NotNull String day) {
+    public void setDay(final String day) {
         this.day = day;
     }
 
@@ -84,7 +76,7 @@ public class AvailabilityEntity implements Serializable {
         return startHour;
     }
 
-    public void setStartHour(final @NotNull Time startHour) {
+    public void setStartHour(final Time startHour) {
         this.startHour = startHour;
     }
 
@@ -92,15 +84,15 @@ public class AvailabilityEntity implements Serializable {
         return endHour;
     }
 
-    public void setEndHour(final @NotNull Time endHour) {
+    public void setEndHour(final Time endHour) {
         this.endHour = endHour;
     }
 
-    public Set<JobEntity> getJobs() {
+    public List<JobEntity> getJobs() {
         return jobs;
     }
 
-    public void setJobs(final @NotNull Set<JobEntity> jobs) {
+    public void setJobs(final List<JobEntity> jobs) {
         this.jobs = jobs;
     }
 }

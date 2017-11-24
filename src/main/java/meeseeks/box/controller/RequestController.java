@@ -38,16 +38,6 @@ public class RequestController {
 
     @ResponseBody
     @Secured({"ROLE_PROVIDER"})
-    @PostMapping("/insert")
-    public ResponseEntity<RequestEntity> insert(@Valid @RequestBody RequestEntity request,
-                                                @AuthenticationPrincipal @ApiIgnore ProviderEntity provider) {
-        return provider.getId().equals(request.getProvider().getId()) ?
-                new ResponseEntity<>(requestRepository.save(request), HttpStatus.OK) :
-                new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-    }
-
-    @ResponseBody
-    @Secured({"ROLE_PROVIDER"})
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<RequestEntity> delete(@PathVariable("id") Integer id,
                                                 @AuthenticationPrincipal @ApiIgnore ProviderEntity provider) {

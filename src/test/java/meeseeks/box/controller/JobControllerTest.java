@@ -1,16 +1,12 @@
 package meeseeks.box.controller;
 
-import static java.util.Collections.singletonList;
-import static org.mockito.Matchers.notNull;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.sql.Time;
-import java.util.HashSet;
-import java.util.Optional;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import meeseeks.box.domain.AvailabilityEntity;
+import meeseeks.box.domain.CategoryEntity;
+import meeseeks.box.domain.ConsumerEntity;
+import meeseeks.box.domain.JobEntity;
+import meeseeks.box.model.JobModel;
+import meeseeks.box.repository.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -26,18 +22,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.sql.Time;
+import java.util.ArrayList;
+import java.util.Optional;
 
-import meeseeks.box.domain.AvailabilityEntity;
-import meeseeks.box.domain.CategoryEntity;
-import meeseeks.box.domain.ConsumerEntity;
-import meeseeks.box.domain.JobEntity;
-import meeseeks.box.model.JobModel;
-import meeseeks.box.repository.AvailabilityRepository;
-import meeseeks.box.repository.CategoryRepository;
-import meeseeks.box.repository.ConsumerRepository;
-import meeseeks.box.repository.JobRepository;
-import meeseeks.box.repository.ProviderRepository;
+import static java.util.Collections.singletonList;
+import static org.mockito.Matchers.notNull;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(JobController.class)
@@ -71,7 +65,7 @@ public class JobControllerTest {
         AvailabilityEntity availability = new AvailabilityEntity("Monday", new Time(0), new Time(0));
         ConsumerEntity consumer = new ConsumerEntity("test", "password", "Name", "test@test.com");
         CategoryEntity category = new CategoryEntity("Testing");
-        JobModel model = new JobModel(job, new HashSet<>(singletonList(availability)), category);
+        JobModel model = new JobModel(job, new ArrayList<>(singletonList(availability)), category);
         JobEntity expected = model.build(consumer);
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(consumer, AuthorityUtils.createAuthorityList("ROLE_CONSUMER"));

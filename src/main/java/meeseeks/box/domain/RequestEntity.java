@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Calendar;
 
@@ -58,7 +57,7 @@ public class RequestEntity implements Serializable {
         this(DEFAULT, DEFAULT_STATUS);
     }
 
-    public RequestEntity(final @NotNull String message, final @NotNull Boolean isAccepted) {
+    public RequestEntity(final String message, final Boolean isAccepted) {
         this.message = message;
         this.accepted = isAccepted;
     }
@@ -74,7 +73,7 @@ public class RequestEntity implements Serializable {
         return id;
     }
 
-    public void setId(final @NotNull Integer id) {
+    public void setId(final Integer id) {
         this.id = id;
     }
 
@@ -82,7 +81,7 @@ public class RequestEntity implements Serializable {
         return date;
     }
 
-    public void setDate(final @NotNull Calendar date) {
+    public void setDate(final Calendar date) {
         this.date = date;
     }
 
@@ -90,7 +89,7 @@ public class RequestEntity implements Serializable {
         return message;
     }
 
-    public void setMessage(final @NotNull String message) {
+    public void setMessage(final String message) {
         this.message = message;
     }
 
@@ -98,7 +97,7 @@ public class RequestEntity implements Serializable {
         return accepted;
     }
 
-    public void setAccepted(final @NotNull Boolean accepted) {
+    public void setAccepted(final Boolean accepted) {
         this.accepted = accepted;
     }
 
@@ -106,7 +105,7 @@ public class RequestEntity implements Serializable {
         return provider;
     }
 
-    public void setProvider(final @NotNull ProviderEntity provider) {
+    public void setProvider(final ProviderEntity provider) {
         this.provider = provider;
     }
 
@@ -114,7 +113,7 @@ public class RequestEntity implements Serializable {
         return job;
     }
 
-    public void setJob(final @NotNull JobEntity job) {
+    public void setJob(final JobEntity job) {
         this.job = job;
     }
 }

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Calendar;
 
@@ -61,7 +60,7 @@ public class ReviewEntity implements Serializable {
         this("", -1);
     }
 
-    public ReviewEntity(final @NotNull String message, final @NotNull Integer rating) {
+    public ReviewEntity(final String message, final Integer rating) {
         this.message = message;
         this.rating = rating;
     }
@@ -70,7 +69,7 @@ public class ReviewEntity implements Serializable {
         return id;
     }
 
-    public void setId(final @NotNull Integer id) {
+    public void setId(final Integer id) {
         this.id = id;
     }
 
@@ -78,7 +77,7 @@ public class ReviewEntity implements Serializable {
         return message;
     }
 
-    public void setMessage(final @NotNull String message) {
+    public void setMessage(final String message) {
         this.message = message;
     }
 
@@ -86,7 +85,7 @@ public class ReviewEntity implements Serializable {
         return date;
     }
 
-    public void setDate(final @NotNull Calendar date) {
+    public void setDate(final Calendar date) {
         this.date = date;
     }
 
@@ -94,7 +93,7 @@ public class ReviewEntity implements Serializable {
         return rating;
     }
 
-    public void setRating(final @NotNull Integer rating) {
+    public void setRating(final Integer rating) {
         this.rating = rating;
     }
 
@@ -102,7 +101,7 @@ public class ReviewEntity implements Serializable {
         return receivedByProvider;
     }
 
-    public void setReceivedByProvider(final @NotNull Boolean receivedByProvider) {
+    public void setReceivedByProvider(final Boolean receivedByProvider) {
         this.receivedByProvider = receivedByProvider;
     }
 
@@ -110,7 +109,7 @@ public class ReviewEntity implements Serializable {
         return consumer;
     }
 
-    public void setConsumer(final @NotNull ConsumerEntity consumer) {
+    public void setConsumer(final ConsumerEntity consumer) {
         this.consumer = consumer;
     }
 
@@ -118,7 +117,7 @@ public class ReviewEntity implements Serializable {
         return provider;
     }
 
-    public void setProvider(final @NotNull ProviderEntity provider) {
+    public void setProvider(final ProviderEntity provider) {
         this.provider = provider;
     }
 
@@ -126,7 +125,7 @@ public class ReviewEntity implements Serializable {
         return job;
     }
 
-    public void setJob(final @NotNull JobEntity job) {
+    public void setJob(final JobEntity job) {
         this.job = job;
     }
 }
