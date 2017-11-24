@@ -20,11 +20,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import java.util.ArrayList;
 import java.util.Optional;
-import java.util.Set;
+import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
-import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Arrays.asList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
@@ -62,7 +64,7 @@ public class SkillControllerTest {
     @Test
     public void isGettingSkillByName() throws Exception {
         // declaration:
-        Set<SkillEntity> result = newHashSet(makeSkill("A"));
+        List<SkillEntity> result = asList(makeSkill("A"));
         // when:
         when(skillRepository.findAllByNameContaining(anyString(), any(PageRequest.class))).thenReturn(result);
         // then:
@@ -72,7 +74,7 @@ public class SkillControllerTest {
     @Test
     public void isGettingAllTheTasks() throws Exception {
         // declaration:
-        Set<SkillEntity> skills = newHashSet(makeSkill(), makeSkill(), makeSkill());
+        List<SkillEntity> skills = asList(makeSkill(), makeSkill(), makeSkill());
         // when:
         when(skillRepository.getAllSkillsForCurrentProvider()).thenReturn(skills);
         // then:
@@ -92,7 +94,7 @@ public class SkillControllerTest {
     @Test
     public void isInsertingSkillToProvider() throws Exception {
         // declaration:
-        Set<SkillEntity> skills = newHashSet(makeSkill("A"), makeSkill("B"), makeSkill("C"));
+        List<SkillEntity> skills = new ArrayList<>(asList(makeSkill("A"), makeSkill("B")));
         // preconditions:
         provider.setSkills(skills);
         // when:
@@ -107,7 +109,7 @@ public class SkillControllerTest {
     public void isDeletingSkillFromProvider() throws Exception {
         // declarations:
         SkillEntity deletedSkillByTheEnd = makeSkill("test");
-        Set<SkillEntity> skills = newHashSet(deletedSkillByTheEnd, makeSkill("B"), makeSkill("C"));
+        List<SkillEntity> skills = new ArrayList<>(asList(deletedSkillByTheEnd, makeSkill("C")));
         // preconditions:
         provider.setSkills(skills);
         // when:

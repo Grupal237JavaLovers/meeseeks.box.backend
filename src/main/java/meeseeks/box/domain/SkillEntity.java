@@ -2,11 +2,14 @@ package meeseeks.box.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.springframework.core.annotation.Order;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -31,12 +34,13 @@ public class SkillEntity implements Serializable {
     private String name;
 
     @JsonIgnore
+    @OrderBy("id")
     @ManyToMany(mappedBy = "skills")
-    private Set<ProviderEntity> providers = new HashSet<>();
+    private List<ProviderEntity> providers = new ArrayList<>();
 
     private static final String DEFAULT = "";
 
-    public SkillEntity(final @NotNull String name) {
+    public SkillEntity(final String name) {
         this(0, name);
     }
 
@@ -53,7 +57,7 @@ public class SkillEntity implements Serializable {
         return id;
     }
 
-    public void setId(final @NotNull Integer id) {
+    public void setId(final Integer id) {
         this.id = id;
     }
 
@@ -61,15 +65,15 @@ public class SkillEntity implements Serializable {
         return name;
     }
 
-    public void setName(final @NotNull String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
-    public Set<ProviderEntity> getProviders() {
+    public List<ProviderEntity> getProviders() {
         return providers;
     }
 
-    public void setProviders(final @NotNull Set<ProviderEntity> providers) {
+    public void setProviders(final List<ProviderEntity> providers) {
         this.providers = providers;
     }
 }
