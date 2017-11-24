@@ -26,9 +26,7 @@ public interface UserRepository extends CrudRepository<UserEntity, Integer> {
     @Query("delete from UserEntity user where user.username = ?1")
     int deleteUser(final String userName);
 
-    @Query("select user from UserEntity user where user.name like ?1")
-    List<UserEntity> findUsersByName(final String name, final Pageable pageable);
+    List<UserEntity> findAllByNameContaining(final String name, final Pageable pageable);
 
-    @Query("select user from UserEntity user where user.email like ?1")
-    List<UserEntity> findUsersByEmail(final String email, final Pageable pageable);
+    List<UserEntity> findAllByEmailContaining(final String email, final Pageable pageable);
 }

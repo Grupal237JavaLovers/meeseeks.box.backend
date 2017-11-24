@@ -56,11 +56,11 @@ public class UserService implements UserDetailsService {
         return userRepository.deleteUser(username) > 0;
     }
 
-    public List<UserEntity> findUsersByName(final String name, final Integer limit) {
-        return userRepository.findUsersByName(name, new PageRequest(0, limit));
+    public List<UserEntity> findUsersByNameContaining(final String name, final Integer limit) {
+        return userRepository.findAllByNameContaining(name, new PageRequest(0, limit));
     }
 
-    public List<UserEntity> findUsersByEmail(final String email, final Integer limit) {
-        return userRepository.findUsersByEmail(email, new PageRequest(0, limit));
+    public List<UserEntity> findUsersByEmailContaining(final String email, final Integer limit) {
+        return userRepository.findAllByEmailContaining(email, new PageRequest(0, limit));
     }
 }

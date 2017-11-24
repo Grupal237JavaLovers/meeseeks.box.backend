@@ -61,12 +61,12 @@ public class UserController {
     }
 
     @ResponseBody
+    @Secured({"ROLE_PROVIDER", "ROLE_CONSUMER"})
     @GetMapping("/find/{limit}")
-    @Secured({"ROLE_PROVIDER, ROLE_USER"})
-    public List<UserEntity> findUsersByName(@RequestParam(required = false, value = "name") final String name,
-                                            @RequestParam(required = false, value = "email") final String email,
-                                            @PathVariable("limit") final Integer limit) {
-        return name != null ? userService.findUsersByName(name, limit) :
-                email != null ? userService.findUsersByEmail(email, limit) : emptyList();
+    public List<UserEntity> findUsersBy(@RequestParam(required = false, value = "name") final String name,
+                                        @RequestParam(required = false, value = "email") final String email,
+                                        @PathVariable("limit") final Integer limit) {
+        return name != null ? userService.findUsersByNameContaining(name, limit) :
+                email != null ? userService.findUsersByEmailContaining(email, limit) : emptyList();
     }
 }
