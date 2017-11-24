@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -61,7 +62,7 @@ public class ProviderController {
 
     @ResponseBody
     @GetMapping("/get/{id}/skills")
-    public Set<SkillEntity> getProviderSkillsById(@PathVariable("id") final Integer id) throws NotFoundException {
+    public List<SkillEntity> getProviderSkillsById(@PathVariable("id") final Integer id) throws NotFoundException {
         return providerRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Provider Not Found!")).getSkills();
     }

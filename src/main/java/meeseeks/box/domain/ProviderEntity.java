@@ -2,12 +2,13 @@ package meeseeks.box.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.springframework.core.annotation.Order;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Alexandru Stoica
@@ -32,17 +33,19 @@ public class ProviderEntity extends UserEntity implements Serializable {
 
     @JsonIgnore
     @OneToMany(mappedBy = "provider", targetEntity = ReviewEntity.class, cascade = CascadeType.REMOVE)
-    private Set<RequestEntity> reviews = new HashSet<>();
+    private List<RequestEntity> reviews = new ArrayList<>();
 
     @JsonIgnore
+    @OrderBy("id")
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "SkillList", joinColumns = @JoinColumn(name = "id_provider", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "id_skill", referencedColumnName = "id"))
-    private Set<SkillEntity> skills = new HashSet<>();
+    private List<SkillEntity> skills = new ArrayList<>();
 
     @JsonIgnore
+    @OrderBy("id")
     @OneToMany(mappedBy = "provider", targetEntity = RequestEntity.class, cascade = CascadeType.REMOVE)
-    private Set<RequestEntity> requests = new HashSet<>();
+    private List<RequestEntity> requests = new ArrayList<>();
 
     public ProviderEntity(final String username,
                           final String password,
@@ -78,7 +81,7 @@ public class ProviderEntity extends UserEntity implements Serializable {
         return profileImageUrl;
     }
 
-    public void setProfileImageUrl(final @NotNull String profileImageUrl) {
+    public void setProfileImageUrl(final String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
     }
 
@@ -86,7 +89,7 @@ public class ProviderEntity extends UserEntity implements Serializable {
         return description;
     }
 
-    public void setDescription(final @NotNull String description) {
+    public void setDescription(final String description) {
         this.description = description;
     }
 
@@ -94,31 +97,31 @@ public class ProviderEntity extends UserEntity implements Serializable {
         return profileVideoUrl;
     }
 
-    public void setProfileVideoUrl(final @NotNull String profileVideoUrl) {
+    public void setProfileVideoUrl(final String profileVideoUrl) {
         this.profileVideoUrl = profileVideoUrl;
     }
 
-    public Set<SkillEntity> getSkills() {
+    public List<SkillEntity> getSkills() {
         return skills;
     }
 
-    public void setSkills(final @NotNull Set<SkillEntity> skills) {
+    public void setSkills(final List<SkillEntity> skills) {
         this.skills = skills;
     }
 
-    public Set<RequestEntity> getReviews() {
+    public List<RequestEntity> getReviews() {
         return reviews;
     }
 
-    public void setReviews(final @NotNull Set<RequestEntity> reviews) {
+    public void setReviews(final List<RequestEntity> reviews) {
         this.reviews = reviews;
     }
 
-    public Set<RequestEntity> getRequests() {
+    public List<RequestEntity> getRequests() {
         return requests;
     }
 
-    public void setRequests(final @NotNull Set<RequestEntity> requests) {
+    public void setRequests(final List<RequestEntity> requests) {
         this.requests = requests;
     }
 
