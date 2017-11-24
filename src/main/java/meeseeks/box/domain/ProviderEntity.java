@@ -41,8 +41,8 @@ public class ProviderEntity extends UserEntity implements Serializable {
     private List<SkillEntity> skills = new ArrayList<>();
 
     @JsonIgnore
-    @OrderBy("id")
-    @OneToMany(mappedBy = "provider", targetEntity = RequestEntity.class, cascade = CascadeType.REMOVE)
+    @OrderBy("date")
+    @OneToMany(mappedBy = "provider", targetEntity = RequestEntity.class, cascade = CascadeType.ALL)
     private List<RequestEntity> requests = new ArrayList<>();
 
     public ProviderEntity(final String username,
