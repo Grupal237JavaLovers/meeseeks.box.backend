@@ -1,25 +1,22 @@
 package meeseeks.box.controller;
 
-import javax.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-
 import meeseeks.box.domain.UserEntity;
 import meeseeks.box.exception.AccessDeniedException;
 import meeseeks.box.model.ChangePasswordModel;
 import meeseeks.box.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.List;
+
+import static java.util.Collections.emptyList;
 
 /**
  * @author Alexandru Stoica
@@ -57,9 +54,19 @@ public class UserController {
 
     @DeleteMapping("/delete")
     public ResponseEntity<?> delete() {
-        UserEntity user =(UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserEntity user = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userService.delete(user.getUsername()) ?
                 new ResponseEntity<>(HttpStatus.ACCEPTED) :
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @ResponseBody
+    @Secured({"ROLE_PROVIDER", "ROLE_CONSUMER"})
+    @GetMapping("/find/{limit}")
+    public List<UserEntity> findUsersBy(@RequestParam(required = false, value = "name") final String name,
+                                        @RequestParam(required = false, value = "email") final String email,
+                                        @PathVariable("limit") final Integer limit) {
+        return name != null ? userService.findUsersByNameContaining(name, limit) :
+                email != null ? userService.findUsersByEmailContaining(email, limit) : emptyList();
     }
 }

@@ -21,10 +21,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static org.mockito.Matchers.any;
@@ -38,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @WebMvcTest(SkillController.class)
 @AutoConfigureMockMvc
-@DisplayName("Skills Integration Tests")
+@DisplayName("Skills Controller Unit-Tests")
 public class SkillControllerTest {
 
     @Autowired

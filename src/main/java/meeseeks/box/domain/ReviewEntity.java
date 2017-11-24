@@ -97,7 +97,7 @@ public class ReviewEntity implements Serializable {
         this.rating = rating;
     }
 
-    public Boolean isReceivedByProvider() {
+    public Boolean getReceivedByProvider() {
         return receivedByProvider;
     }
 
