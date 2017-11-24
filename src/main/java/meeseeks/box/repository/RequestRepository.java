@@ -4,9 +4,11 @@ import meeseeks.box.domain.JobEntity;
 import meeseeks.box.domain.ProviderEntity;
 import meeseeks.box.domain.RequestEntity;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import javax.transaction.Transactional;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
@@ -33,5 +35,21 @@ public interface RequestRepository extends BaseCrudRepository<RequestEntity, Int
 
     @Query("select request from RequestEntity request where request.provider = ?1 and request.job = ?2")
     Optional<RequestEntity> getRequestByProviderAndJob(final ProviderEntity provider, final JobEntity job);
+
+    @Query("select request from RequestEntity request where request.provider = ?#{principal}")
+    List<RequestEntity> getAllRequestsForCurrentProvider();
+
+    @Query("select request from RequestEntity request where request.provider = ?#{principal}")
+    List<RequestEntity> getRequestsForCurrentProvider(final Pageable pageable);
+
+    @Modifying
+    @Transactional
+    @Query("delete from RequestEntity request where request.provider = ?#{principal} and request.id = ?1")
+    Integer deleteRequestFromCurrentProvider(final Integer id);
+
+    @Modifying
+    @Transactional
+    @Query("update RequestEntity request set request.message = ?2 where request.provider = ?#{principal} and request.id = ?1")
+    Integer updateRequestFromCurrentProvider(final Integer id, final String message);
 
 }

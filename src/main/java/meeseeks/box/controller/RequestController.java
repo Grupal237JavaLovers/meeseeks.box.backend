@@ -16,7 +16,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -39,23 +38,21 @@ public class RequestController {
     @ResponseBody
     @Secured({"ROLE_PROVIDER"})
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<RequestEntity> delete(@PathVariable("id") Integer id,
-                                                @AuthenticationPrincipal @ApiIgnore ProviderEntity provider) {
-        RequestEntity request = findRequestById(id);
-        if (provider.getId().equals(request.getProvider().getId())) {
-            requestRepository.delete(request);
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    public ResponseEntity<RequestEntity> delete(@PathVariable("id") Integer id) {
+        return requestRepository.deleteRequestFromCurrentProvider(id) > 0 ?
+            new ResponseEntity<>(HttpStatus.OK):
+            new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
     @ResponseBody
     @Secured({"ROLE_PROVIDER"})
-    @PatchMapping("/update")
-    public ResponseEntity<RequestEntity> update(@Valid @RequestBody RequestEntity updated,
+    @PatchMapping("/update/{id}/{message}")
+    public ResponseEntity<RequestEntity> update(@PathVariable("id") Integer id,
+                                                @PathVariable("description") final String message,
                                                 @AuthenticationPrincipal @ApiIgnore ProviderEntity provider) {
-        return provider.getId().equals(updated.getProvider().getId()) ?
-                new ResponseEntity<>(requestRepository.save(updated), HttpStatus.OK) :
+        return requestRepository.updateRequestFromCurrentProvider(id, message) > 0?
+                new ResponseEntity<>(requestRepository.findById(id)
+                        .orElseThrow(() -> new NotFoundException("Request Not Found!")), HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
@@ -99,6 +96,13 @@ public class RequestController {
                                                                     @PathVariable("limit") Integer limit) {
         return requestRepository.findLatestAcceptedRequestsForProvider(providerRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Provider Not Found!")), new PageRequest(0, limit));
+    }
+
+    @ResponseBody
+    @GetMapping("/get/all/{limit}")
+    @Secured({"ROLE_PROVIDER"})
+    public List<RequestEntity> getAllRequestsForCurrentProvider(@PathVariable("limit") final Integer limit) {
+        return requestRepository.getRequestsForCurrentProvider(new PageRequest(0, limit));
     }
 
     private RequestEntity findRequestById(@PathVariable("id") Integer id) {
