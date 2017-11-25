@@ -21,6 +21,6 @@ deploy:
   zip_file: './build/libs/meeseeks.box.backend-1.0.jar'
   skip_cleanup: true
   on:
-    branch: travisci
+    branch: master
 before_deploy:
   - "./gradlew bootRepackage"
