@@ -10,3 +10,13 @@ cache:
     - $HOME/.gradle/wrapper/
 services:
   - mysql
+deploy:
+  provider: elasticbeanstalk
+  access_key_id: $AWS_ACCESS_ID
+  secret_access_key: $AWS_ACCESS_KEY
+  region: "eu-central-1"  
+  app: "MeeSeeksBox"
+  env: "meeseeksbox-staging"
+  bucket_name: "elasticbeanstalk-eu-central-1-390933536668"
+  on:
+    branch: travisci
