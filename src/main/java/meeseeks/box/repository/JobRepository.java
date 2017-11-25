@@ -25,12 +25,12 @@ public interface JobRepository extends BaseCrudRepository<JobEntity, Integer> {
     @Transactional
     @Modifying
     @Query("delete from JobEntity job where job.id = ?2 and job.consumer = ?1")
-    Long deleteIfCreatedBy(final Integer idConsumer, final Integer idJob);
+    Integer deleteIfCreatedBy(final ConsumerEntity consumer, final Integer idJob);
 
     @Transactional
     @Modifying
     @Query("update JobEntity job set job = ?3 where job.id = ?2 and job.consumer = ?1")
-    Long updateIfCreatedBy(final Integer idConsumer, final Integer idJob, final JobEntity job);
+    Integer updateIfCreatedBy(final Integer idConsumer, final Integer idJob, final JobEntity job);
 
     @Query("select j from JobEntity j join j.requests r join r.provider p where p=?1 order by j.created desc")
     List<JobEntity> findLatestJobsRequestedByProvider(final @NotNull ProviderEntity provider, Pageable pageable);
