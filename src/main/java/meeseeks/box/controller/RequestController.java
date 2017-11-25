@@ -37,16 +37,16 @@ public class RequestController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<RequestEntity> delete(@PathVariable("id") Integer id) {
         return requestRepository.deleteRequestFromCurrentProvider(id) > 0 ?
-            new ResponseEntity<>(HttpStatus.OK):
-            new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+                new ResponseEntity<>(HttpStatus.OK) :
+                new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
     @ResponseBody
-    @Secured({"ROLE_PROVIDER"})
+    @Secured("ROLE_PROVIDER")
     @PatchMapping("/update/{id}/{message}")
     public ResponseEntity<RequestEntity> update(@PathVariable("id") Integer id,
                                                 @PathVariable("message") final String message) {
-        return requestRepository.updateRequestFromCurrentProvider(id, message) > 0?
+        return requestRepository.updateRequestFromCurrentProvider(id, message) > 0 ?
                 new ResponseEntity<>(requestRepository.findById(id)
                         .orElseThrow(() -> new NotFoundException("Request Not Found!")), HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.UNAUTHORIZED);

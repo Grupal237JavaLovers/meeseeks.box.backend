@@ -6,6 +6,7 @@ import meeseeks.box.domain.RequestEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
@@ -42,14 +43,13 @@ public interface RequestRepository extends BaseCrudRepository<RequestEntity, Int
     @Query("select request from RequestEntity request where request.provider = ?#{principal}")
     List<RequestEntity> getRequestsForCurrentProvider(final Pageable pageable);
 
-    @Modifying
     @Transactional
+    @Modifying(clearAutomatically = true)
     @Query("delete from RequestEntity request where request.provider = ?#{principal} and request.id = ?1")
     Integer deleteRequestFromCurrentProvider(final Integer id);
 
-    @Modifying
     @Transactional
-    @Query("update RequestEntity request set request.message = ?2 where request.provider = ?#{principal} and request.id = ?1")
-    Integer updateRequestFromCurrentProvider(final Integer id, final String message);
-
+    @Modifying(clearAutomatically = true)
+    @Query("update RequestEntity request set request.message = :message where request.provider = ?#{principal} and request.id = :id")
+    Integer updateRequestFromCurrentProvider(@Param("id") final Integer id, @Param("message") final String message);
 }
