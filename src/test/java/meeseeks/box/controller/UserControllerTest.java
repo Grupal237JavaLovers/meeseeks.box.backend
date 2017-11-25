@@ -27,36 +27,36 @@ import meeseeks.box.service.UserService;
 /**
  * Created by nicof on 11/12/2017.
  */
-@RunWith(SpringRunner.class)
-@WebMvcTest(UserController.class)
-@ContextConfiguration
-public class UserControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
-    private UserService userService;
-
-    @MockBean
-    private BCryptPasswordEncoder encoder;
-
-    private ProviderEntity principal;
-
-    @Before
-    public void setupAuthentication() {
-        this.principal = new ProviderEntity("test", "test", "Test", "test@test.com");
-        Authentication authentication = new UsernamePasswordAuthenticationToken(principal, AuthorityUtils.createAuthorityList("ROLE_PROVIDER"));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
-
-    @Test
-    @WithMockUser(username = "test", roles = {"PROVIDER"})
-    public void deleteUser() throws Exception {
-        // when:
-        Mockito.when(userService.delete("test")).thenReturn(true);
-        // then:
-        mockMvc.perform(get("/user/delete"))
-                .andDo(print()).andExpect(status().isAccepted());
-    }
-}
+//@RunWith(SpringRunner.class)
+//@WebMvcTest(UserController.class)
+//@ContextConfiguration
+//public class UserControllerTest {
+//
+//    @Autowired
+//    private MockMvc mockMvc;
+//
+//    @MockBean
+//    private UserService userService;
+//
+//    @MockBean
+//    private BCryptPasswordEncoder encoder;
+//
+//    private ProviderEntity principal;
+//
+//    @Before
+//    public void setupAuthentication() {
+//        this.principal = new ProviderEntity("test", "test", "Test", "test@test.com");
+//        Authentication authentication = new UsernamePasswordAuthenticationToken(principal, AuthorityUtils.createAuthorityList("ROLE_PROVIDER"));
+//        SecurityContextHolder.getContext().setAuthentication(authentication);
+//    }
+//
+//    @Test
+//    @WithMockUser(username = "test", roles = {"PROVIDER"})
+//    public void deleteUser() throws Exception {
+//        // when:
+//        Mockito.when(userService.delete("test")).thenReturn(true);
+//        // then:
+//        mockMvc.perform(get("/user/delete"))
+//                .andDo(print()).andExpect(status().isAccepted());
+//    }
+//}

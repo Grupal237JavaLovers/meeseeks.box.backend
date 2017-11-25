@@ -1,5 +1,5 @@
 # Connection URL for the Database
-spring.datasource.url = jdbc:mysql://127.0.0.1:3306/meeseeks_test?createDatabaseIfNotExist=true&useSSL=false
+spring.datasource.url = jdbc:mysql://localhost:3306/meeseeks_test?createDatabaseIfNotExist=true&useSSL=false
 
 
 # Username and password
@@ -26,5 +26,4 @@ security.basic.enabled=false
 
 app.security.secret=5b520eaf9a2067a98de258ec8a3a3f3e8b64f219
 app.cors.origins=*
-#app.security.token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aW5nQVBJMiIsImV4cCI6MTUxOTI2ODk0M30.sd4gvFBF6jFs7tc5OTiyzzdq3Rg0I679FZ8q1gDE2UfIeyN23Q4wDAmx9Xo_ppgVXOOu9wrD3zvX8vKp40M4SQ
-app.security.token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aW5nQVBJIiwiZXhwIjoxNTE5MjY2MzkyfQ.S3YMwvQkYXzRDsj-oVyMQ-BnHhP8nWxgC8japF5MTshCYJuh0E02zidiUGJ9O7yJa7s6kR0foNIchJUg0vkHbQ
+app.security.token=test

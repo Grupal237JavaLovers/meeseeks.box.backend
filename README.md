@@ -29,3 +29,5 @@ You can also test any action from the browser.Keep in mind that the documentatio
 #### Using JWT
 
 To use JWT authentication when testing using the Swagger documentation, you need to first login using a REST client and then get the token (after the Bearer) and put it in your **application.properties** file under the **app.security.token** key.After you restart the app, every request to the backend will be made using the token.
+
+## Staging server: http://meeseeksbox-staging.eu-central-1.elasticbeanstalk.com 

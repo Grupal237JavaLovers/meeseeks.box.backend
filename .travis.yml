@@ -1,0 +1,26 @@
+language: java
+jdk:
+  - oraclejdk8
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+services:
+  - mysql
+deploy:
+  provider: elasticbeanstalk
+  access_key_id: $AWS_ACCESS_ID
+  secret_access_key: $AWS_ACCESS_KEY
+  region: "eu-central-1"
+  app: "MeeSeeksBox"
+  env: "meeseeksbox-staging"
+  bucket_name: "elasticbeanstalk-eu-central-1-390933536668"
+  zip_file: './build/libs/meeseeks.box.backend-1.0.jar'
+  skip_cleanup: true
+  on:
+    branch: master
+before_deploy:
+  - "./gradlew bootRepackage"
