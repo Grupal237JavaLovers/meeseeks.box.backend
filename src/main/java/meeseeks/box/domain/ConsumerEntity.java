@@ -5,40 +5,39 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Alexandru Stoica
  * @version 1.0
  */
 
-@SuppressWarnings("unused")
 @Entity
-@Table(name = "Consumer")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ConsumerEntity extends UserEntity implements Serializable {
+
+    private static final String DEFAULT = "";
 
     @Column(name = "profile_image")
     private String profileImageUrl;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "consumer", targetEntity = JobEntity.class)
-    private Set<JobEntity> jobs = new HashSet<>();
+    @OrderBy("id")
+    @OneToMany(mappedBy = "consumer", targetEntity = JobEntity.class, cascade = CascadeType.REMOVE)
+    private List<JobEntity> jobs = new ArrayList<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "consumer", targetEntity = ReviewEntity.class)
-    private Set<RequestEntity> reviews = new HashSet<>();
+    @OrderBy("id")
+    @OneToMany(mappedBy = "consumer", targetEntity = ReviewEntity.class, cascade = CascadeType.REMOVE)
+    private List<RequestEntity> reviews = new ArrayList<>();
 
-    private static final String DEFAULT = "";
-
-    public ConsumerEntity(final @NotNull String username,
-                          final @NotNull String password,
-                          final @NotNull String name,
-                          final @NotNull String email) {
+    public ConsumerEntity(final String username,
+                          final String password,
+                          final String name,
+                          final String email) {
         this(username, password, name, email, DEFAULT);
     }
 
@@ -46,36 +45,37 @@ public class ConsumerEntity extends UserEntity implements Serializable {
         this(DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT);
     }
 
-    public ConsumerEntity(final @NotNull String username,
-                          final @NotNull String password,
-                          final @NotNull String name,
-                          final @NotNull String email,
-                          final @NotNull String profileImageUrl) {
+    public ConsumerEntity(final String username,
+                          final String password,
+                          final String name,
+                          final String email,
+                          final String profileImageUrl) {
         super(email, username, password, name);
         this.profileImageUrl = profileImageUrl;
+        this.setRole(UserRole.consumer);
     }
 
-    public @NotNull String getProfileImageUrl() {
+    public String getProfileImageUrl() {
         return profileImageUrl;
     }
 
-    public void setProfileImageUrl(final @NotNull String profileImageUrl) {
+    public void setProfileImageUrl(final String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
     }
 
-    public @NotNull Set<JobEntity> getJobs() {
+    public List<JobEntity> getJobs() {
         return jobs;
     }
 
-    public void setJobs(final @NotNull Set<JobEntity> jobs) {
+    public void setJobs(final List<JobEntity> jobs) {
         this.jobs = jobs;
     }
 
-    public @NotNull Set<RequestEntity> getReviews() {
+    public List<RequestEntity> getReviews() {
         return reviews;
     }
 
-    public void setReviews(final @NotNull Set<RequestEntity> reviews) {
+    public void setReviews(final List<RequestEntity> reviews) {
         this.reviews = reviews;
     }
 }

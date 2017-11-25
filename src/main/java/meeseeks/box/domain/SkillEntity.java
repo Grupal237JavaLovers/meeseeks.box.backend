@@ -4,10 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Alexandru Stoica
@@ -31,40 +30,46 @@ public class SkillEntity implements Serializable {
     private String name;
 
     @JsonIgnore
+    @OrderBy("id")
     @ManyToMany(mappedBy = "skills")
-    private Set<ProviderEntity> providers = new HashSet<>();
+    private List<ProviderEntity> providers = new ArrayList<>();
 
     private static final String DEFAULT = "";
 
-    public SkillEntity(final @NotNull String name) {
-        this.name = name;
+    public SkillEntity(final String name) {
+        this(0, name);
     }
 
     public SkillEntity() {
         this(DEFAULT);
     }
 
-    public @NotNull Integer getId() {
-        return id;
-    }
-
-    public void setId(final @NotNull Integer id) {
+    public SkillEntity(final Integer id, final String name) {
         this.id = id;
-    }
-
-    public @NotNull String getName() {
-        return name;
-    }
-
-    public void setName(final @NotNull String name) {
         this.name = name;
     }
 
-    public @NotNull Set<ProviderEntity> getProviders() {
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(final Integer id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public List<ProviderEntity> getProviders() {
         return providers;
     }
 
-    public void setProviders(final @NotNull Set<ProviderEntity> providers) {
+    public void setProviders(final List<ProviderEntity> providers) {
         this.providers = providers;
     }
 }

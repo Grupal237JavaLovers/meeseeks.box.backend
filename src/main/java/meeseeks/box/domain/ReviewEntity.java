@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Calendar;
 
@@ -14,8 +13,6 @@ import java.util.Calendar;
  * @author Alexandru Stoica
  * @version 1.0
  */
-
-@SuppressWarnings({"WeakerAccess", "unused"})
 @Entity
 @Table(name = "Review")
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -44,21 +41,18 @@ public class ReviewEntity implements Serializable {
 
     @Column(name = "received_provider")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private Boolean isReceivedByProvider;
+    private Boolean receivedByProvider;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, targetEntity = ConsumerEntity.class)
     @JoinColumn(name = "id_consumer")
     private ConsumerEntity consumer;
 
-
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, targetEntity = ProviderEntity.class)
+    @ManyToOne(fetch = FetchType.EAGER, targetEntity = ProviderEntity.class)
     @JoinColumn(name = "id_provider")
     private ProviderEntity provider;
 
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, targetEntity = JobEntity.class)
+    @ManyToOne(fetch = FetchType.EAGER, targetEntity = JobEntity.class)
     @JoinColumn(name = "id_job")
     private JobEntity job;
 
@@ -66,72 +60,72 @@ public class ReviewEntity implements Serializable {
         this("", -1);
     }
 
-    public ReviewEntity(final @NotNull String message, final @NotNull Integer rating) {
+    public ReviewEntity(final String message, final Integer rating) {
         this.message = message;
         this.rating = rating;
     }
 
-    public @NotNull Integer getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(final @NotNull Integer id) {
+    public void setId(final Integer id) {
         this.id = id;
     }
 
-    public @NotNull String getMessage() {
+    public String getMessage() {
         return message;
     }
 
-    public void setMessage(final @NotNull String message) {
+    public void setMessage(final String message) {
         this.message = message;
     }
 
-    public @NotNull Calendar getDate() {
+    public Calendar getDate() {
         return date;
     }
 
-    public void setDate(final @NotNull Calendar date) {
+    public void setDate(final Calendar date) {
         this.date = date;
     }
 
-    public @NotNull Integer getRating() {
+    public Integer getRating() {
         return rating;
     }
 
-    public void setRating(final @NotNull Integer rating) {
+    public void setRating(final Integer rating) {
         this.rating = rating;
     }
 
-    public @NotNull Boolean isReceivedByProvider() {
-        return isReceivedByProvider;
+    public Boolean getReceivedByProvider() {
+        return receivedByProvider;
     }
 
-    public void setReceivedByProvider(final @NotNull Boolean receivedByProvider) {
-        isReceivedByProvider = receivedByProvider;
+    public void setReceivedByProvider(final Boolean receivedByProvider) {
+        this.receivedByProvider = receivedByProvider;
     }
 
-    public @NotNull ConsumerEntity getConsumer() {
+    public ConsumerEntity getConsumer() {
         return consumer;
     }
 
-    public void setConsumer(final @NotNull ConsumerEntity consumer) {
+    public void setConsumer(final ConsumerEntity consumer) {
         this.consumer = consumer;
     }
 
-    public @NotNull ProviderEntity getProvider() {
+    public ProviderEntity getProvider() {
         return provider;
     }
 
-    public void setProvider(final @NotNull ProviderEntity provider) {
+    public void setProvider(final ProviderEntity provider) {
         this.provider = provider;
     }
 
-    public @NotNull JobEntity getJob() {
+    public JobEntity getJob() {
         return job;
     }
 
-    public void setJob(final @NotNull JobEntity job) {
+    public void setJob(final JobEntity job) {
         this.job = job;
     }
 }

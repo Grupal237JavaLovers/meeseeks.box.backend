@@ -5,10 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Alexandru Stoica
@@ -33,12 +32,13 @@ public class CategoryEntity implements Serializable {
     private String name;
 
     @JsonIgnore
+    @OrderBy("id")
     @OneToMany(mappedBy = "category", targetEntity = JobEntity.class)
-    private Set<JobEntity> jobs = new HashSet<>();
+    private List<JobEntity> jobs = new ArrayList<>();
 
     private static final String DEFAULT = "";
 
-    public CategoryEntity(final @NotNull String name) {
+    public CategoryEntity(final String name) {
         this.name = name;
     }
 
@@ -46,27 +46,27 @@ public class CategoryEntity implements Serializable {
         this(DEFAULT);
     }
 
-    public @NotNull Integer getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(final @NotNull Integer id) {
+    public void setId(final Integer id) {
         this.id = id;
     }
 
-    public @NotNull String getName() {
+    public String getName() {
         return name;
     }
 
-    public void setName(final @NotNull String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
-    public @NotNull Set<JobEntity> getJobs() {
+    public List<JobEntity> getJobs() {
         return jobs;
     }
 
-    public void setJobs(final @NotNull Set<JobEntity> jobs) {
+    public void setJobs(final List<JobEntity> jobs) {
         this.jobs = jobs;
     }
 }

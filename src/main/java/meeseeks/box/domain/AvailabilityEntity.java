@@ -4,21 +4,17 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.sql.Time;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Alexandru Stoica
  * @version 1.0
  */
-
-
-@SuppressWarnings("unused")
 @Entity
-@Table(name = "Availability")
+@Table(name = "Availability", uniqueConstraints = @UniqueConstraint(columnNames = {"day", "start_hour", "end_hour"}))
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AvailabilityEntity implements Serializable {
 
@@ -28,7 +24,7 @@ public class AvailabilityEntity implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Integer id;
 
-    @Column(name = "day", unique = true)
+    @Column(name = "day")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String day;
 
@@ -41,8 +37,9 @@ public class AvailabilityEntity implements Serializable {
     private Time endHour;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "availability", targetEntity = JobEntity.class)
-    private Set<JobEntity> jobs = new HashSet<>();
+    @OrderBy("id")
+    @ManyToMany(mappedBy = "availabilities")
+    private List<JobEntity> jobs = new ArrayList<>();
 
     private static final Time DEFAULT_HOUR = new Time(0);
     private static final String DEFAULT_DAY = "";
@@ -51,51 +48,51 @@ public class AvailabilityEntity implements Serializable {
         this(DEFAULT_DAY, DEFAULT_HOUR, DEFAULT_HOUR);
     }
 
-    public AvailabilityEntity(final @NotNull String day,
-                              final @NotNull Time startHour,
-                              final @NotNull Time endHour) {
+    public AvailabilityEntity(final String day,
+                              final Time startHour,
+                              final Time endHour) {
         this.day = day;
         this.startHour = startHour;
         this.endHour = endHour;
     }
 
-    public @NotNull Integer getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(final @NotNull Integer id) {
+    public void setId(final Integer id) {
         this.id = id;
     }
 
-    public @NotNull String getDay() {
+    public String getDay() {
         return day;
     }
 
-    public void setDay(final @NotNull String day) {
+    public void setDay(final String day) {
         this.day = day;
     }
 
-    public @NotNull Time getStartHour() {
+    public Time getStartHour() {
         return startHour;
     }
 
-    public void setStartHour(final @NotNull Time startHour) {
+    public void setStartHour(final Time startHour) {
         this.startHour = startHour;
     }
 
-    public @NotNull Time getEndHour() {
+    public Time getEndHour() {
         return endHour;
     }
 
-    public void setEndHour(final @NotNull Time endHour) {
+    public void setEndHour(final Time endHour) {
         this.endHour = endHour;
     }
 
-    public @NotNull Set<JobEntity> getJobs() {
+    public List<JobEntity> getJobs() {
         return jobs;
     }
 
-    public void setJobs(final @NotNull Set<JobEntity> jobs) {
+    public void setJobs(final List<JobEntity> jobs) {
         this.jobs = jobs;
     }
 }

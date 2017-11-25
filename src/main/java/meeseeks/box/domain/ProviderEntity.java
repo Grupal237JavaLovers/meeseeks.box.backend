@@ -4,10 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Alexandru Stoica
@@ -15,10 +14,11 @@ import java.util.Set;
  */
 
 @Entity
-@Table(name = "Provider")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @SuppressWarnings("all")
 public class ProviderEntity extends UserEntity implements Serializable {
+
+    private static final String DEFAULT = "";
 
     @Column(name = "profile_image")
     private String profileImageUrl;
@@ -30,25 +30,25 @@ public class ProviderEntity extends UserEntity implements Serializable {
     private String profileVideoUrl;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "provider", targetEntity = ReviewEntity.class)
-    private Set<RequestEntity> reviews = new HashSet<>();
+    @OneToMany(mappedBy = "provider", targetEntity = ReviewEntity.class, cascade = CascadeType.REMOVE)
+    private List<RequestEntity> reviews = new ArrayList<>();
 
     @JsonIgnore
+    @OrderBy("id")
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "SkillList", joinColumns = @JoinColumn(name = "id_provider", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "id_skill", referencedColumnName = "id"))
-    private Set<SkillEntity> skills = new HashSet<>();
+    private List<SkillEntity> skills = new ArrayList<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "provider", targetEntity = RequestEntity.class)
-    private Set<RequestEntity> requests = new HashSet<>();
+    @OrderBy("date")
+    @OneToMany(mappedBy = "provider", targetEntity = RequestEntity.class, cascade = CascadeType.ALL)
+    private List<RequestEntity> requests = new ArrayList<>();
 
-    private static final String DEFAULT = "";
-
-    public ProviderEntity(final @NotNull String username,
-                          final @NotNull String password,
-                          final @NotNull String name,
-                          final @NotNull String email) {
+    public ProviderEntity(final String username,
+                          final String password,
+                          final String name,
+                          final String email) {
         this(username, password, name, email, DEFAULT, DEFAULT, DEFAULT);
     }
 
@@ -57,64 +57,70 @@ public class ProviderEntity extends UserEntity implements Serializable {
     }
 
     @SuppressWarnings("WeakerAccess")
-    public ProviderEntity(final @NotNull String username,
-                          final @NotNull String password,
-                          final @NotNull String name,
-                          final @NotNull String email,
-                          final @NotNull String profileImageUrl,
-                          final @NotNull String description,
-                          final @NotNull String profileVideoUrl) {
+    public ProviderEntity(final String username,
+                          final String password,
+                          final String name,
+                          final String email,
+                          final String profileImageUrl,
+                          final String description,
+                          final String profileVideoUrl) {
         super(email, username, password, name);
         this.profileImageUrl = profileImageUrl;
         this.description = description;
         this.profileVideoUrl = profileVideoUrl;
+        this.setRole(UserRole.provider);
     }
 
-    public @NotNull String getProfileImageUrl() {
+    public ProviderEntity(final String username, final String password) {
+        this(username, password, "default", "default@test.com");
+    }
+
+    public String getProfileImageUrl() {
         return profileImageUrl;
     }
 
-    public void setProfileImageUrl(final @NotNull String profileImageUrl) {
+    public void setProfileImageUrl(final String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
     }
 
-    public @NotNull String getDescription() {
+    public String getDescription() {
         return description;
     }
 
-    public void setDescription(final @NotNull String description) {
+    public void setDescription(final String description) {
         this.description = description;
     }
 
-    public @NotNull String getProfileVideoUrl() {
+    public String getProfileVideoUrl() {
         return profileVideoUrl;
     }
 
-    public void setProfileVideoUrl(final @NotNull String profileVideoUrl) {
+    public void setProfileVideoUrl(final String profileVideoUrl) {
         this.profileVideoUrl = profileVideoUrl;
     }
 
-    public @NotNull Set<SkillEntity> getSkills() {
+    public List<SkillEntity> getSkills() {
         return skills;
     }
 
-    public void setSkills(final @NotNull Set<SkillEntity> skills) {
+    public void setSkills(final List<SkillEntity> skills) {
         this.skills = skills;
     }
 
-    public @NotNull Set<RequestEntity> getReviews() {
+    public List<RequestEntity> getReviews() {
         return reviews;
     }
 
-    public void setReviews(final @NotNull Set<RequestEntity> reviews) {
+    public void setReviews(final List<RequestEntity> reviews) {
         this.reviews = reviews;
     }
 
-    public @NotNull Set<RequestEntity> getRequests() {
+    public List<RequestEntity> getRequests() {
         return requests;
     }
 
-    public void setRequests(final @NotNull Set<RequestEntity> requests) {
+    public void setRequests(final List<RequestEntity> requests) {
         this.requests = requests;
     }
+
 }

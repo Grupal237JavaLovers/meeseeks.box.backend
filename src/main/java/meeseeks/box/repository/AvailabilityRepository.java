@@ -1,11 +1,20 @@
 package meeseeks.box.repository;
 
-import meeseeks.box.domain.AvailabilityEntity;
+import java.sql.Time;
+import java.util.Optional;
+
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+
+import meeseeks.box.domain.AvailabilityEntity;
 
 /**
  * @author Alexandru Stoica
  * @version 1.0
  */
 
-public interface AvailabilityRepository extends CrudRepository<AvailabilityEntity, Integer> { }
+@Repository
+public interface AvailabilityRepository extends CrudRepository<AvailabilityEntity, Integer>
+{
+    public Optional<AvailabilityEntity> findByDayAndStartHourAndEndHour(String day, Time startHour, Time endHour);
+}

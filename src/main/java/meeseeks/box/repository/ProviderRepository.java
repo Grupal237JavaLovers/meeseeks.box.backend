@@ -1,8 +1,8 @@
 package meeseeks.box.repository;
 
-import meeseeks.box.domain.ProviderEntity;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
+
+import meeseeks.box.domain.ProviderEntity;
 
 /**
  * @author Alexandru Stoica
@@ -10,4 +10,4 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public interface ProviderRepository extends CrudRepository<ProviderEntity, Integer> { }
+public interface ProviderRepository extends BaseCrudRepository<ProviderEntity, Integer> { }

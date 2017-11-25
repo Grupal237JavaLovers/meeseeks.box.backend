@@ -2,20 +2,19 @@ package meeseeks.box.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 /**
  * @author Alexandru Stoica
  * @version 1.0
  */
 
-@SuppressWarnings("unused")
 @Entity
 @Table(name = "Job")
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -51,36 +50,47 @@ public class JobEntity implements Serializable {
     @Column(name = "expiration_date")
     private Calendar expiration;
 
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, targetEntity = CategoryEntity.class)
+    @ManyToOne(fetch = FetchType.LAZY,
+            targetEntity = CategoryEntity.class,
+            cascade = CascadeType.PERSIST)
     @JoinColumn(name = "category")
     private CategoryEntity category;
 
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, targetEntity = AvailabilityEntity.class)
-    @JoinColumn(name = "availability")
-    private AvailabilityEntity availability;
-
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, targetEntity = ConsumerEntity.class)
+    @ManyToOne(fetch = FetchType.LAZY,
+            targetEntity = ConsumerEntity.class,
+            cascade = CascadeType.PERSIST)
     @JoinColumn(name = "id_consumer")
     private ConsumerEntity consumer;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "job", targetEntity = RequestEntity.class)
-    private Set<RequestEntity> requests = new HashSet<>();
+    @OrderBy("id")
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "AvailabilityList", joinColumns = @JoinColumn(name = "id_job", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "id_availability", referencedColumnName = "id"))
+    private List<AvailabilityEntity> availabilities = new ArrayList<>();
 
     @JsonIgnore
+    @OrderBy("id")
+    @OneToMany(mappedBy = "job", targetEntity = RequestEntity.class)
+    private List<RequestEntity> requests = new ArrayList<>();
+
+    @JsonIgnore
+    @OrderBy("id")
     @OneToMany(mappedBy = "job", targetEntity = ReviewEntity.class)
-    private Set<RequestEntity> reviews = new HashSet<>();
+    private List<RequestEntity> reviews = new ArrayList<>();
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column
+    @CreationTimestamp
+    private Calendar created;
 
     private static final String DEFAULT = "";
 
-    public JobEntity(final @NotNull String name,
-                     final @NotNull String description,
-                     final @NotNull String location,
-                     final @NotNull String type,
-                     final @NotNull Double price) {
+    public JobEntity(final String name,
+                     final String description,
+                     final String location,
+                     final String type,
+                     final Double price) {
         this.name = name;
         this.description = description;
         this.location = location;
@@ -92,99 +102,103 @@ public class JobEntity implements Serializable {
         this(DEFAULT, DEFAULT, DEFAULT, DEFAULT, 1.0);
     }
 
-    public @NotNull Integer getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(final @NotNull Integer id) {
+    public void setId(final Integer id) {
         this.id = id;
     }
 
-    public @NotNull String getName() {
+    public String getName() {
         return name;
     }
 
-    public void setName(final @NotNull String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
-    public @NotNull String getDescription() {
+    public String getDescription() {
         return description;
     }
 
-    public void setDescription(final @NotNull String description) {
+    public void setDescription(final String description) {
         this.description = description;
     }
 
-    public @NotNull String getLocation() {
+    public String getLocation() {
         return location;
     }
 
-    public void setLocation(final @NotNull String location) {
+    public void setLocation(final String location) {
         this.location = location;
     }
 
-    public @NotNull String getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(final @NotNull String type) {
+    public void setType(final String type) {
         this.type = type;
     }
 
-    public @NotNull Double getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(final @NotNull Double price) {
+    public void setPrice(final Double price) {
         this.price = price;
     }
 
-    public @NotNull Calendar getExpiration() {
+    public Calendar getExpiration() {
         return expiration;
     }
 
-    public void setExpiration(final @NotNull Calendar expiration) {
+    public void setExpiration(final Calendar expiration) {
         this.expiration = expiration;
     }
 
-    public @NotNull CategoryEntity getCategory() {
+    public CategoryEntity getCategory() {
         return category;
     }
 
-    public void setCategory(final @NotNull CategoryEntity category) {
+    public void setCategory(final CategoryEntity category) {
         this.category = category;
     }
 
-    public @NotNull AvailabilityEntity getAvailability() {
-        return availability;
+    public List<AvailabilityEntity> getAvailabilities() {
+        return availabilities;
     }
 
-    public void setAvailability(final @NotNull AvailabilityEntity availability) {
-        this.availability = availability;
+    public void setAvailabilities(final List<AvailabilityEntity> availabilities) {
+        this.availabilities = availabilities;
     }
 
-    public @NotNull ConsumerEntity getConsumer() {
+    public ConsumerEntity getConsumer() {
         return consumer;
     }
 
-    public void setConsumer(final @NotNull ConsumerEntity consumer) {
+    public void setConsumer(final ConsumerEntity consumer) {
         this.consumer = consumer;
     }
 
-    public @NotNull Set<RequestEntity> getRequests() {
+    public List<RequestEntity> getRequests() {
         return requests;
     }
 
-    public void setRequests(final @NotNull Set<RequestEntity> requests) {
+    public void setRequests(final List<RequestEntity> requests) {
         this.requests = requests;
     }
 
-    public @NotNull Set<RequestEntity> getReviews() {
+    public List<RequestEntity> getReviews() {
         return reviews;
     }
 
-    public void setReviews(final @NotNull Set<RequestEntity> reviews) {
+    public void setReviews(final List<RequestEntity> reviews) {
         this.reviews = reviews;
+    }
+
+    public Calendar getCreated() {
+        return created;
     }
 }
