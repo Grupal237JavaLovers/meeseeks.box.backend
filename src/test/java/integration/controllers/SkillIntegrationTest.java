@@ -1,13 +1,13 @@
 package integration.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import meeseeks.box.MeeseeksBox;
 import meeseeks.box.domain.ProviderEntity;
 import meeseeks.box.domain.SkillEntity;
+import meeseeks.box.domain.UserEntity;
 import meeseeks.box.repository.ProviderRepository;
 import meeseeks.box.repository.SkillRepository;
-import org.hamcrest.collection.IsEmptyIterable;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,16 +22,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
 import static java.util.Arrays.asList;
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static java.util.Collections.singletonList;
+import static org.hamcrest.core.Is.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * @author Tiron Andreea-Ecaterina
@@ -59,54 +58,81 @@ public class SkillIntegrationTest {
     @Autowired
     private ProviderRepository providerRepository;
 
-    private ProviderEntity provider;
-
-    @Before
-    public void setUp() throws Exception {
-        provider = new ProviderEntity();
-        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(provider, null, provider.getAuthorities()));
+    @Test
+    public void isAddingSkillToProviderByName() throws Exception {
+        // declarations:
+        ProviderEntity provider = makeProvider();
+        List<SkillEntity> expected = singletonList(makeSkill(1, "test"));
+        // preconditions:
+        providerRepository.save(provider);
+        // then:
+        assertValidResultFrom(() -> post("/skill/insert/test"), provider, jsonAsObjectIsEqualTo(expected));
     }
 
     @Test
-    public void isDeletingSkillsById() throws Exception {
-        SkillEntity skill = makeSkill(1, "skill");
-        SkillEntity skill2= makeSkill(2,"skill2");
-
+    public void isGettingSkillsByName() throws Exception {
+        // declarations:
+        final String SEARCH_TERM = "tes";
+        final String SEARCH_RESULTS_LIMIT = "10";
+        List<SkillEntity> skills = asList(makeSkill(1, "test"),
+                makeSkill(2, "testing"),
+                makeSkill(3, "none"));
+        List<SkillEntity> expected = asList(makeSkill(1, "test"),
+                makeSkill(2, "testing"));
         // preconditions:
-        skillRepository.save(skill);
-        skillRepository.save(skill2);
-        providerRepository.save(provider);
-        provider.setSkills(asList(skillRepository.findOne(1), skillRepository.findOne(2)));
-        providerRepository.save(provider);
-
-        System.out.println(skillRepository.getAllSkillsForCurrentProvider());
+        skillRepository.save(skills);
         // then:
-        assertValidResultFrom(() -> delete("/skill/delete/1"),
-                jsonPath("$", IsEmptyIterable.emptyIterable()));
+        assertValidResultFrom(() -> get("/skill/get/" + SEARCH_TERM + "/" + SEARCH_RESULTS_LIMIT),
+                makeProvider(), jsonAsObjectIsEqualTo(expected));
     }
 
     @Test
-    public void isDeletingSkillById() throws Exception {
-        SkillEntity skill = makeSkill(1, "skill");
-        providerRepository.save(provider);
+    public void isGettingSkillById() throws Exception {
+        // declarations:
+        final String WANTED_ID = "1";
+        SkillEntity expected = makeSkill(1, "Test");
+        List<SkillEntity> skills = asList(expected, makeSkill(2, ""));
         // preconditions:
-        List<ProviderEntity> providerEntityList = new ArrayList<>();
-        providerEntityList.add(provider);
-        skill.setProviders(providerEntityList);
-        skillRepository.save(skill);
-
+        skillRepository.save(skills);
         // then:
-        assertValidResultFrom(() -> delete("/skill/delete/1"),
-                jsonPath("$", IsEmptyIterable.emptyIterable()));
+        assertValidResultFrom(() -> get("/skill/get/" + WANTED_ID), makeProvider(),
+                jsonAsObjectIsEqualTo(expected));
+    }
+
+    @Test
+    public void isDeletingSkillByIdFromProvider() throws Exception {
+        // declarations:
+        SkillEntity first = makeSkill(1, "testing");
+        SkillEntity next = makeSkill(2, "coding");
+        ProviderEntity provider = makeProvider();
+        // preconditions:
+        providerRepository.save(provider);
+        provider.setSkills(asList(first, next));
+        providerRepository.save(provider);
+        // then:
+        assertValidResultFrom(() -> delete("/skill/delete/1"), provider,
+                jsonPath("$[0].name", is("coding")));
     }
 
     private void assertValidResultFrom(final Supplier<MockHttpServletRequestBuilder> method,
+                                       final UserEntity user,
                                        final ResultMatcher matcher) throws Exception {
         mockMvc.perform(method.get()
-                .principal(new UsernamePasswordAuthenticationToken(provider, null, provider.getAuthorities())))
+                .principal(new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(matcher);
+    }
+
+    private <T> ResultMatcher jsonAsObjectIsEqualTo(final T object) throws JsonProcessingException {
+        return content().json(mapper.writeValueAsString(object));
+    }
+
+    private ProviderEntity makeProvider() {
+        ProviderEntity provider = new ProviderEntity();
+        SecurityContextHolder.getContext()
+                .setAuthentication(new UsernamePasswordAuthenticationToken(provider, null, provider.getAuthorities()));
+        return provider;
     }
 
     private SkillEntity makeSkill(final Integer id, final String name) {
