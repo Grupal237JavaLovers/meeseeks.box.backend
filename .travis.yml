@@ -19,9 +19,8 @@ deploy:
   env: "meeseeksbox-staging"
   bucket_name: "elasticbeanstalk-eu-central-1-390933536668"
   zip_file: './build/libs/meeseeks.box.backend-1.0.jar'
+  skip_cleanup: true
   on:
     branch: travisci
 before_deploy:
   - "./gradlew bootRepackage"
-  - "git add ."
-  - "git status"
