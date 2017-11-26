@@ -1,4 +1,4 @@
-# Meeseeks Box
+# Meeseeks Box [![Build Status](https://travis-ci.org/Grupal237JavaLovers/meeseeks.box.backend.svg?branch=develop)](https://travis-ci.org/Grupal237JavaLovers/meeseeks.box.backend) [![Coverage Status](https://coveralls.io/repos/github/Grupal237JavaLovers/meeseeks.box.backend/badge.svg?branch=develop)](https://coveralls.io/github/Grupal237JavaLovers/meeseeks.box.backend)
 
 ## Contributing
 

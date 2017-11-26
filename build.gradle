@@ -1,4 +1,3 @@
-
 buildscript {
     ext {
         springBootVersion = '1.5.8.RELEASE'
@@ -11,6 +10,11 @@ buildscript {
     }
 }
 
+plugins {
+    id 'jacoco'
+    id 'com.github.kt3k.coveralls' version '2.6.3'
+}
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
@@ -19,7 +23,12 @@ apply plugin: 'org.springframework.boot'
 group 'meeseeks.box.backend'
 version '1.0'
 
-apply plugin: 'java'
+jacocoTestReport {
+    reports {
+        xml.enabled = true // coveralls plugin depends on xml format report
+        html.enabled = true
+    }
+}
 
 sourceCompatibility = 1.8
 
