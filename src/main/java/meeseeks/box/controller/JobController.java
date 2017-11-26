@@ -66,9 +66,8 @@ public class JobController {
     @Secured({"ROLE_CONSUMER"})
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") final Integer id,
-                                    final Authentication authentication) {
-        ConsumerEntity consumer = (ConsumerEntity) authentication.getPrincipal();
-        return jobRepository.deleteIfCreatedBy(consumer.getId(), id) > 0 ?
+                                    @AuthenticationPrincipal @ApiIgnore ConsumerEntity consumer) {
+        return jobRepository.deleteIfCreatedBy(consumer, id) > 0 ?
                 new ResponseEntity<>(HttpStatus.ACCEPTED) :
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
@@ -76,8 +75,7 @@ public class JobController {
     @Secured({"ROLE_CONSUMER"})
     @PatchMapping("/update")
     public ResponseEntity<JobEntity> update(@RequestBody JobModel updated,
-                                            final Authentication authentication) {
-        ConsumerEntity consumer = (ConsumerEntity) authentication.getPrincipal();
+                                            @AuthenticationPrincipal @ApiIgnore ConsumerEntity consumer) {
         return jobRepository.updateIfCreatedBy(consumer.getId(), updated.getJob().getId(), updated.build(consumer)) > 0 ?
                 new ResponseEntity<>(jobRepository.findById(updated.getJob().getId())
                         .orElseThrow(() -> new NotFoundException("Updated Job Not Found!")), HttpStatus.OK) :
