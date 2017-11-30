@@ -2,7 +2,6 @@ package meeseeks.box.controller;
 
 import static java.util.Collections.emptyList;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -27,12 +26,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import meeseeks.box.domain.UserEntity;
 import meeseeks.box.exception.AccessDeniedException;
 import meeseeks.box.exception.BadRequestException;
 import meeseeks.box.model.ChangePasswordModel;
+import meeseeks.box.service.PusherService;
 import meeseeks.box.service.UserService;
 
 /**
@@ -46,11 +44,13 @@ public class UserController {
 
     private final BCryptPasswordEncoder encoder;
     private final UserService userService;
+    private final PusherService pusherService;
 
     @Autowired
-    public UserController(final BCryptPasswordEncoder encoder, final UserService userService) {
+    public UserController(final BCryptPasswordEncoder encoder, final UserService userService, final PusherService pusherService) {
         this.encoder = encoder;
         this.userService = userService;
+        this.pusherService = pusherService;
     }
 
     @ResponseBody
@@ -89,7 +89,7 @@ public class UserController {
 
     @ResponseBody
     @PostMapping(value = "/auth/notifications", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public HashMap<?, ?> authNotifications(@RequestParam HashMap<?, ?> params)
+    public HashMap<String, String> authNotifications(@RequestParam HashMap<?, ?> params)
     {
         String action = (String) params.get("action");
 
@@ -100,33 +100,8 @@ public class UserController {
         String token = (String) params.get("token");
         String path = (String) params.get("path");
 
-        String newToken = this.generateAccessToken(path, action);
-
-        HashMap<String, Object> map = new HashMap<>();
-
-        map.put("access_token", newToken);
-        map.put("token_type", "bearer");
-        map.put("expires_in", "" + (24 * 60 * 60));
-
-        return map;
+        return pusherService.authenticateUser(token, path, action, "private-notifications");
     }
 
-    private String generateAccessToken(String path, String action) {
-        HashMap<String, Object> claims = new HashMap<>();
-        HashMap<String, Object> claims2 = new HashMap<>();
 
-        claims2.put("path", path);
-        claims2.put("action", action);
-        claims.put("permission", claims2);
-
-        return Jwts.builder()
-                .claim("app", "402dd0d4-06b3-44bd-b39f-600839531748")
-                .setIssuer("api_keys/" + "6a80dc5a-e240-4429-80a0-74289802f10d")
-                .setIssuedAt(new Date(System.currentTimeMillis() - 60 * 10 * 100))
-                .setExpiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 100 - 60 * 10 * 100))
-                .setSubject(4 + "")
-                .claim("feeds", claims)
-                .signWith(SignatureAlgorithm.HS512, "CSOjERDCT4Z4klIazvqUKHNAlc7WnyJFtVAT2EeSxTA=".getBytes())
-                .compact();
-    }
 }
