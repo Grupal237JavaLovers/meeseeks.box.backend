@@ -1,13 +1,9 @@
 package meeseeks.box.controller;
 
-import meeseeks.box.domain.*;
-import meeseeks.box.exception.NotFoundException;
-import meeseeks.box.repository.ConsumerRepository;
-import meeseeks.box.repository.JobRepository;
-import meeseeks.box.repository.ProviderRepository;
-import meeseeks.box.repository.RequestRepository;
-import meeseeks.box.security.SecurityConstants;
-import meeseeks.box.service.UserService;
+import java.util.HashMap;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,10 +12,30 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletResponse;
+import meeseeks.box.domain.ConsumerEntity;
+import meeseeks.box.domain.JobEntity;
+import meeseeks.box.domain.ProviderEntity;
+import meeseeks.box.domain.RequestEntity;
+import meeseeks.box.domain.UserEntity;
+import meeseeks.box.exception.NotFoundException;
+import meeseeks.box.repository.ConsumerRepository;
+import meeseeks.box.repository.JobRepository;
+import meeseeks.box.repository.ProviderRepository;
+import meeseeks.box.repository.RequestRepository;
+import meeseeks.box.security.SecurityConstants;
+import meeseeks.box.service.PusherService;
+import meeseeks.box.service.PusherService.NotificationType;
+import meeseeks.box.service.UserService;
+import springfox.documentation.annotations.ApiIgnore;
 
 
 /**
@@ -37,6 +53,7 @@ public class ConsumerController {
     private final JobRepository jobRepository;
     private final ProviderRepository providerRepository;
     private final RequestRepository requestRepository;
+    private final PusherService pusherService;
 
     private final Logger LOGGER = Logger.getLogger(ProviderController.class.getName());
 
@@ -46,13 +63,15 @@ public class ConsumerController {
                               final SecurityConstants securityConstants,
                               final JobRepository jobRepository,
                               final ProviderRepository providerRepository,
-                              final RequestRepository requestRepository) {
+                              final RequestRepository requestRepository,
+                              final PusherService pusherService) {
         this.consumerRepository = consumerRepository;
         this.userService = userService;
         this.securityConstants = securityConstants;
         this.jobRepository = jobRepository;
         this.providerRepository = providerRepository;
         this.requestRepository = requestRepository;
+        this.pusherService = pusherService;
     }
 
     @GetMapping("/get/{id}")
@@ -104,8 +123,18 @@ public class ConsumerController {
         RequestEntity request = requestRepository.getRequestByProviderAndJob(provider, job)
                 .orElseThrow(() -> new NotFoundException("Request Not Found!"));
         request.setAccepted(Boolean.TRUE);
-        return job.getConsumer().getId().equals(consumer.getId()) ?
+        ResponseEntity<?> response = job.getConsumer().getId().equals(consumer.getId()) ?
                 new ResponseEntity<>(requestRepository.save(request), HttpStatus.ACCEPTED) :
                 new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+
+        if (response.getStatusCode() == HttpStatus.ACCEPTED) {
+            // Send a new notification to the provider using Pusher Feeds
+            HashMap<String, Object> data = new HashMap<>();
+            data.put("job", job.getId());
+            data.put("consumer", consumer.getName());
+            pusherService.createNotification(NotificationType.JOB_APPLY, provider.getId(), data);
+        }
+
+        return response;
     }
 }

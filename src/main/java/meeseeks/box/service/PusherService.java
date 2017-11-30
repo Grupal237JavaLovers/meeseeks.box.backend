@@ -1,14 +1,22 @@
 package meeseeks.box.service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -21,9 +29,11 @@ public class PusherService
 {
     private static final Integer EXPIRE_TIME = 86400; // 24 hours in seconds
     private static final Integer LEEWAY_TIME = 600; // 10 minutes in seconds
+    private static final String PUSHER_ENDPOINT = "https://us1.pusherplatform.io/services/feeds/v1/";
 
     private final UserService userService;
     private final SecurityConstants securityConstants;
+    private final RestTemplate rest;
 
     @Value("${app.pusher.feeds.locator}")
     private String instanceLocator;
@@ -35,10 +45,13 @@ public class PusherService
     private String appKey;
     private String appSecret;
 
+    private final Logger LOGGER = Logger.getLogger(PusherService.class.getName());
+
     @Autowired
-    public PusherService(UserService userService, SecurityConstants securityConstants) {
+    public PusherService(UserService userService, SecurityConstants securityConstants, RestTemplateBuilder restBuilder) {
         this.userService = userService;
         this.securityConstants = securityConstants;
+        this.rest = restBuilder.build();
     }
 
     @PostConstruct
@@ -86,13 +99,33 @@ public class PusherService
     }
 
 
+    public void createNotification(NotificationType jobApply, Integer userId, HashMap<String,Object> data) {
+        data.put("type", jobApply);
+
+        HashMap<String, Object> items = new HashMap<>();
+        List<Object> item = new ArrayList<>();
+        item.add(data);
+
+        items.put("items", item);
+
+        HttpHeaders headers = new HttpHeaders(){{
+            set("Authorization", "Bearer " + generateAccessToken("feeds/private-notifications-" + userId + "/items", "WRITE", userId));
+        }};
+
+        try {
+            this.rest.exchange(PUSHER_ENDPOINT + this.appId + "/feeds/private-notifications-" + userId + "/items", HttpMethod.POST, new HttpEntity<>(items, headers), String.class);
+        } catch (Exception ex) {
+            LOGGER.error(ex);
+        }
+    }
+
     private String generateAccessToken(String path, String action, Integer userId) {
         HashMap<String, Object> claims = new HashMap<>();
-        HashMap<String, Object> claims2 = new HashMap<>();
+        HashMap<String, Object> permission = new HashMap<>();
 
-        claims2.put("path", path);
-        claims2.put("action", action);
-        claims.put("permission", claims2);
+        permission.put("path", path);
+        permission.put("action", action);
+        claims.put("permission", permission);
 
         return Jwts.builder()
                 .claim("app", this.appId)
@@ -103,5 +136,9 @@ public class PusherService
                 .claim("feeds", claims)
                 .signWith(SignatureAlgorithm.HS512, this.appSecret.getBytes())
                 .compact();
+    }
+
+    public enum NotificationType {
+        JOB_APPLY, JOB_ACCEPT
     }
 }
