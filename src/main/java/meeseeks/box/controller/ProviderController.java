@@ -7,7 +7,10 @@ import meeseeks.box.repository.JobRepository;
 import meeseeks.box.repository.ProviderRepository;
 import meeseeks.box.repository.RequestRepository;
 import meeseeks.box.security.SecurityConstants;
+import meeseeks.box.service.PusherService;
 import meeseeks.box.service.UserService;
+import meeseeks.box.service.PusherService.NotificationType;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
+
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -36,6 +41,7 @@ public class ProviderController {
     private final SecurityConstants securityConstants;
     private final JobRepository jobRepository;
     private final RequestRepository requestRepository;
+    private final PusherService pusherService;
 
     private final Logger LOGGER = Logger.getLogger(ProviderController.class.getName());
 
@@ -44,12 +50,14 @@ public class ProviderController {
                               final UserService userService,
                               final SecurityConstants securityConstants,
                               final JobRepository jobRepository,
-                              final RequestRepository requestRepository) {
+                              final RequestRepository requestRepository,
+                              final PusherService pusherService) {
         this.providerRepository = providerRepository;
         this.userService = userService;
         this.securityConstants = securityConstants;
         this.jobRepository = jobRepository;
         this.requestRepository = requestRepository;
+        this.pusherService = pusherService;
     }
 
     @ResponseBody
@@ -113,6 +121,15 @@ public class ProviderController {
             throw new DataAlreadyExists("Provider's application already exists!");
         });
         RequestEntity request = new RequestEntity(provider, job, message);
-        return new ResponseEntity<>(requestRepository.save(request), HttpStatus.ACCEPTED);
+
+        ResponseEntity<RequestEntity> response = new ResponseEntity<>(requestRepository.save(request), HttpStatus.ACCEPTED);
+
+        // Send a new notification to the consumer using Pusher Feeds
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("job", job.getId());
+        data.put("provider", provider.getName());
+        pusherService.createNotification(NotificationType.JOB_APPLY, job.getConsumer().getId(), data);
+
+        return response;
     }
 }

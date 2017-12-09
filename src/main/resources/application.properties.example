@@ -27,3 +27,7 @@ app.security.secret=5b520eaf9a2067a98de258ec8a3a3f3e8b64f219
 app.cors.origins=*
 # Token to be used by the Swagger Docs, without Bearer
 app.security.token=ModifyWithATokenYouGetFromLogin
+
+# Pusher Feeds Credentials
+app.pusher.feeds.locator=v1:us1:402dd0d4-06b3-44bd-b39f-600839531748
+app.pusher.feeds.secret=6a80dc5a-e240-4429-80a0-74289802f10d:CSOjERDCT4Z4klIazvqUKHNAlc7WnyJFtVAT2EeSxTA=

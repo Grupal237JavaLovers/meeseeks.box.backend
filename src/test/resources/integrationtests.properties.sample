@@ -27,3 +27,7 @@ security.basic.enabled=false
 app.security.secret=5b520eaf9a2067a98de258ec8a3a3f3e8b64f219
 app.cors.origins=*
 app.security.token=test
+
+# Pusher Feeds Test Credentials
+app.pusher.feeds.locator=v1:us1:66160402-a23e-450d-be12-a1e076e6dbed
+app.pusher.feeds.secret=a229f98f-8222-48af-ab80-277dd288e279:Q6nBuDQWoaKhvOm5vT9Btk6BLbF22VWkPb16yydCzcM=
