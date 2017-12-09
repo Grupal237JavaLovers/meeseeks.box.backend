@@ -97,10 +97,9 @@ public class UserController {
             throw new BadRequestException();
         }
 
-        String token = (String) params.get("token");
-        String path = (String) params.get("path");
-
-        return pusherService.authenticateUser(token, path, action, "private-notifications");
+        return pusherService.authenticateUser((String) params.get("token"), (String) params.get("path"),
+                action, "private-notifications"
+        );
     }
 
 

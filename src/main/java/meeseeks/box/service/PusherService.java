@@ -27,9 +27,9 @@ import meeseeks.box.security.SecurityConstants;
 @Service
 public class PusherService
 {
-    private static final Integer EXPIRE_TIME = 86400; // 24 hours in seconds
-    private static final Integer LEEWAY_TIME = 600; // 10 minutes in seconds
-    private static final String PUSHER_ENDPOINT = "https://us1.pusherplatform.io/services/feeds/v1/";
+    private final Integer EXPIRE_TIME = 86400; // 24 hours in seconds
+    private final Integer LEEWAY_TIME = 600; // 10 minutes in seconds
+    private final String PUSHER_ENDPOINT = "https://us1.pusherplatform.io/services/feeds/v1/";
 
     private final UserService userService;
     private final SecurityConstants securityConstants;
