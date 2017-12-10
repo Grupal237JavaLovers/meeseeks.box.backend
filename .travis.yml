@@ -26,3 +26,5 @@ deploy:
     branch: master
 before_deploy:
   - "./gradlew bootRepackage"
+notifications:
+  email: false
