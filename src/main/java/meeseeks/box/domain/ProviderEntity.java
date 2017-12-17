@@ -75,6 +75,10 @@ public class ProviderEntity extends UserEntity implements Serializable {
         this(username, password, "default", "default@test.com");
     }
 
+    public ProviderEntity(final String username, final String password, final String email) {
+        this(username, password, DEFAULT, email);
+    }
+
     public String getProfileImageUrl() {
         return profileImageUrl;
     }

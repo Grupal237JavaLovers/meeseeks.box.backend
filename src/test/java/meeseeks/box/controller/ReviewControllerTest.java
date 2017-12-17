@@ -1,13 +1,14 @@
 package meeseeks.box.controller;
 
-import static org.mockito.Matchers.notNull;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.Optional;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import meeseeks.box.domain.ConsumerEntity;
+import meeseeks.box.domain.JobEntity;
+import meeseeks.box.domain.ProviderEntity;
+import meeseeks.box.domain.ReviewEntity;
+import meeseeks.box.repository.ConsumerRepository;
+import meeseeks.box.repository.JobRepository;
+import meeseeks.box.repository.ProviderRepository;
+import meeseeks.box.repository.ReviewRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -24,16 +25,13 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Optional;
 
-import meeseeks.box.domain.ConsumerEntity;
-import meeseeks.box.domain.JobEntity;
-import meeseeks.box.domain.ProviderEntity;
-import meeseeks.box.domain.ReviewEntity;
-import meeseeks.box.repository.ConsumerRepository;
-import meeseeks.box.repository.JobRepository;
-import meeseeks.box.repository.ProviderRepository;
-import meeseeks.box.repository.ReviewRepository;
+import static org.mockito.Matchers.notNull;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(ReviewController.class)
@@ -69,7 +67,7 @@ public class ReviewControllerTest {
 
         Mockito.when(jobRepository.findById(1)).thenReturn(Optional.of(job));
         Mockito.when(providerRepository.findById(2)).thenReturn(Optional.of(provider));
-        Mockito.when(consumerRepository.findOne(Matchers.anyInt())).thenReturn(consumer);
+        Mockito.when(consumerRepository.findById(Matchers.anyInt())).thenReturn(Optional.of(consumer));
 
         ReviewEntity review = new ReviewEntity("message", 10);
         ReviewEntity expected = new ReviewEntity("message", 10);
@@ -100,7 +98,7 @@ public class ReviewControllerTest {
 
         Mockito.when(jobRepository.findById(1)).thenReturn(Optional.of(job));
         Mockito.when(consumerRepository.findById(2)).thenReturn(Optional.of(consumer));
-        Mockito.when(providerRepository.findOne(Matchers.anyInt())).thenReturn(provider);
+        Mockito.when(providerRepository.findById(Matchers.anyInt())).thenReturn(Optional.of(provider));
 
         ReviewEntity review = new ReviewEntity("message", 10);
         ReviewEntity expected = new ReviewEntity("message", 10);

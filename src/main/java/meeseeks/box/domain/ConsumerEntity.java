@@ -55,6 +55,10 @@ public class ConsumerEntity extends UserEntity implements Serializable {
         this.setRole(UserRole.consumer);
     }
 
+    public ConsumerEntity(final String email, final String username) {
+        this(username, DEFAULT, DEFAULT, email);
+    }
+
     public String getProfileImageUrl() {
         return profileImageUrl;
     }
