@@ -60,7 +60,11 @@ public class JobController {
             availabilities.add(availabilityRepository.findByDayAndStartHourAndEndHour(entity.getDay(), entity.getStartHour(), entity.getEndHour()).orElse(entity));
         }
         job.setAvailabilities(availabilities);
-        return jobRepository.save(job.build(consumer));
+        JobEntity entity = jobRepository.save(job.build(consumer));
+
+        entity.getCreated().setTimeInMillis((entity.getCreated().getTimeInMillis() / 1000) * 1000);
+
+        return entity;
     }
 
     @Secured({"ROLE_CONSUMER"})
