@@ -87,27 +87,26 @@ public class JobIntegrationTest {
         consumer = new ConsumerEntity("consumer", "consumer");
         consumer = consumerRepository.save(consumer);
         provider = providerRepository.save(provider);
-        consumer.getCreated().setTimeInMillis((consumer.getCreated().getTimeInMillis() / 1000) * 1000);
+        setTime(consumer.getCreated());
         setTime(provider.getCreated());
     }
 
     @Test
-    public void isInseringJob(){
+    public void isInseringJob() throws Exception {
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(consumer, null, consumer.getAuthorities()));
         JobEntity job = new JobEntity("Test", "Testing", "TestCity", "Volunteer", 100.0);
         AvailabilityEntity availability = new AvailabilityEntity("Monday", new Time(0), new Time(0));
         CategoryEntity category = new CategoryEntity("Testing");
         JobModel model = new JobModel(job, new ArrayList<>(singletonList(availability)), category);
 
-        try {
-            mockMvc.perform(post("/job/insert")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(model)))
-                    .andDo(print()).andExpect(status().isOk())
-                    .andExpect(content().json(mapper.writeValueAsString(jobRepository.findOne(1))));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        assertValidResultFrom(() -> post("/job/insert"), consumer, mapper.writeValueAsString(model)
+//                ,content().json(mapper.writeValueAsString(jobRepository.findOne(1))));
+
+        mockMvc.perform(post("/job/insert")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(model)))
+                .andDo(print()).andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(jobRepository.findOne(1))));
     }
 
     @Test
@@ -136,7 +135,7 @@ public class JobIntegrationTest {
         JobModel model = new JobModel(job, new ArrayList<>(singletonList(availability)), category);
         JobEntity expected = model.build(consumer);
         jobRepository.save(expected);
-        expected.getCreated().setTimeInMillis((expected.getCreated().getTimeInMillis() / 1000) * 1000);
+        setTime(expected.getCreated());
 
         JobEntity job1 = new JobEntity("Test1", "Testing1", "TestCity1", "Volunteer1", 100.0);
         AvailabilityEntity availability1 = new AvailabilityEntity("Monday1", new Time(1), new Time(2));
@@ -144,17 +143,17 @@ public class JobIntegrationTest {
         JobModel model1 = new JobModel(job1, new ArrayList<>(singletonList(availability1)), category1);
         JobEntity expected1 = model1.build(consumer);
         jobRepository.save(expected1);
-        expected1.getCreated().setTimeInMillis((expected1.getCreated().getTimeInMillis() / 1000) * 1000);
+        setTime(expected1.getCreated());
 
         JobEntity job2 = new JobEntity("Test2", "Testing2", "TestCity2", "Volunteer2", 100.0);
         AvailabilityEntity availability2 = new AvailabilityEntity("Monday2", new Time(2), new Time(2));
         CategoryEntity category2 = new CategoryEntity("Testing2");
         JobModel model2 = new JobModel(job2, new ArrayList<>(singletonList(availability2)), category2);
         ConsumerEntity consumer2 = consumerRepository.save(new ConsumerEntity("a", "a"));
-        consumer2.getCreated().setTimeInMillis((consumer2.getCreated().getTimeInMillis() / 1000) * 1000);
+        setTime(consumer2.getCreated());
         JobEntity expected2 = model2.build(consumer2);
         jobRepository.save(expected2);
-        expected2.getCreated().setTimeInMillis((expected2.getCreated().getTimeInMillis() / 1000) * 1000);
+        setTime(expected2.getCreated());
 
         List<JobEntity> jobs = asList(expected, expected1, expected2);
         List<JobEntity> expectedList = asList(expected, expected1);
@@ -174,8 +173,7 @@ public class JobIntegrationTest {
         JobModel model = new JobModel(job, new ArrayList<>(singletonList(availability)), category);
         JobEntity expected = model.build(consumer);
         jobRepository.save(expected);
-        expected.getCreated().setTimeInMillis((expected.getCreated().getTimeInMillis() / 1000) * 1000);
-        final RequestEntity m = new RequestEntity( provider, job, "m");
+        setTime(expected.getCreated());        final RequestEntity m = new RequestEntity( provider, job, "m");
 
         JobEntity job1 = new JobEntity("Test1", "Testing1", "TestCity1", "Volunteer1", 100.0);
         AvailabilityEntity availability1 = new AvailabilityEntity("Monday1", new Time(1), new Time(2));
@@ -183,7 +181,7 @@ public class JobIntegrationTest {
         JobModel model1 = new JobModel(job1, new ArrayList<>(singletonList(availability1)), category1);
         JobEntity expected1 = model1.build(consumer);
         jobRepository.save(expected1);
-        expected1.getCreated().setTimeInMillis((expected1.getCreated().getTimeInMillis() / 1000) * 1000);
+        setTime(expected1.getCreated());
         final RequestEntity m2 = new RequestEntity( provider, job1, "m");
 
         List<RequestEntity> requests = asList(m, m2);
@@ -195,16 +193,156 @@ public class JobIntegrationTest {
         CategoryEntity category2 = new CategoryEntity("Testing2");
         JobModel model2 = new JobModel(job2, new ArrayList<>(singletonList(availability2)), category2);
         ConsumerEntity consumer2 = consumerRepository.save(new ConsumerEntity("a", "a"));
-        consumer2.getCreated().setTimeInMillis((consumer2.getCreated().getTimeInMillis() / 1000) * 1000);
+        setTime(consumer2.getCreated());
         JobEntity expected2 = model2.build(consumer2);
         jobRepository.save(expected2);
-        expected2.getCreated().setTimeInMillis((expected2.getCreated().getTimeInMillis() / 1000) * 1000);
-
-        List<JobEntity> jobs = asList(expected, expected1, expected2);
+        setTime(expected2.getCreated());
         List<JobEntity> expectedList = asList(expected, expected1);
 
         // then:
         assertValidResultFrom(() -> get("/job/latest/provider/2"), provider, jsonAsObjectIsEqualTo(expectedList));
+        assertValidResultFrom(() -> get("/job/latest/provider/1"), provider, jsonAsObjectIsEqualTo(asList(expected1)));
+
+    }
+
+    @Test
+    public void testgetLatestJobsByCategory() throws Exception{
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(provider, null, provider.getAuthorities()));
+
+        JobEntity job = new JobEntity("Test", "Testing", "TestCity", "Volunteer", 100.0);
+        AvailabilityEntity availability = new AvailabilityEntity("Monday", new Time(0), new Time(0));
+        CategoryEntity category = new CategoryEntity("Testing");
+        JobModel model = new JobModel(job, new ArrayList<>(singletonList(availability)), category);
+        JobEntity expected = model.build(consumer);
+        jobRepository.save(expected);
+        setTime(expected.getCreated());
+
+        JobEntity job1 = new JobEntity("Test1", "Testing1", "TestCity1", "Volunteer1", 100.0);
+        AvailabilityEntity availability1 = new AvailabilityEntity("Monday1", new Time(1), new Time(2));
+        CategoryEntity category1 = new CategoryEntity("Testing1");
+        JobModel model1 = new JobModel(job1, new ArrayList<>(singletonList(availability1)), category1);
+        JobEntity expected1 = model1.build(consumer);
+        jobRepository.save(expected1);
+        setTime(expected1.getCreated());
+
+        JobEntity job2 = new JobEntity("Test2", "Testing2", "TestCity2", "Volunteer2", 100.0);
+        AvailabilityEntity availability2 = new AvailabilityEntity("Monday2", new Time(2), new Time(2));
+        CategoryEntity category2 = new CategoryEntity("Testing2");
+        JobModel model2 = new JobModel(job2, new ArrayList<>(singletonList(availability2)), category2);
+        ConsumerEntity consumer2 = consumerRepository.save(new ConsumerEntity("a", "a"));
+        setTime(consumer2.getCreated());
+        JobEntity expected2 = model2.build(consumer2);
+        jobRepository.save(expected2);
+        setTime(expected2.getCreated());
+
+        List<JobEntity> expectedList = asList(expected);
+
+        assertValidResultFrom(() -> get("/job/find/category/1"), provider, mapper.writeValueAsString(category),jsonAsObjectIsEqualTo(expectedList));
+    }
+
+    @Test
+    public void testgetLatestJobsByLocation() throws Exception{
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(provider, null, provider.getAuthorities()));
+
+        JobEntity job = new JobEntity("Test", "Testing", "TestCity", "Volunteer", 100.0);
+        AvailabilityEntity availability = new AvailabilityEntity("Monday", new Time(0), new Time(0));
+        CategoryEntity category = new CategoryEntity("Testing");
+        JobModel model = new JobModel(job, new ArrayList<>(singletonList(availability)), category);
+        JobEntity expected = model.build(consumer);
+        jobRepository.save(expected);
+        setTime(expected.getCreated());
+
+        JobEntity job1 = new JobEntity("Test1", "Testing1", "TestCity1", "Volunteer1", 100.0);
+        AvailabilityEntity availability1 = new AvailabilityEntity("Monday1", new Time(1), new Time(2));
+        CategoryEntity category1 = new CategoryEntity("Testing1");
+        JobModel model1 = new JobModel(job1, new ArrayList<>(singletonList(availability1)), category1);
+        JobEntity expected1 = model1.build(consumer);
+        jobRepository.save(expected1);
+        setTime(expected1.getCreated());
+
+        JobEntity job2 = new JobEntity("Test2", "Testing2", "TestCity2", "Volunteer2", 100.0);
+        AvailabilityEntity availability2 = new AvailabilityEntity("Monday2", new Time(2), new Time(2));
+        CategoryEntity category2 = new CategoryEntity("Testing2");
+        JobModel model2 = new JobModel(job2, new ArrayList<>(singletonList(availability2)), category2);
+        ConsumerEntity consumer2 = consumerRepository.save(new ConsumerEntity("a", "a"));
+        setTime(consumer2.getCreated());
+        JobEntity expected2 = model2.build(consumer2);
+        jobRepository.save(expected2);
+        setTime(expected2.getCreated());
+
+        List<JobEntity> expectedList = asList(expected);
+
+        assertValidResultFrom(() -> get("/job/find/location/TestCity/1"), provider,jsonAsObjectIsEqualTo(expectedList));
+    }
+
+    @Test
+    public void testgetLatestJobsByPriceBetween() throws Exception{
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(provider, null, provider.getAuthorities()));
+
+        JobEntity job = new JobEntity("Test", "Testing", "TestCity", "Volunteer", 10.0);
+        AvailabilityEntity availability = new AvailabilityEntity("Monday", new Time(0), new Time(0));
+        CategoryEntity category = new CategoryEntity("Testing");
+        JobModel model = new JobModel(job, new ArrayList<>(singletonList(availability)), category);
+        JobEntity expected = model.build(consumer);
+        jobRepository.save(expected);
+        setTime(expected.getCreated());
+
+        JobEntity job1 = new JobEntity("Test1", "Testing1", "TestCity1", "Volunteer1", 30.0);
+        AvailabilityEntity availability1 = new AvailabilityEntity("Monday1", new Time(1), new Time(2));
+        CategoryEntity category1 = new CategoryEntity("Testing1");
+        JobModel model1 = new JobModel(job1, new ArrayList<>(singletonList(availability1)), category1);
+        JobEntity expected1 = model1.build(consumer);
+        jobRepository.save(expected1);
+        setTime(expected1.getCreated());
+
+        JobEntity job2 = new JobEntity("Test2", "Testing2", "TestCity2", "Volunteer2", 100.0);
+        AvailabilityEntity availability2 = new AvailabilityEntity("Monday2", new Time(2), new Time(2));
+        CategoryEntity category2 = new CategoryEntity("Testing2");
+        JobModel model2 = new JobModel(job2, new ArrayList<>(singletonList(availability2)), category2);
+        ConsumerEntity consumer2 = consumerRepository.save(new ConsumerEntity("a", "a"));
+        setTime(consumer2.getCreated());
+        JobEntity expected2 = model2.build(consumer2);
+        jobRepository.save(expected2);
+        setTime(expected2.getCreated());
+
+        List<JobEntity> expectedList = asList(expected, expected1);
+
+        assertValidResultFrom(() -> get("/job/find/price_between/0/60/2"), provider,jsonAsObjectIsEqualTo(expectedList));
+    }
+
+    @Test
+    public void testgetLatestJobsByType() throws Exception{
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(provider, null, provider.getAuthorities()));
+
+        JobEntity job = new JobEntity("Test", "Testing", "TestCity", "Volunteer", 10.0);
+        AvailabilityEntity availability = new AvailabilityEntity("Monday", new Time(0), new Time(0));
+        CategoryEntity category = new CategoryEntity("Testing");
+        JobModel model = new JobModel(job, new ArrayList<>(singletonList(availability)), category);
+        JobEntity expected = model.build(consumer);
+        jobRepository.save(expected);
+        setTime(expected.getCreated());
+
+        JobEntity job1 = new JobEntity("Test1", "Testing1", "TestCity1", "Volunteer1", 30.0);
+        AvailabilityEntity availability1 = new AvailabilityEntity("Monday1", new Time(1), new Time(2));
+        CategoryEntity category1 = new CategoryEntity("Testing1");
+        JobModel model1 = new JobModel(job1, new ArrayList<>(singletonList(availability1)), category1);
+        JobEntity expected1 = model1.build(consumer);
+        jobRepository.save(expected1);
+        setTime(expected1.getCreated());
+
+        JobEntity job2 = new JobEntity("Test2", "Testing2", "TestCity2", "Volunteer2", 100.0);
+        AvailabilityEntity availability2 = new AvailabilityEntity("Monday2", new Time(2), new Time(2));
+        CategoryEntity category2 = new CategoryEntity("Testing2");
+        JobModel model2 = new JobModel(job2, new ArrayList<>(singletonList(availability2)), category2);
+        ConsumerEntity consumer2 = consumerRepository.save(new ConsumerEntity("a", "a"));
+        setTime(consumer2.getCreated());
+        JobEntity expected2 = model2.build(consumer2);
+        jobRepository.save(expected2);
+        setTime(expected2.getCreated());
+
+        List<JobEntity> expectedList = asList(expected);
+
+        assertValidResultFrom(() -> get("/job/find/type/Volunteer/1"), provider,jsonAsObjectIsEqualTo(expectedList));
     }
 
     public JobModel makeJob(List<AvailabilityEntity> availabilities,CategoryEntity category){
@@ -239,6 +377,19 @@ public class JobIntegrationTest {
                                        final ResultMatcher matcher) throws Exception {
         mockMvc.perform(method.get()
                 .principal(new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(matcher);
+    }
+
+    private void assertValidResultFrom(final Supplier<MockHttpServletRequestBuilder> method,
+                                       final UserEntity user,
+                                       String content,
+                                       final ResultMatcher matcher) throws Exception {
+        mockMvc.perform(method.get()
+                .principal(new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(matcher);
