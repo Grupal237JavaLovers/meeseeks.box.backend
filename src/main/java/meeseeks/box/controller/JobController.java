@@ -100,6 +100,13 @@ public class JobController {
 
     @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})
     @ResponseBody
+    @GetMapping("/{id}")
+    public JobEntity getJob(@PathVariable("id") final Integer id) {
+        return jobRepository.findOne(id);
+    }
+
+    @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})
+    @ResponseBody
     @GetMapping("/find/location/{location}/{limit}")
     public List<JobEntity> getLatestJobsByLocation(@PathVariable("location") final String location,
                                                    @PathVariable("limit") final Integer limit) {
