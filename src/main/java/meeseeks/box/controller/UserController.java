@@ -88,7 +88,8 @@ public class UserController {
     }
 
     @ResponseBody
-    @PostMapping(value = "/auth/notifications", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/auth/notifications", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public HashMap<String, String> authNotifications(@RequestParam HashMap<?, ?> params)
     {
         String action = (String) params.get("action");
@@ -101,6 +102,4 @@ public class UserController {
                 action, "private-notifications"
         );
     }
-
-
 }

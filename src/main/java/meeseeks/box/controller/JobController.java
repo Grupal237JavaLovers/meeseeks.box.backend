@@ -80,7 +80,9 @@ public class JobController {
     @PatchMapping("/update")
     public ResponseEntity<JobEntity> update(@RequestBody JobModel updated,
                                             @AuthenticationPrincipal @ApiIgnore ConsumerEntity consumer) {
-        return jobRepository.updateIfCreatedBy(consumer.getId(), updated.getJob().getId(), updated.build(consumer)) > 0 ?
+        return jobRepository.updateIfCreatedBy(consumer.getId(),
+                updated.getJob().getId(),
+                updated.build(consumer)) > 0 ?
                 new ResponseEntity<>(jobRepository.findById(updated.getJob().getId())
                         .orElseThrow(() -> new NotFoundException("Updated Job Not Found!")), HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.UNAUTHORIZED);

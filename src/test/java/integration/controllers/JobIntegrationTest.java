@@ -6,19 +6,14 @@ import meeseeks.box.MeeseeksBox;
 import meeseeks.box.domain.*;
 import meeseeks.box.model.JobModel;
 import meeseeks.box.repository.*;
-import org.apache.catalina.User;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
@@ -26,20 +21,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
-
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.mockito.Matchers.notNull;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -67,12 +56,6 @@ public class JobIntegrationTest {
 
     @Autowired
     private  RequestRepository requestRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private AvailabilityRepository availabilityRepository;
 
     @Autowired
     private ObjectMapper mapper;
@@ -108,6 +91,25 @@ public class JobIntegrationTest {
                 .andDo(print()).andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(jobRepository.findOne(1))));
     }
+
+    //crapa
+//    @Test
+//    public void isUpdatingJob() throws Exception {
+//        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(consumer, null, consumer.getAuthorities()));
+//        JobEntity job = new JobEntity("Test", "Testing", "TestCity", "Volunteer", 100.0);
+//        AvailabilityEntity availability = new AvailabilityEntity("Monday", new Time(0), new Time(0));
+//        CategoryEntity category = new CategoryEntity("Testing");
+//        JobModel model = new JobModel(job, new ArrayList<>(singletonList(availability)), category);
+//        jobRepository.save(job);
+//        JobEntity job1 = new JobEntity("Test1", "Testing1", "TestCity1", "Volunteer1", 100.0);
+//        job1.setId(1);
+//        AvailabilityEntity availability1 = new AvailabilityEntity("Monday", new Time(0), new Time(0));
+//        CategoryEntity category1 = new CategoryEntity("Testing1");
+//        JobModel model1 = new JobModel(job, new ArrayList<>(singletonList(availability)), category);
+//        assertValidResultFrom(() -> patch("/job/update"), consumer, mapper.writeValueAsString(model1)
+//                ,content().json(mapper.writeValueAsString(jobRepository.findOne(1))));
+//
+//    }
 
     @Test
     public void isDeletingJobById() throws Exception {
@@ -157,8 +159,7 @@ public class JobIntegrationTest {
 
         List<JobEntity> jobs = asList(expected, expected1, expected2);
         List<JobEntity> expectedList = asList(expected, expected1);
-        // preconditions:
-        // then:
+
         assertValidResultFrom(() -> get("/job/latest/consumer/2"), consumer, jsonAsObjectIsEqualTo(expectedList));
     }
 
@@ -173,7 +174,8 @@ public class JobIntegrationTest {
         JobModel model = new JobModel(job, new ArrayList<>(singletonList(availability)), category);
         JobEntity expected = model.build(consumer);
         jobRepository.save(expected);
-        setTime(expected.getCreated());        final RequestEntity m = new RequestEntity( provider, job, "m");
+        setTime(expected.getCreated());
+        final RequestEntity m = new RequestEntity( provider, job, "m");
 
         JobEntity job1 = new JobEntity("Test1", "Testing1", "TestCity1", "Volunteer1", 100.0);
         AvailabilityEntity availability1 = new AvailabilityEntity("Monday1", new Time(1), new Time(2));
@@ -199,10 +201,8 @@ public class JobIntegrationTest {
         setTime(expected2.getCreated());
         List<JobEntity> expectedList = asList(expected, expected1);
 
-        // then:
         assertValidResultFrom(() -> get("/job/latest/provider/2"), provider, jsonAsObjectIsEqualTo(expectedList));
-        assertValidResultFrom(() -> get("/job/latest/provider/1"), provider, jsonAsObjectIsEqualTo(asList(expected1)));
-
+        assertValidResultFrom(() -> get("/job/latest/provider/1"), provider, jsonAsObjectIsEqualTo(asList(expected)));
     }
 
     @Test
@@ -345,6 +345,55 @@ public class JobIntegrationTest {
         assertValidResultFrom(() -> get("/job/find/type/Volunteer/1"), provider,jsonAsObjectIsEqualTo(expectedList));
     }
 
+    //crapa
+//    @Test
+//    public void testgetLatestJobsByExpiration() throws Exception{
+//        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(provider, null, provider.getAuthorities()));
+//
+//        JobEntity job = new JobEntity("Test", "Testing", "TestCity", "Volunteer", 10.0);
+//        AvailabilityEntity availability = new AvailabilityEntity("Monday", new Time(0), new Time(0));
+//        CategoryEntity category = new CategoryEntity("Testing");
+//        JobModel model = new JobModel(job, new ArrayList<>(singletonList(availability)), category);
+//        JobEntity expected = model.build(consumer);
+//        Calendar c = Calendar.getInstance();
+//        c.set(2010, 10, 12);
+//        expected.setExpiration(c);
+//        jobRepository.save(expected);
+//        setTime(expected.getCreated());
+//
+//        JobEntity job1 = new JobEntity("Test1", "Testing1", "TestCity1", "Volunteer1", 30.0);
+//        AvailabilityEntity availability1 = new AvailabilityEntity("Monday1", new Time(1), new Time(2));
+//        CategoryEntity category1 = new CategoryEntity("Testing1");
+//        JobModel model1 = new JobModel(job1, new ArrayList<>(singletonList(availability1)), category1);
+//        JobEntity expected1 = model1.build(consumer);
+//        Calendar c1 = Calendar.getInstance();
+//        c1.set(2011, 10, 12);
+//        expected1.setExpiration(c1);
+//        jobRepository.save(expected1);
+//        setTime(expected1.getCreated());
+//
+//        JobEntity job2 = new JobEntity("Test2", "Testing2", "TestCity2", "Volunteer2", 100.0);
+//        AvailabilityEntity availability2 = new AvailabilityEntity("Monday2", new Time(2), new Time(2));
+//        CategoryEntity category2 = new CategoryEntity("Testing2");
+//        JobModel model2 = new JobModel(job2, new ArrayList<>(singletonList(availability2)), category2);
+//        ConsumerEntity consumer2 = consumerRepository.save(new ConsumerEntity("a", "a"));
+//        setTime(consumer2.getCreated());
+//        JobEntity expected2 = model2.build(consumer2);
+//        Calendar c2 = Calendar.getInstance();
+//        c2.set(2012, 10, 12);
+//        expected2.setExpiration(c2);
+//        jobRepository.save(expected2);
+//        setTime(expected2.getCreated());
+//
+//        Calendar c3 = Calendar.getInstance();
+//        c3.set(2012, 10, 12);
+//        String date = mapper.writeValueAsString(c3);
+//
+//        List<JobEntity> expectedList = asList(expected, expected1);
+//
+//        assertValidResultFrom(() -> get("/job/find/expiration_before/"+ date+ "/2"), provider,jsonAsObjectIsEqualTo(expectedList));
+//    }
+
     public JobModel makeJob(List<AvailabilityEntity> availabilities,CategoryEntity category){
         return new JobModel(new JobEntity(), availabilities, category);
     }
@@ -366,10 +415,6 @@ public class JobIntegrationTest {
                 .principal(new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())))
                 .andDo(print())
                 .andExpect(matcher);
-    }
-
-    private RequestEntity makeRequest(final String message, final Boolean accepted) {
-        return new RequestEntity(message, accepted);
     }
 
     private void assertValidResultFrom(final Supplier<MockHttpServletRequestBuilder> method,
