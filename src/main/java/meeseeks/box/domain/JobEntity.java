@@ -62,7 +62,6 @@ public class JobEntity implements Serializable {
     @JoinColumn(name = "id_consumer")
     private ConsumerEntity consumer;
 
-    @JsonIgnore
     @OrderBy("id")
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "AvailabilityList", joinColumns = @JoinColumn(name = "id_job", referencedColumnName = "id"),
