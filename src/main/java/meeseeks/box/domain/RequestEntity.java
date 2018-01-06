@@ -45,8 +45,7 @@ public class RequestEntity implements Serializable {
     @JoinColumn(name = "id_provider")
     private ProviderEntity provider;
 
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, targetEntity = JobEntity.class)
+    @ManyToOne(fetch = FetchType.EAGER, targetEntity = JobEntity.class)
     @JoinColumn(name = "id_job")
     private JobEntity job;
 
