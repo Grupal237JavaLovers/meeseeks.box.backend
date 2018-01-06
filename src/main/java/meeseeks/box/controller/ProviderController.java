@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Alexandru Stoica
@@ -120,7 +121,9 @@ public class ProviderController {
         requestRepository.getRequestByProviderAndJob(provider, job).ifPresent(item -> {
             throw new DataAlreadyExists("Provider's application already exists!");
         });
-        RequestEntity request = new RequestEntity(provider, job, message);
+        Optional<ProviderEntity> providerById = providerRepository.findById(provider.getId());
+        ProviderEntity theProvider = providerById.orElseGet(() -> providerById.orElseThrow(() -> new NotFoundException("Provider Not Found!")));
+        RequestEntity request = new RequestEntity(theProvider, job, message);
 
         ResponseEntity<RequestEntity> response = new ResponseEntity<>(requestRepository.save(request), HttpStatus.ACCEPTED);
 
