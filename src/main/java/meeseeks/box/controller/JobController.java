@@ -19,7 +19,8 @@ import javax.validation.Valid;
 import java.util.*;
 
 /**
- * Created by nicof on 10/28/2017.
+ * @author Nicoleta Fecioru
+ * @version 1.0
  */
 
 @RestController
@@ -61,16 +62,15 @@ public class JobController {
         }
         job.setAvailabilities(availabilities);
         JobEntity entity = jobRepository.save(job.build(consumer));
-
         entity.getCreated().setTimeInMillis((entity.getCreated().getTimeInMillis() / 1000) * 1000);
-
         return entity;
     }
 
     @Secured({"ROLE_CONSUMER"})
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> delete(@PathVariable("id") final Integer id,
-                                    @AuthenticationPrincipal @ApiIgnore ConsumerEntity consumer) {
+    public ResponseEntity<?> delete(
+            @PathVariable("id") final Integer id,
+            @AuthenticationPrincipal @ApiIgnore ConsumerEntity consumer) {
         return jobRepository.deleteIfCreatedBy(consumer, id) > 0 ?
                 new ResponseEntity<>(HttpStatus.ACCEPTED) :
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -78,14 +78,24 @@ public class JobController {
 
     @Secured({"ROLE_CONSUMER"})
     @PatchMapping("/update")
-    public ResponseEntity<JobEntity> update(@RequestBody JobModel updated,
-                                            @AuthenticationPrincipal @ApiIgnore ConsumerEntity consumer) {
-        return jobRepository.updateIfCreatedBy(consumer.getId(),
-                updated.getJob().getId(),
-                updated.build(consumer)) > 0 ?
-                new ResponseEntity<>(jobRepository.findById(updated.getJob().getId())
-                        .orElseThrow(() -> new NotFoundException("Updated Job Not Found!")), HttpStatus.OK) :
+    public ResponseEntity<JobEntity> update(
+            @RequestBody JobModel job,
+            @AuthenticationPrincipal @ApiIgnore ConsumerEntity consumer) {
+        return getConsumerFromDatabaseForJob(job.getJob()).getId().equals(consumer.getId()) ?
+                new ResponseEntity<>(jobRepository.save(job.build(consumer)),
+                        HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
+
+    private ConsumerEntity getConsumerFromDatabaseForJob(final JobEntity job) {
+        return consumerRepository.findByJobsIsContaining(job)
+                .orElseThrow(() -> new NotFoundException("404 Consumer Not Found!"));
+    }
+
+
+    private JobEntity getJobById(final Integer id) {
+        return jobRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Updated Job Not Found!"));
     }
 
     @Secured({"ROLE_PROVIDER"})

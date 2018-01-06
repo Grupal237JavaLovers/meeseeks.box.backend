@@ -3,6 +3,8 @@ package meeseeks.box.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
@@ -64,7 +66,8 @@ public class JobEntity implements Serializable {
 
     @OrderBy("id")
     @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "AvailabilityList", joinColumns = @JoinColumn(name = "id_job", referencedColumnName = "id"),
+    @JoinTable(name = "AvailabilityList",
+            joinColumns = @JoinColumn(name = "id_job", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "id_availability", referencedColumnName = "id"))
     private List<AvailabilityEntity> availabilities = new ArrayList<>();
 
@@ -86,21 +89,26 @@ public class JobEntity implements Serializable {
 
     private static final String DEFAULT = "";
 
-    public JobEntity(final String name,
-                     final String description,
-                     final String location,
-                     final String type,
-                     final Double price) {
+    public JobEntity(
+            final String name,
+            final String description,
+            final String location,
+            final String type,
+            final Double price) {
         this.name = name;
         this.description = description;
         this.location = location;
         this.type = type;
         this.price = price;
-        this.created= null;
+        this.created = null;
+    }
+
+    public JobEntity(final String name) {
+        this(name, DEFAULT, DEFAULT, DEFAULT, 1.0);
     }
 
     public JobEntity() {
-        this(DEFAULT, DEFAULT, DEFAULT, DEFAULT, 1.0);
+        this(DEFAULT);
     }
 
     public Integer getId() {
