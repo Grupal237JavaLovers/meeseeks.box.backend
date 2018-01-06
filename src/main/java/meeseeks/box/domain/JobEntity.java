@@ -2,6 +2,7 @@ package meeseeks.box.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
@@ -50,15 +51,14 @@ public class JobEntity implements Serializable {
     @Column(name = "expiration_date")
     private Calendar expiration;
 
-    @ManyToOne(fetch = FetchType.LAZY,
+    @ManyToOne(fetch = FetchType.EAGER,
             targetEntity = CategoryEntity.class,
             cascade = CascadeType.PERSIST)
     @JoinColumn(name = "category")
     private CategoryEntity category;
 
-    @ManyToOne(fetch = FetchType.LAZY,
-            targetEntity = ConsumerEntity.class,
-            cascade = CascadeType.PERSIST)
+    @ManyToOne(fetch = FetchType.EAGER,
+            targetEntity = ConsumerEntity.class)
     @JoinColumn(name = "id_consumer")
     private ConsumerEntity consumer;
 
@@ -81,6 +81,7 @@ public class JobEntity implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column
     @CreationTimestamp
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Calendar created;
 
     private static final String DEFAULT = "";
@@ -95,6 +96,7 @@ public class JobEntity implements Serializable {
         this.location = location;
         this.type = type;
         this.price = price;
+        this.created= null;
     }
 
     public JobEntity() {
@@ -199,5 +201,9 @@ public class JobEntity implements Serializable {
 
     public Calendar getCreated() {
         return created;
+    }
+
+    public void setCreated(Calendar created) {
+        this.created = created;
     }
 }

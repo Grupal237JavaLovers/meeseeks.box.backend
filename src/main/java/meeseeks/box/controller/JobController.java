@@ -60,7 +60,11 @@ public class JobController {
             availabilities.add(availabilityRepository.findByDayAndStartHourAndEndHour(entity.getDay(), entity.getStartHour(), entity.getEndHour()).orElse(entity));
         }
         job.setAvailabilities(availabilities);
-        return jobRepository.save(job.build(consumer));
+        JobEntity entity = jobRepository.save(job.build(consumer));
+
+        entity.getCreated().setTimeInMillis((entity.getCreated().getTimeInMillis() / 1000) * 1000);
+
+        return entity;
     }
 
     @Secured({"ROLE_CONSUMER"})
@@ -76,7 +80,9 @@ public class JobController {
     @PatchMapping("/update")
     public ResponseEntity<JobEntity> update(@RequestBody JobModel updated,
                                             @AuthenticationPrincipal @ApiIgnore ConsumerEntity consumer) {
-        return jobRepository.updateIfCreatedBy(consumer.getId(), updated.getJob().getId(), updated.build(consumer)) > 0 ?
+        return jobRepository.updateIfCreatedBy(consumer.getId(),
+                updated.getJob().getId(),
+                updated.build(consumer)) > 0 ?
                 new ResponseEntity<>(jobRepository.findById(updated.getJob().getId())
                         .orElseThrow(() -> new NotFoundException("Updated Job Not Found!")), HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
