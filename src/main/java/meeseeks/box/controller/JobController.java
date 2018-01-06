@@ -86,7 +86,7 @@ public class JobController {
     @ResponseBody
     @GetMapping("/latest/provider/{limit}")
     public List<JobEntity> getLatestJobsRequestedByProvider(@AuthenticationPrincipal @ApiIgnore ProviderEntity provider,
-                                                            @PathVariable("limit") final Integer limit)  {
+                                                            @PathVariable("limit") final Integer limit) {
         return jobRepository.findLatestJobsRequestedByProvider(provider, new PageRequest(0, limit));
     }
 
@@ -136,6 +136,17 @@ public class JobController {
     public List<JobEntity> getLatestJobsByExpirationDateBefore(@PathVariable("date") final Calendar date,
                                                                @PathVariable("limit") final Integer limit) {
         return jobRepository.findLatestByExpirationBefore(date, new PageRequest(0, limit));
+    }
+
+    @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})
+    @ResponseBody
+    @GetMapping("/search/{criteria}/{limit}")
+    public List<JobEntity> getAllJobsBySearchCriteria(@PathVariable("criteria") final String criteria,
+                                                      @PathVariable("limit") final Integer limit) {
+        if (criteria.equals("null")) {
+            return jobRepository.findAllByNameContaining("", new PageRequest(0, limit));
+        }
+        return jobRepository.findAllByNameContaining(criteria, new PageRequest(0, limit));
     }
 
     @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})
