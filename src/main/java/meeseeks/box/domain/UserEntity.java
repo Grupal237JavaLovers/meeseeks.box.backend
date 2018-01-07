@@ -1,11 +1,10 @@
 package meeseeks.box.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.Email;
 import org.springframework.security.core.GrantedAuthority;
@@ -64,9 +63,11 @@ public class UserEntity implements UserDetails, Serializable {
     @JsonProperty(access = Access.READ_ONLY)
     private UserRole role;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column
     @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.STRING,
+            pattern = "dd-MM-yyyy hh:mm")
     @JsonProperty(access = Access.READ_ONLY)
     private Calendar created;
 

@@ -4,10 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import meeseeks.box.MeeseeksBox;
 import meeseeks.box.domain.ConsumerEntity;
-import meeseeks.box.domain.JobEntity;
 import meeseeks.box.domain.ProviderEntity;
 import meeseeks.box.domain.UserEntity;
-import meeseeks.box.model.ChangePasswordModel;
 import meeseeks.box.repository.ConsumerRepository;
 import meeseeks.box.repository.JobRepository;
 import meeseeks.box.repository.ProviderRepository;
@@ -33,7 +31,8 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import static java.util.Arrays.asList;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -75,7 +74,7 @@ public class UserIntegrationTest {
         consumer = new ConsumerEntity("consumer", "consumer","consumer", "consumer");
         consumer = consumerRepository.save(consumer);
         provider = providerRepository.save(provider);
-        setTime(provider.getCreated());
+        //setTime(provider.getCreated());
     }
 
     @Test
@@ -116,10 +115,10 @@ public class UserIntegrationTest {
 
         ConsumerEntity entity = new ConsumerEntity("dac", "dac");
         consumerRepository.save(entity);
-        setTime(entity.getCreated());
+       // setTime(entity.getCreated());
         ConsumerEntity entity1 = new ConsumerEntity("dons", "dons");
         consumerRepository.save(entity1);
-        setTime(entity1.getCreated());
+       // setTime(entity1.getCreated());
         List<UserEntity> expectedList = asList(provider);
 
 

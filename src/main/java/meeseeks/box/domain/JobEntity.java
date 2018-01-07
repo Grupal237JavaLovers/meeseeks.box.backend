@@ -1,10 +1,9 @@
 package meeseeks.box.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
@@ -53,6 +52,14 @@ public class JobEntity implements Serializable {
     @Column(name = "expiration_date")
     private Calendar expiration;
 
+    @Column
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.STRING,
+            pattern = "dd-MM-yyyy hh:mm")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Calendar created;
+
     @ManyToOne(fetch = FetchType.EAGER,
             targetEntity = CategoryEntity.class,
             cascade = CascadeType.PERSIST)
@@ -81,13 +88,8 @@ public class JobEntity implements Serializable {
     @OneToMany(mappedBy = "job", targetEntity = ReviewEntity.class)
     private List<RequestEntity> reviews = new ArrayList<>();
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column
-    @CreationTimestamp
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Calendar created;
 
-    private static final String DEFAULT = "";
+    private static final String DEFAULT = "default";
 
     public JobEntity(
             final String name,
@@ -100,7 +102,6 @@ public class JobEntity implements Serializable {
         this.location = location;
         this.type = type;
         this.price = price;
-        this.created = null;
     }
 
     public JobEntity(final String name) {
@@ -207,11 +208,7 @@ public class JobEntity implements Serializable {
         this.reviews = reviews;
     }
 
-    public Calendar getCreated() {
-        return created;
-    }
-
-    public void setCreated(Calendar created) {
-        this.created = created;
+    public Calendar created() {
+        return this.created;
     }
 }
