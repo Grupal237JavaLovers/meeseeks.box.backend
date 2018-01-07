@@ -40,12 +40,13 @@ public class RequestEntity implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Boolean accepted;
 
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER, targetEntity = ProviderEntity.class)
+    @ManyToOne(fetch = FetchType.EAGER,
+            targetEntity = ProviderEntity.class)
     @JoinColumn(name = "id_provider")
     private ProviderEntity provider;
 
-    @ManyToOne(fetch = FetchType.EAGER, targetEntity = JobEntity.class)
+    @ManyToOne(fetch = FetchType.EAGER,
+            targetEntity = JobEntity.class)
     @JoinColumn(name = "id_job")
     private JobEntity job;
 

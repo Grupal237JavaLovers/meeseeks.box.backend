@@ -1,5 +1,6 @@
 package meeseeks.box.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -35,7 +36,6 @@ public class UserEntity implements UserDetails, Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    @JsonProperty(access = Access.READ_ONLY)
     private Integer id;
 
     @Email(message = "{provider.email.incorrect}",
@@ -63,9 +63,11 @@ public class UserEntity implements UserDetails, Serializable {
     @JsonProperty(access = Access.READ_ONLY)
     private UserRole role;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column
     @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.STRING,
+            pattern = "dd-MM-yyyy hh:mm")
     @JsonProperty(access = Access.READ_ONLY)
     private Calendar created;
 
@@ -77,13 +79,24 @@ public class UserEntity implements UserDetails, Serializable {
         this(DEFAULT, DEFAULT, DEFAULT, DEFAULT);
     }
 
-    public UserEntity(final String email,
-                      final String username,
-                      final String password,
-                      final String name) {
+    public UserEntity(
+            final String email,
+            final String username,
+            final String password,
+            final String name) {
+        this(email, username, password, DEFAULT, name);
+    }
+
+    public UserEntity(
+            final String email,
+            final String username,
+            final String password,
+            final String confirmPassword,
+            final String name) {
         super();
         this.id = null;
         this.email = email;
+        this.confirmPassword = confirmPassword;
         this.username = username;
         this.password = password;
         this.name = name;

@@ -9,7 +9,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +18,8 @@ import javax.validation.Valid;
 import java.util.*;
 
 /**
- * Created by nicof on 10/28/2017.
+ * @author Nicoleta Fecioru
+ * @version 1.0
  */
 
 @RestController
@@ -33,11 +33,12 @@ public class JobController {
     private final AvailabilityRepository availabilityRepository;
 
     @Autowired
-    public JobController(final JobRepository jobRepository,
-                         final ProviderRepository providerRepository,
-                         final ConsumerRepository consumerRepository,
-                         final CategoryRepository categoryRepository,
-                         final AvailabilityRepository availabilityRepository) {
+    public JobController(
+            final JobRepository jobRepository,
+            final ProviderRepository providerRepository,
+            final ConsumerRepository consumerRepository,
+            final CategoryRepository categoryRepository,
+            final AvailabilityRepository availabilityRepository) {
         this.jobRepository = jobRepository;
         this.providerRepository = providerRepository;
         this.consumerRepository = consumerRepository;
@@ -45,8 +46,8 @@ public class JobController {
         this.availabilityRepository = availabilityRepository;
     }
 
-    @Secured({"ROLE_CONSUMER"})
     @ResponseBody
+    @Secured({"ROLE_CONSUMER"})
     @PostMapping("/insert")
     public JobEntity insert(@RequestBody @Valid JobModel job) {
         ConsumerEntity consumer = (ConsumerEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -60,17 +61,14 @@ public class JobController {
             availabilities.add(availabilityRepository.findByDayAndStartHourAndEndHour(entity.getDay(), entity.getStartHour(), entity.getEndHour()).orElse(entity));
         }
         job.setAvailabilities(availabilities);
-        JobEntity entity = jobRepository.save(job.build(consumer));
-
-        entity.getCreated().setTimeInMillis((entity.getCreated().getTimeInMillis() / 1000) * 1000);
-
-        return entity;
+        return jobRepository.save(job.build(consumer));
     }
 
     @Secured({"ROLE_CONSUMER"})
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> delete(@PathVariable("id") final Integer id,
-                                    @AuthenticationPrincipal @ApiIgnore ConsumerEntity consumer) {
+    public ResponseEntity<?> delete(
+            @PathVariable("id") final Integer id,
+            @AuthenticationPrincipal @ApiIgnore ConsumerEntity consumer) {
         return jobRepository.deleteIfCreatedBy(consumer, id) > 0 ?
                 new ResponseEntity<>(HttpStatus.ACCEPTED) :
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -78,62 +76,83 @@ public class JobController {
 
     @Secured({"ROLE_CONSUMER"})
     @PatchMapping("/update")
-    public ResponseEntity<JobEntity> update(@RequestBody JobModel updated,
-                                            @AuthenticationPrincipal @ApiIgnore ConsumerEntity consumer) {
-        return jobRepository.updateIfCreatedBy(consumer.getId(),
-                updated.getJob().getId(),
-                updated.build(consumer)) > 0 ?
-                new ResponseEntity<>(jobRepository.findById(updated.getJob().getId())
-                        .orElseThrow(() -> new NotFoundException("Updated Job Not Found!")), HttpStatus.OK) :
+    public ResponseEntity<JobEntity> update(
+            @RequestBody JobModel job,
+            @AuthenticationPrincipal @ApiIgnore ConsumerEntity consumer) {
+        return getConsumerFromDatabaseForJob(job.getJob()).getId().equals(consumer.getId()) ?
+                new ResponseEntity<>(jobRepository.save(job.build(consumer)),
+                        HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
+    private ConsumerEntity getConsumerFromDatabaseForJob(final JobEntity job) {
+        return consumerRepository.findByJobsIsContaining(job)
+                .orElseThrow(() -> new NotFoundException("404 Consumer Not Found!"));
+    }
+
+    @ResponseBody
     @Secured({"ROLE_PROVIDER"})
-    @ResponseBody
     @GetMapping("/latest/provider/{limit}")
-    public List<JobEntity> getLatestJobsRequestedByProvider(@AuthenticationPrincipal @ApiIgnore ProviderEntity provider,
-                                                            @PathVariable("limit") final Integer limit) {
-        return jobRepository.findLatestJobsRequestedByProvider(provider, new PageRequest(0, limit));
+    public List<JobEntity> getLatestJobsRequestedByProvider(
+            @AuthenticationPrincipal @ApiIgnore ProviderEntity provider,
+            @PathVariable("limit") final Integer limit) {
+        return jobRepository.findLatestJobsRequestedByProvider(
+                provider, new PageRequest(0, limit));
     }
 
+    @ResponseBody
     @Secured({"ROLE_CONSUMER"})
-    @ResponseBody
     @GetMapping("/latest/consumer/{limit}")
-    public List<JobEntity> getLatestJobsCreatedByConsumer(@AuthenticationPrincipal @ApiIgnore ConsumerEntity consumer,
-                                                          @PathVariable("limit") final Integer limit) {
-        return jobRepository.findLatestJobsCreatedByConsumer(consumer, new PageRequest(0, limit));
+    public List<JobEntity> getLatestJobsCreatedByConsumer
+            (@AuthenticationPrincipal @ApiIgnore ConsumerEntity consumer,
+             @PathVariable("limit") final Integer limit) {
+        return jobRepository.findLatestJobsCreatedByConsumer(
+                consumer, new PageRequest(0, limit));
     }
 
-    @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})
     @ResponseBody
+    @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})
     @GetMapping("/{id}")
     public JobEntity getJob(@PathVariable("id") final Integer id) {
         return jobRepository.findOne(id);
     }
 
-    @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})
     @ResponseBody
+    @GetMapping("/categories")
+    @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})
+    public Iterable<CategoryEntity> getAllCategories(){
+        return categoryRepository.findAll();
+    }
+
+    @ResponseBody
+    @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})
     @GetMapping("/find/location/{location}/{limit}")
-    public List<JobEntity> getLatestJobsByLocation(@PathVariable("location") final String location,
-                                                   @PathVariable("limit") final Integer limit) {
-        return jobRepository.findLatestByLocation(location, new PageRequest(0, limit));
+    public List<JobEntity> getLatestJobsByLocation(
+            @PathVariable("location") final String location,
+            @PathVariable("limit") final Integer limit) {
+        return jobRepository.findLatestByLocation(location,
+                new PageRequest(0, limit));
     }
 
-    @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})
     @ResponseBody
+    @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})
     @GetMapping("/find/category/{limit}")
-    public List<JobEntity> getLatestJobsByCategory(@RequestBody final CategoryEntity category,
-                                                   @PathVariable("limit") final Integer limit) {
-        return jobRepository.findLatestByCategory(category, new PageRequest(0, limit));
+    public List<JobEntity> getLatestJobsByCategory(
+            @RequestBody final CategoryEntity category,
+            @PathVariable("limit") final Integer limit) {
+        return jobRepository.findLatestByCategory(category,
+                new PageRequest(0, limit));
     }
 
-    @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})
     @ResponseBody
+    @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})
     @GetMapping("/find/price_between/{low}/{high}/{limit}")
-    public List<JobEntity> getLatestJobByPriceBetween(@PathVariable("low") final Double low,
-                                                      @PathVariable("high") final Double high,
-                                                      @PathVariable("limit") final Integer limit) {
-        return jobRepository.findLatestByPriceBetween(low, high, new PageRequest(0, limit));
+    public List<JobEntity> getLatestJobByPriceBetween(
+            @PathVariable("low") final Double low,
+            @PathVariable("high") final Double high,
+            @PathVariable("limit") final Integer limit) {
+        return jobRepository.findLatestByPriceBetween(
+                low, high, new PageRequest(0, limit));
     }
 
     @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})

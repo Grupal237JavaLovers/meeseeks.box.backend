@@ -66,7 +66,7 @@ public class ReviewIntegrationTest {
 
     @Test
     public void isInsertingReviewForProvider() throws Exception {
-        // declarations:
+        // when:
         final String ID_JOB = "1";
         final String ID_PROVIDER = "1";
         ProviderEntity provider = makeProvider("provider", "password", "provider@test.com");
