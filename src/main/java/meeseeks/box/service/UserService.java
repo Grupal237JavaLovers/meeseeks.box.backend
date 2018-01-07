@@ -38,7 +38,7 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Wrong username or password!"));
     }
 
-    public UserEntity saveUser(UserEntity user) {
+    public UserEntity saveUser(final UserEntity user) {
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user.setConfirmPassword(user.getPassword());
         return userRepository.save(user);

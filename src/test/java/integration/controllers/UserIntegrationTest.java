@@ -53,8 +53,8 @@ public class UserIntegrationTest {
 
     @Before
     public void setUp() {
-        consumer = consumerRepository.save(
-                new ConsumerEntity("consumer", "consumer", "consumer", "consumer"));
+        consumer = consumerRepository.save(new ConsumerEntity(
+                "test", "password", "consumer@email.com"));
     }
 
     private void authenticateUser(final UserEntity user) {
@@ -79,8 +79,8 @@ public class UserIntegrationTest {
     public void whenChangingPassword_ValidNewPassword_ExpectPasswordChanged() throws Exception {
         // given:
         authenticateUser(consumer);
-        ChangePasswordModel model = new ChangePasswordModel("consumer",
-                "password", "password");
+        ChangePasswordModel model = new ChangePasswordModel("password",
+                "better-password", "better-password");
         // when:
         RequestBuilder request = patch("/user/change-password")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -106,12 +106,13 @@ public class UserIntegrationTest {
         // given:
         authenticateUser(consumer);
         consumerRepository.save(asList(
-                new ConsumerEntity("testing", "test"),
-                new ConsumerEntity("testing@com", "testable")));
+                new ConsumerEntity("testing", "test", "testing@t.com"),
+                new ConsumerEntity("testing@com", "testable",
+                        "test@email.com")));
         List<UserEntity> expected = singletonList(consumer);
         // when:
         RequestBuilder request = get("/user/find/1")
-                .param("name", "consumer")
+                .param("name", "default")
                 .content("");
         // then:
         new AssertRequest(mockMvc).assertExpectedResultEquals(request,
@@ -124,9 +125,10 @@ public class UserIntegrationTest {
             Exception {
         // given:
         authenticateUser(consumer);
-        ConsumerEntity next = new ConsumerEntity("consumer@com", "test");
-        consumerRepository.save(asList(next,
-                new ConsumerEntity("testing@com", "testable")));
+        ConsumerEntity next = new ConsumerEntity(
+                "consumer", "test", "consumer@test.com");
+        consumerRepository.save(asList(next, new ConsumerEntity(
+                "username", "testable", "email@test.com")));
         List<UserEntity> expected = asList(consumer, next);
         // when:
         RequestBuilder request = get("/user/find/2")

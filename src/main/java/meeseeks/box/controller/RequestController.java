@@ -24,9 +24,10 @@ public class RequestController {
     private final ProviderRepository providerRepository;
 
     @Autowired
-    public RequestController(final RequestRepository requestRepository,
-                             final JobRepository jobRepository,
-                             final ProviderRepository providerRepository) {
+    public RequestController(
+            final RequestRepository requestRepository,
+            final JobRepository jobRepository,
+            final ProviderRepository providerRepository) {
         this.requestRepository = requestRepository;
         this.jobRepository = jobRepository;
         this.providerRepository = providerRepository;
@@ -44,8 +45,9 @@ public class RequestController {
     @ResponseBody
     @Secured("ROLE_PROVIDER")
     @PatchMapping("/update/{id}/{message}")
-    public ResponseEntity<RequestEntity> update(@PathVariable("id") Integer id,
-                                                @PathVariable("message") final String message) {
+    public ResponseEntity<RequestEntity> update(
+            @PathVariable("id") Integer id,
+            @PathVariable("message") final String message) {
         return requestRepository.updateRequestFromCurrentProvider(id, message) > 0 ?
                 new ResponseEntity<>(requestRepository.findById(id)
                         .orElseThrow(() -> new NotFoundException("Request Not Found!")), HttpStatus.OK) :
@@ -62,34 +64,42 @@ public class RequestController {
     @ResponseBody
     @GetMapping("/find/between/{limit}")
     @Secured({"ROLE_PROVIDER", "ROLE_CONSUMER"})
-    public List<RequestEntity> findRequestsWithDateInRange(@RequestBody DateRange range,
-                                                           @PathVariable("limit") Integer limit) {
-        return requestRepository.findByDateBetween(range.getStart(), range.getEnd(), new PageRequest(0, limit));
+    public List<RequestEntity> findRequestsWithDateInRange(
+            @RequestBody DateRange range,
+            @PathVariable("limit") Integer limit) {
+        return requestRepository.findByDateBetween(range.getStart(), range.getEnd(),
+                new PageRequest(0, limit));
     }
 
     @ResponseBody
     @GetMapping("/latest/job/{idJob}/{limit}")
     @Secured({"ROLE_PROVIDER", "ROLE_CONSUMER"})
-    public List<RequestEntity> getLatestRequestsFromJob(@PathVariable("idJob") Integer id,
-                                                        @PathVariable("limit") Integer limit) {
+    public List<RequestEntity> getLatestRequestsFromJob(
+            @PathVariable("idJob") Integer id,
+            @PathVariable("limit") Integer limit) {
         return requestRepository.findLatestRequestsFromJob(jobRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Job Not Found!")), new PageRequest(0, limit));
+                        .orElseThrow(() -> new NotFoundException("Job Not Found!")),
+                new PageRequest(0, limit));
     }
 
     @ResponseBody
     @GetMapping("/latest/provider/{idProvider}/{limit}")
     @Secured({"ROLE_PROVIDER", "ROLE_CONSUMER"})
-    public List<RequestEntity> getLatestRequestsForProvider(@PathVariable("idProvider") Integer id,
-                                                            @PathVariable("limit") Integer limit) {
-        return requestRepository.findLatestRequestsForProvider(providerRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Provider Not Found")), new PageRequest(0, limit));
+    public List<RequestEntity> getLatestRequestsForProvider(
+            @PathVariable("idProvider") Integer id,
+            @PathVariable("limit") Integer limit) {
+        return requestRepository.findLatestRequestsForProvider(
+                providerRepository.findById(id).orElseThrow(() ->
+                        new NotFoundException("Provider Not Found")),
+                new PageRequest(0, limit));
     }
 
     @ResponseBody
     @GetMapping("/latest/provider/accepted/{idProvider}/{limit}")
     @Secured({"ROLE_PROVIDER", "ROLE_CONSUMER"})
-    public List<RequestEntity> getLatestAcceptedRequestsForProvider(@PathVariable("idProvider") Integer id,
-                                                                    @PathVariable("limit") Integer limit) {
+    public List<RequestEntity> getLatestAcceptedRequestsForProvider(
+            @PathVariable("idProvider") Integer id,
+            @PathVariable("limit") Integer limit) {
         return requestRepository.findLatestAcceptedRequestsForProvider(providerRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Provider Not Found!")), new PageRequest(0, limit));
     }
@@ -97,11 +107,13 @@ public class RequestController {
     @ResponseBody
     @GetMapping("/get/all/{limit}")
     @Secured({"ROLE_PROVIDER"})
-    public List<RequestEntity> getAllRequestsForCurrentProvider(@PathVariable("limit") final Integer limit) {
+    public List<RequestEntity> getAllRequestsForCurrentProvider(
+            @PathVariable("limit") final Integer limit) {
         return requestRepository.getRequestsForCurrentProvider(new PageRequest(0, limit));
     }
 
-    private RequestEntity findRequestById(@PathVariable("id") Integer id) {
-        return requestRepository.findById(id).orElseThrow(() -> new NotFoundException("Request Not Found!"));
+    private RequestEntity findRequestById(final Integer id) {
+        return requestRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Request Not Found!"));
     }
 }
