@@ -1,15 +1,12 @@
 package integration.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import meeseeks.box.MeeseeksBox;
 import meeseeks.box.domain.ConsumerEntity;
-import meeseeks.box.domain.ProviderEntity;
 import meeseeks.box.domain.UserEntity;
+import meeseeks.box.model.ChangePasswordModel;
 import meeseeks.box.repository.ConsumerRepository;
-import meeseeks.box.repository.JobRepository;
-import meeseeks.box.repository.ProviderRepository;
-import meeseeks.box.repository.RequestRepository;
+import org.jooq.lambda.Unchecked;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,17 +20,13 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.RequestBuilder;
 
-import java.util.Calendar;
 import java.util.List;
-import java.util.function.Supplier;
 
 import static java.util.Arrays.asList;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static java.util.Collections.singletonList;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -50,120 +43,98 @@ public class UserIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private JobRepository jobRepository;
-
-    @Autowired
-    private ProviderRepository providerRepository;
-
-    @Autowired
     private ConsumerRepository consumerRepository;
-
-    @Autowired
-    private RequestRepository requestRepository;
 
     @Autowired
     private ObjectMapper mapper;
 
-    private ProviderEntity provider;
 
     private ConsumerEntity consumer;
 
     @Before
-    public void setUp() throws Exception {
-        provider = new ProviderEntity("provider", "provider");
-        consumer = new ConsumerEntity("consumer", "consumer","consumer", "consumer");
-        consumer = consumerRepository.save(consumer);
-        provider = providerRepository.save(provider);
-        //setTime(provider.getCreated());
+    public void setUp() {
+        consumer = consumerRepository.save(
+                new ConsumerEntity("consumer", "consumer", "consumer", "consumer"));
+    }
+
+    private void authenticateUser(final UserEntity user) {
+        SecurityContextHolder.getContext().setAuthentication(new
+                UsernamePasswordAuthenticationToken(user, null, user
+                .getAuthorities()));
     }
 
     @Test
-    public void testCurrent() throws Exception {
-        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(consumer,
-                null, consumer.getAuthorities()));
-
-        assertValidResultFrom(() -> get("/user/current"), consumer,
-                content().json(mapper.writeValueAsString(consumer)));
-    }
-
-//    @Test
-//    public void testChangePassword() throws Exception {
-//        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(consumer,
-//                null, consumer.getAuthorities()));
-//        ChangePasswordModel model = new ChangePasswordModel("consumer", "password", "password");
-//
-//        assertValidResultFrom(() -> post("/user/change-password"), consumer,
-//                mapper.writeValueAsString(model), status().isAccepted());
-//    }
-
-    @Test
-    public void testDelete() throws Exception {
-        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(consumer,
-                null, consumer.getAuthorities()));
-
-        assertValidResult(() -> delete("/user/delete"), status().isAccepted(), consumer);
-    }
-
-    public void setTime(Calendar c){
-        c.setTimeInMillis((c.getTimeInMillis()/1000)*1000);
+    public void whenGettingCurrentUser_UserExists_ExpectCurrentUser() throws Exception {
+        // given:
+        authenticateUser(consumer);
+        // when:
+        RequestBuilder request = get("/user/current").content("");
+        // then:
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                Unchecked.supplier(() -> content().json(mapper
+                        .writeValueAsString(consumer))));
     }
 
     @Test
-    public void testFind() throws Exception {
-        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(consumer,
-                null, consumer.getAuthorities()));
-
-        ConsumerEntity entity = new ConsumerEntity("dac", "dac");
-        consumerRepository.save(entity);
-       // setTime(entity.getCreated());
-        ConsumerEntity entity1 = new ConsumerEntity("dons", "dons");
-        consumerRepository.save(entity1);
-       // setTime(entity1.getCreated());
-        List<UserEntity> expectedList = asList(provider);
-
-
-        mockMvc.perform(get("/user/find/1")
-                .principal(new UsernamePasswordAuthenticationToken(consumer, null, consumer.getAuthorities()))
+    public void whenChangingPassword_ValidNewPassword_ExpectPasswordChanged() throws Exception {
+        // given:
+        authenticateUser(consumer);
+        ChangePasswordModel model = new ChangePasswordModel("consumer",
+                "password", "password");
+        // when:
+        RequestBuilder request = patch("/user/change-password")
                 .contentType(MediaType.APPLICATION_JSON)
-                .param("name", "d")
-                .param("password", "d"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonAsObjectIsEqualTo(expectedList));
+                .content(mapper.writeValueAsBytes(model));
+        // then:
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                () -> status().isAccepted());
     }
 
-    private <T> ResultMatcher jsonAsObjectIsEqualTo(final T object) throws JsonProcessingException {
-        return content().json(mapper.writeValueAsString(object));
+    @Test
+    public void whenDeletingUser_UserExists_ExpectUserDeleted() throws Exception {
+        // given:
+        authenticateUser(consumer);
+        // when:
+        RequestBuilder request = delete("/user/delete").content("");
+        // then:
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                () -> status().isAccepted());
     }
 
-    private void assertValidResult(final Supplier<MockHttpServletRequestBuilder> method,
-                                   final ResultMatcher matcher, UserEntity user) throws Exception {
-        mockMvc.perform(method.get()
-                .principal(new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())))
-                .andDo(print())
-                .andExpect(matcher);
+    @Test
+    public void whenFindingUserByName_UserExists_ExpectUser() throws Exception {
+        // given:
+        authenticateUser(consumer);
+        consumerRepository.save(asList(
+                new ConsumerEntity("testing", "test"),
+                new ConsumerEntity("testing@com", "testable")));
+        List<UserEntity> expected = singletonList(consumer);
+        // when:
+        RequestBuilder request = get("/user/find/1")
+                .param("name", "consumer")
+                .content("");
+        // then:
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                Unchecked.supplier(() -> content().json(mapper
+                        .writeValueAsString(expected))));
     }
 
-    private void assertValidResultFrom(final Supplier<MockHttpServletRequestBuilder> method,
-                                       final UserEntity user,
-                                       final ResultMatcher matcher) throws Exception {
-        mockMvc.perform(method.get()
-                .principal(new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(matcher);
-    }
-
-    private void assertValidResultFrom(final Supplier<MockHttpServletRequestBuilder> method,
-                                       final UserEntity user,
-                                       String content,
-                                       final ResultMatcher matcher) throws Exception {
-        mockMvc.perform(method.get()
-                .principal(new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities()))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(matcher);
+    @Test
+    public void whenFindingUsersByEmail_UsersExists_ExpectUsers() throws
+            Exception {
+        // given:
+        authenticateUser(consumer);
+        ConsumerEntity next = new ConsumerEntity("consumer@com", "test");
+        consumerRepository.save(asList(next,
+                new ConsumerEntity("testing@com", "testable")));
+        List<UserEntity> expected = asList(consumer, next);
+        // when:
+        RequestBuilder request = get("/user/find/2")
+                .param("email", "consumer")
+                .content("");
+        // then:
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                Unchecked.supplier(() -> content().json(mapper
+                        .writeValueAsString(expected))));
     }
 }

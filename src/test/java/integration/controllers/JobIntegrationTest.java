@@ -25,22 +25,19 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.ResultMatcher;
 
 import java.sql.Time;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(
@@ -92,7 +89,7 @@ public class JobIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(model));
         // then:
-        assertExpectedResultEquals(request,
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
                 () -> jsonPath("$.name", Is.is("Name")));
     }
 
@@ -110,7 +107,7 @@ public class JobIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsBytes(makeJobModel(jobSavedInDatabase)));
         // then:
-        assertExpectedResultEquals(request,
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
                 () -> jsonPath("$.name", Is.is("Update")));
     }
 
@@ -127,7 +124,8 @@ public class JobIntegrationTest {
                 "/job/delete/" + jobSavedInRepository.getId())
                 .contentType(MediaType.APPLICATION_JSON).content("");
         // then:
-        assertExpectedResultEquals(request, () -> status().isAccepted());
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                () -> status().isAccepted());
         assertThat(jobRepository.findOne(1), IsNull.nullValue());
     }
 
@@ -142,8 +140,8 @@ public class JobIntegrationTest {
         RequestBuilder request = get("/job/latest/consumer/2")
                 .content("");
         // then:
-        assertExpectedResultEquals(request, Unchecked.supplier(() ->
-                content().json(mapper.writeValueAsString(expected))));
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                Unchecked.supplier(() -> content().json(mapper.writeValueAsString(expected))));
     }
 
     @Test
@@ -159,8 +157,8 @@ public class JobIntegrationTest {
         RequestBuilder request = get("/job/latest/provider/2")
                 .content("");
         // then:
-        assertExpectedResultEquals(request, Unchecked.supplier(() ->
-                content().json(mapper.writeValueAsString(expected))));
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                Unchecked.supplier(() -> content().json(mapper.writeValueAsString(expected))));
     }
 
     @Test
@@ -175,8 +173,8 @@ public class JobIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsBytes(jobs.get(0).getCategory()));
         // then:
-        assertExpectedResultEquals(request, Unchecked.supplier(() ->
-                content().json(mapper.writeValueAsString(expected))));
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                Unchecked.supplier(() -> content().json(mapper.writeValueAsString(expected))));
     }
 
     @Test
@@ -190,8 +188,8 @@ public class JobIntegrationTest {
         RequestBuilder request = get("/job/find/location/" +
                 jobs.get(0).getLocation() + "/2").content("");
         // then:
-        assertExpectedResultEquals(request, Unchecked.supplier(() ->
-                content().json(mapper.writeValueAsString(expected))));
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                Unchecked.supplier(() -> content().json(mapper.writeValueAsString(expected))));
     }
 
     @Test
@@ -206,8 +204,9 @@ public class JobIntegrationTest {
         // when:
         RequestBuilder request = get("/job/categories").content("");
         // then:
-        assertExpectedResultEquals(request, Unchecked.supplier(() ->
-                content().json(mapper.writeValueAsString(categories))));
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                Unchecked.supplier(() -> content().json(mapper
+                        .writeValueAsString(categories))));
     }
 
     @Test
@@ -224,8 +223,8 @@ public class JobIntegrationTest {
         RequestBuilder request = get("/job/find/price_between/"
                 + LOWER_LIMIT + "/" + UPPER_LIMIT + "/" + SIZE).content("");
         // then:
-        assertExpectedResultEquals(request, Unchecked.supplier(() ->
-                content().json(mapper.writeValueAsString(expected))));
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                Unchecked.supplier(() -> content().json(mapper.writeValueAsString(expected))));
     }
 
     @Test
@@ -239,8 +238,8 @@ public class JobIntegrationTest {
         RequestBuilder request = get("/job/find/type/default/2")
                 .content("");
         // then:
-        assertExpectedResultEquals(request, Unchecked.supplier(() ->
-                content().json(mapper.writeValueAsString(expected))));
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                Unchecked.supplier(() -> content().json(mapper.writeValueAsString(expected))));
     }
 
     private List<JobEntity> insertJobsIntroRepository() {
@@ -266,17 +265,5 @@ public class JobIntegrationTest {
         CategoryEntity category = new CategoryEntity(
                 Integer.toString(new Random().nextInt(100000)));
         return new JobModel(job, singletonList(availability), category);
-    }
-
-    private void assertExpectedResultEquals(
-            final RequestBuilder request,
-            final Supplier<ResultMatcher> matcher) throws Exception {
-        performRequestAndPrintResult(request)
-                .andExpect(matcher.get());
-    }
-
-    private ResultActions performRequestAndPrintResult(RequestBuilder request)
-            throws Exception {
-        return mockMvc.perform(request).andDo(print());
     }
 }

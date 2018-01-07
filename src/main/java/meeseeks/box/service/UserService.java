@@ -38,10 +38,10 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Wrong username or password!"));
     }
 
-    public void saveUser(UserEntity user) {
+    public UserEntity saveUser(UserEntity user) {
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user.setConfirmPassword(user.getPassword());
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
     public String getJWTToken(UserEntity user) {

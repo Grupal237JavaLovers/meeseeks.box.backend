@@ -6,6 +6,8 @@ import meeseeks.box.domain.ProviderEntity;
 import meeseeks.box.domain.RequestEntity;
 import meeseeks.box.repository.ProviderRepository;
 import meeseeks.box.repository.RequestRepository;
+import org.hamcrest.core.Is;
+import org.jooq.lambda.Unchecked;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,20 +20,16 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.RequestBuilder;
 
-import java.util.function.Supplier;
-
-import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * @author Alexandru Stoica
  * @version 1.0
  */
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
@@ -56,54 +54,54 @@ public class RequestIntegrationTest {
     private ProviderEntity provider;
 
     @Before
-    public void setUp() throws Exception {
-        provider = new ProviderEntity();
-        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(provider, null, provider.getAuthorities()));
+    public void setUp() {
+        provider = providerRepository.save(new ProviderEntity());
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(provider,
+                        null, provider.getAuthorities()));
     }
 
     @Test
-    public void isDeletingRequestById() throws Exception {
-        RequestEntity request = makeRequest("test", true);
-        // preconditions:
+    public void whenDeletingRequest_RequestExists_ExpectRequestDeleted()
+            throws Exception {
+        // given:
+        RequestEntity request = new RequestEntity("test", true);
         request.setProvider(provider);
         requestRepository.save(request);
+        // when:
+        RequestBuilder requestPath =
+                delete("/request/delete/1").content("");
         // then:
-        assertValidResultFrom(() -> delete("/request/delete/1"), status().isOk());
+        new AssertRequest(mockMvc).assertExpectedResultEquals(
+                requestPath, () -> status().isOk());
     }
 
     @Test
-    public void isUpdatingRequestMessage() throws Exception {
-        // declarations:
-        RequestEntity expected = makeRequest("test", true);
-        // preconditions:
+    public void whenUpdatingRequest_RequestExists_ExpectRequestUpdated() throws Exception {
+        // given:
+        RequestEntity expected = new RequestEntity("test", true);
         expected.setProvider(provider);
         requestRepository.save(expected);
+        // when:
+        RequestBuilder requestPath =
+                patch("/request/update/1/NewText").content("");
         // then:
-        assertValidResultFrom(()-> patch("/request/update/1/NewText"),
-                jsonPath("$.message", is("NewText")));
+        new AssertRequest(mockMvc).assertExpectedResultEquals(requestPath,
+                () -> jsonPath("$.message", Is.is("NewText")));
     }
 
     @Test
-    public void isGettingById() throws Exception {
-        RequestEntity request = makeRequest("test", true);
-        // preconditions:
+    public void whenGettingRequestById_RequestExists_ExpectRequestWithThatId() throws Exception {
+        // given:
+        RequestEntity request = new RequestEntity("test", true);
         request.setProvider(provider);
         requestRepository.save(request);
+        // when:
+        RequestBuilder requestPath =
+                get("/request/get/1").content("");
         // then:
-        assertValidResultFrom(() -> get("/request/get/1"),
-                content().json(mapper.writeValueAsString(requestRepository.findOne(1))));
-    }
-
-    private RequestEntity makeRequest(final String message, final Boolean accepted) {
-        return new RequestEntity(message, accepted);
-    }
-
-    private void assertValidResultFrom(final Supplier<MockHttpServletRequestBuilder> method,
-                                       final ResultMatcher matcher) throws Exception {
-        mockMvc.perform(method.get()
-                .principal(new UsernamePasswordAuthenticationToken(provider, null, provider.getAuthorities())))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(matcher);
+        new AssertRequest(mockMvc).assertExpectedResultEquals(requestPath,
+                Unchecked.supplier(() -> content().json(mapper.writeValueAsString
+                        (requestRepository.findOne(1)))));
     }
 }
