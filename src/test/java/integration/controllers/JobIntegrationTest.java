@@ -195,6 +195,22 @@ public class JobIntegrationTest {
     }
 
     @Test
+    public void whenGettingAllCategories_CategoriesExist_ExpectCategories()
+            throws Exception {
+        // given:
+        authenticateUser(provider);
+        List<JobEntity> jobs = insertJobsIntroRepository();
+        List<CategoryEntity> categories = jobs.stream()
+                .map(JobEntity::getCategory)
+                .collect(Collectors.toList());
+        // when:
+        RequestBuilder request = get("/job/categories").content("");
+        // then:
+        assertExpectedResultEquals(request, Unchecked.supplier(() ->
+                content().json(mapper.writeValueAsString(categories))));
+    }
+
+    @Test
     public void whenGettingLatestJobsByPriceBetween_JobsExist_ExpectLatestJobs()
             throws Exception {
         // given:

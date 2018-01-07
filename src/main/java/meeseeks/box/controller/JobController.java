@@ -61,9 +61,7 @@ public class JobController {
             availabilities.add(availabilityRepository.findByDayAndStartHourAndEndHour(entity.getDay(), entity.getStartHour(), entity.getEndHour()).orElse(entity));
         }
         job.setAvailabilities(availabilities);
-        JobEntity entity = jobRepository.save(job.build(consumer));
-        //entity.getCreated().setTimeInMillis((entity.getCreated().getTimeInMillis() / 1000) * 1000);
-        return entity;
+        return jobRepository.save(job.build(consumer));
     }
 
     @Secured({"ROLE_CONSUMER"})
@@ -92,12 +90,6 @@ public class JobController {
                 .orElseThrow(() -> new NotFoundException("404 Consumer Not Found!"));
     }
 
-
-    private JobEntity getJobById(final Integer id) {
-        return jobRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Updated Job Not Found!"));
-    }
-
     @ResponseBody
     @Secured({"ROLE_PROVIDER"})
     @GetMapping("/latest/provider/{limit}")
@@ -123,6 +115,13 @@ public class JobController {
     @GetMapping("/{id}")
     public JobEntity getJob(@PathVariable("id") final Integer id) {
         return jobRepository.findOne(id);
+    }
+
+    @ResponseBody
+    @GetMapping("/categories")
+    @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})
+    public Iterable<CategoryEntity> getAllCategories(){
+        return categoryRepository.findAll();
     }
 
     @ResponseBody
