@@ -40,7 +40,6 @@ public class RequestEntity implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Boolean accepted;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER, targetEntity = ProviderEntity.class)
     @JoinColumn(name = "id_provider")
     private ProviderEntity provider;
