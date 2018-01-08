@@ -10,6 +10,8 @@ cache:
     - $HOME/.gradle/wrapper/
 services:
   - mysql
+after_success:
+  - ./gradlew jacocoTestReport coveralls
 deploy:
   provider: elasticbeanstalk
   access_key_id: $AWS_ACCESS_ID
@@ -24,3 +26,5 @@ deploy:
     branch: master
 before_deploy:
   - "./gradlew bootRepackage"
+notifications:
+  email: false

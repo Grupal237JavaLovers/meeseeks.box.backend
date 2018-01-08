@@ -9,13 +9,15 @@ import meeseeks.box.repository.ConsumerRepository;
 import meeseeks.box.repository.JobRepository;
 import meeseeks.box.repository.ProviderRepository;
 import meeseeks.box.repository.ReviewRepository;
+import meeseeks.box.utils.ReviewBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -23,6 +25,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/review")
 public class ReviewController {
+
+    @FunctionalInterface
+    private interface TriFunction<T, U, X, R> {
+        R apply(T param1, U param2, X param3);
+    }
 
     private final ReviewRepository reviewRepository;
     private final ProviderRepository providerRepository;
@@ -40,71 +47,65 @@ public class ReviewController {
         this.jobRepository = jobRepository;
     }
 
-    @Secured({"ROLE_CONSUMER"})
     @ResponseBody
+    @Secured({"ROLE_CONSUMER"})
     @PostMapping("/insert/{job}/provider/{id}")
-    public ReviewEntity insertForProvider(@PathVariable("job") final Integer job,
-                                          @PathVariable("id") final Integer id,
-                                          @RequestBody @Valid ReviewEntity review) {
-        JobEntity jobEntity = jobRepository.findById(job).orElseThrow(() -> new NotFoundException("Job not found"));
-        ProviderEntity provider = getProviderById(id);
-        ConsumerEntity consumer = (ConsumerEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        // Get the managed consumer from the database because Hibernate weirdness
-        consumer = consumerRepository.findOne(consumer.getId());
-        review.setProvider(provider);
-        review.setConsumer(consumer);
-        review.setReceivedByProvider(true);
-        review.setJob(jobEntity);
+    public ReviewEntity insertReviewForProvider(@PathVariable("job") final Integer idJob,
+                                                @PathVariable("id") final Integer idProvider,
+                                                @RequestBody @Valid ReviewEntity review,
+                                                @AuthenticationPrincipal @ApiIgnore ConsumerEntity consumer) {
+        review = new ReviewBuilder(review)
+                .setProvider(getProviderById(idProvider))
+                .setConsumer(getConsumerById(consumer.getId()))
+                .setJob(getJobById(idJob))
+                .setRecievedByProvider(true).build();
         return reviewRepository.save(review);
     }
 
-    @Secured({"ROLE_PROVIDER"})
     @ResponseBody
+    @Secured({"ROLE_PROVIDER"})
     @PostMapping("/insert/{job}/consumer/{id}")
-    public ReviewEntity insertForConsumer(@PathVariable("job") final Integer job,
-                                          @PathVariable("id") final Integer id,
-                                          @RequestBody @Valid ReviewEntity review) {
-        JobEntity jobEntity = jobRepository.findById(job).orElseThrow(() -> new NotFoundException("Job not found"));
-        ConsumerEntity consumer = getConsumerById(id);
-        ProviderEntity provider = (ProviderEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        // Get the managed provider from the database because Hibernate weirdness
-        provider = providerRepository.findOne(provider.getId());
-        review.setProvider(provider);
-        review.setConsumer(consumer);
-        review.setReceivedByProvider(false);
-        review.setJob(jobEntity);
+    public ReviewEntity insertReviewForConsumer(@PathVariable("job") final Integer idJob,
+                                                @PathVariable("id") final Integer idConsumer,
+                                                @RequestBody @Valid ReviewEntity review,
+                                                @AuthenticationPrincipal @ApiIgnore ProviderEntity provider) {
+        review = new ReviewBuilder(review)
+                .setProvider(getProviderById(provider.getId()))
+                .setConsumer(getConsumerById(idConsumer))
+                .setJob(getJobById(idJob))
+                .setRecievedByProvider(false).build();
         return reviewRepository.save(review);
     }
 
     @ResponseBody
     @Secured("ROLE_PROVIDER")
     @PostMapping("/update/consumer/{id}")
-    public ResponseEntity<ReviewEntity> updateRatingReviewForConsumer(@PathVariable("id") final Integer id,
-                                                                      @RequestParam(required = false, value = "rating") final Integer rating,
-                                                                      @RequestParam(required = false, value = "message") final String message) {
-        ReviewEntity review = getReviewById(id);
-        Integer finalRating = rating != null ? rating : review.getRating();
-        String finalMessage = message != null ? message : review.getMessage();
-        return reviewRepository.updateReviewForConsumer(id, finalRating, finalMessage) > 0 ?
-                new ResponseEntity<>(getReviewById(id), HttpStatus.ACCEPTED) :
-                new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    public ResponseEntity<ReviewEntity> updateReviewForConsumer(@PathVariable("id") final Integer id,
+                                                                @RequestParam(required = false, value = "rating") final Integer rating,
+                                                                @RequestParam(required = false, value = "message") final String message) {
+        return updateReviewBasedOn(id, rating, message, reviewRepository::updateReviewForConsumer);
     }
 
     @ResponseBody
-    @Secured("ROLE_PROVIDER")
+    @Secured("ROLE_CONSUMER")
     @PostMapping("/update/provider/{id}")
-    public ResponseEntity<ReviewEntity> updateRatingReviewForProvider(@PathVariable("id") final Integer id,
-                                                                      @RequestParam(required = false, value = "rating") final Integer rating,
-                                                                      @RequestParam(required = false, value = "message") final String message) {
-        ReviewEntity review = getReviewById(id);
-        Integer finalRating = rating != null ? rating : review.getRating();
-        String finalMessage = message != null ? message : review.getMessage();
-        return reviewRepository.updateReviewForProvider(id, finalRating, finalMessage) > 0 ?
-                new ResponseEntity<>(getReviewById(id), HttpStatus.ACCEPTED) :
-                new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    public ResponseEntity<ReviewEntity> updateReviewForProvider(@PathVariable("id") final Integer id,
+                                                                @RequestParam(required = false, value = "rating") final Integer rating,
+                                                                @RequestParam(required = false, value = "message") final String message) {
+        return updateReviewBasedOn(id, rating, message, reviewRepository::updateReviewForProvider);
     }
 
     @ResponseBody
+    @Secured({"ROLE_PROVIDER", "ROLE_CONSUMER"})
+    @GetMapping("/latest/consumer/{id}/{limit}/{received}")
+    public List<ReviewEntity> getLatestReviewsConsumer(@PathVariable("id") final Integer id,
+                                                       @PathVariable("limit") final Integer limit,
+                                                       @PathVariable("received") final Boolean received) throws NotFoundException {
+        return reviewRepository.findLatestReviewsConsumer(getConsumerById(id), received, new PageRequest(0, limit));
+    }
+
+    @ResponseBody
+    @Secured({"ROLE_PROVIDER", "ROLE_CONSUMER"})
     @GetMapping("/latest/provider/{id}/{limit}/{received}")
     public List<ReviewEntity> getLatestReviewsProvider(@PathVariable("id") final Integer id,
                                                        @PathVariable("limit") final Integer limit,
@@ -112,12 +113,19 @@ public class ReviewController {
         return reviewRepository.findLatestReviewsProvider(getProviderById(id), received, new PageRequest(0, limit));
     }
 
-    @ResponseBody
-    @GetMapping("/latest/consumer/{id}/{limit}/{received}")
-    public List<ReviewEntity> getLatestReviewsConsumer(@PathVariable("id") final Integer id,
-                                                       @PathVariable("limit") final Integer limit,
-                                                       @PathVariable("received") final Boolean received) throws NotFoundException {
-        return reviewRepository.findLatestReviewsConsumer(getConsumerById(id), received, new PageRequest(0, limit));
+    private ResponseEntity<ReviewEntity> updateReviewBasedOn(final Integer id, final Integer rating, final String message,
+                                                             final TriFunction<Integer, Integer, String, Integer> getter) {
+        ReviewEntity review = getReviewById(id);
+        Integer finalRating = rating != null ? rating : review.getRating();
+        String finalMessage = message != null ? message : review.getMessage();
+        return getter.apply(id, finalRating, finalMessage) > 0 ?
+                new ResponseEntity<>(getReviewById(id), HttpStatus.ACCEPTED) :
+                new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
+
+    private JobEntity getJobById(final Integer id) {
+        return jobRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Job not found"));
     }
 
     private ReviewEntity getReviewById(final Integer id) {

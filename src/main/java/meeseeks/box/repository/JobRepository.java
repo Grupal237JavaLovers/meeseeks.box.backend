@@ -22,15 +22,15 @@ import java.util.List;
 @Repository
 public interface JobRepository extends BaseCrudRepository<JobEntity, Integer> {
 
-    @Transactional
     @Modifying
+    @Transactional
     @Query("delete from JobEntity job where job.id = ?2 and job.consumer = ?1")
-    Long deleteIfCreatedBy(final Integer idConsumer, final Integer idJob);
+    Integer deleteIfCreatedBy(final ConsumerEntity consumer, final Integer idJob);
 
     @Transactional
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("update JobEntity job set job = ?3 where job.id = ?2 and job.consumer = ?1")
-    Long updateIfCreatedBy(final Integer idConsumer, final Integer idJob, final JobEntity job);
+    Integer updateIfCreatedBy(final ConsumerEntity consumer, final Integer idJob, final JobEntity job);
 
     @Query("select j from JobEntity j join j.requests r join r.provider p where p=?1 order by j.created desc")
     List<JobEntity> findLatestJobsRequestedByProvider(final @NotNull ProviderEntity provider, Pageable pageable);
@@ -53,4 +53,5 @@ public interface JobRepository extends BaseCrudRepository<JobEntity, Integer> {
     @Query("select job from JobEntity job where job.price > ?1 and job.price < ?2 order by job.created desc")
     List<JobEntity> findLatestByPriceBetween(final Double low, final Double high, final Pageable pageable);
 
+    List<JobEntity> findAllByNameContaining(final String name, final Pageable pageable);
 }

@@ -26,16 +26,16 @@ public interface ReviewRepository extends BaseCrudRepository<ReviewEntity, Integ
     @Query("select r from ReviewEntity r where r.consumer=?1 and r.receivedByProvider!=?2 order by r.date desc")
     List<ReviewEntity> findLatestReviewsConsumer(final @NotNull ConsumerEntity consumer, boolean receivedByProvider, Pageable pageable);
 
-    @Modifying
     @Transactional
-    @Query("update ReviewEntity review set review.rating=?2, review.message=?3 " +
-            "where review.provider=?#{principal} and review.id=id and review.receivedByProvider = true")
+    @Modifying(clearAutomatically = true)
+    @Query("update ReviewEntity review set review.rating = ?2, review.message = ?3 " +
+            "where review.provider=?#{principal} and review.id = ?1 and review.receivedByProvider = true")
     Integer updateReviewForConsumer(final Integer id, final Integer rating, final String message);
 
-    @Modifying
     @Transactional
+    @Modifying(clearAutomatically = true)
     @Query("update ReviewEntity review set review.rating = ?2, review.message = ?3 " +
-            "where review.consumer = ?#{principal} and review.id = ?1 and review.receivedByProvider = false")
+            "where review.consumer=?#{principal} and review.id = ?1 and review.receivedByProvider = false")
     Integer updateReviewForProvider(final Integer id, final Integer rating, final String message);
 
 }

@@ -54,7 +54,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .csrf().disable().exceptionHandling().accessDeniedPage("/access-denied").and()
                 .authorizeRequests()
                 .antMatchers("/").permitAll()
-                .antMatchers("/user").permitAll()
+                .antMatchers("/user/auth/notifications").permitAll()
                 .antMatchers(HttpMethod.POST, "/login").permitAll()
                 .antMatchers(HttpMethod.POST, "/provider/register").permitAll()
                 .antMatchers(HttpMethod.POST, "/consumer/register").permitAll()

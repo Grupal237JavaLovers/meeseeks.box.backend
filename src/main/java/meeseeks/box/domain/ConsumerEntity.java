@@ -19,25 +19,30 @@ import java.util.List;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ConsumerEntity extends UserEntity implements Serializable {
 
-    private static final String DEFAULT = "";
+    private static final String DEFAULT = "default";
 
     @Column(name = "profile_image")
     private String profileImageUrl;
 
     @JsonIgnore
     @OrderBy("id")
-    @OneToMany(mappedBy = "consumer", targetEntity = JobEntity.class, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "consumer",
+            targetEntity = JobEntity.class,
+            cascade = CascadeType.REMOVE)
     private List<JobEntity> jobs = new ArrayList<>();
 
     @JsonIgnore
     @OrderBy("id")
-    @OneToMany(mappedBy = "consumer", targetEntity = ReviewEntity.class, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "consumer",
+            targetEntity = ReviewEntity.class,
+            cascade = CascadeType.REMOVE)
     private List<RequestEntity> reviews = new ArrayList<>();
 
-    public ConsumerEntity(final String username,
-                          final String password,
-                          final String name,
-                          final String email) {
+    public ConsumerEntity(
+            final String username,
+            final String password,
+            final String name,
+            final String email) {
         this(username, password, name, email, DEFAULT);
     }
 
@@ -45,14 +50,37 @@ public class ConsumerEntity extends UserEntity implements Serializable {
         this(DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT);
     }
 
-    public ConsumerEntity(final String username,
-                          final String password,
-                          final String name,
-                          final String email,
-                          final String profileImageUrl) {
+    public ConsumerEntity(
+            final String username,
+            final String password,
+            final String name,
+            final String email,
+            final String profileImageUrl) {
         super(email, username, password, name);
         this.profileImageUrl = profileImageUrl;
         this.setRole(UserRole.consumer);
+    }
+
+    public ConsumerEntity(final String username, final String password) {
+        this(username, password, DEFAULT, DEFAULT);
+    }
+
+    public ConsumerEntity(
+            final String username,
+            final String password,
+            final String email) {
+        this(username, password, DEFAULT, email);
+    }
+
+    public ConsumerEntity(
+            final String username,
+            final String password,
+            final String confirmPassword,
+            final String name,
+            final String email,
+            final String profileImage) {
+        super(email, username, password, confirmPassword, name);
+        this.profileImageUrl = profileImage;
     }
 
     public String getProfileImageUrl() {

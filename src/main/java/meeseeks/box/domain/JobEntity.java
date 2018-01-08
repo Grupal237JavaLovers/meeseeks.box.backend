@@ -1,7 +1,9 @@
 package meeseeks.box.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
@@ -50,22 +52,29 @@ public class JobEntity implements Serializable {
     @Column(name = "expiration_date")
     private Calendar expiration;
 
-    @ManyToOne(fetch = FetchType.LAZY,
+    @Column
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.STRING,
+            pattern = "dd-MM-yyyy hh:mm")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Calendar created;
+
+    @ManyToOne(fetch = FetchType.EAGER,
             targetEntity = CategoryEntity.class,
             cascade = CascadeType.PERSIST)
     @JoinColumn(name = "category")
     private CategoryEntity category;
 
-    @ManyToOne(fetch = FetchType.LAZY,
-            targetEntity = ConsumerEntity.class,
-            cascade = CascadeType.PERSIST)
+    @ManyToOne(fetch = FetchType.EAGER,
+            targetEntity = ConsumerEntity.class)
     @JoinColumn(name = "id_consumer")
     private ConsumerEntity consumer;
 
-    @JsonIgnore
     @OrderBy("id")
     @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "AvailabilityList", joinColumns = @JoinColumn(name = "id_job", referencedColumnName = "id"),
+    @JoinTable(name = "AvailabilityList",
+            joinColumns = @JoinColumn(name = "id_job", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "id_availability", referencedColumnName = "id"))
     private List<AvailabilityEntity> availabilities = new ArrayList<>();
 
@@ -79,18 +88,15 @@ public class JobEntity implements Serializable {
     @OneToMany(mappedBy = "job", targetEntity = ReviewEntity.class)
     private List<RequestEntity> reviews = new ArrayList<>();
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column
-    @CreationTimestamp
-    private Calendar created;
 
-    private static final String DEFAULT = "";
+    private static final String DEFAULT = "default";
 
-    public JobEntity(final String name,
-                     final String description,
-                     final String location,
-                     final String type,
-                     final Double price) {
+    public JobEntity(
+            final String name,
+            final String description,
+            final String location,
+            final String type,
+            final Double price) {
         this.name = name;
         this.description = description;
         this.location = location;
@@ -98,8 +104,12 @@ public class JobEntity implements Serializable {
         this.price = price;
     }
 
+    public JobEntity(final String name) {
+        this(name, DEFAULT, DEFAULT, DEFAULT, 1.0);
+    }
+
     public JobEntity() {
-        this(DEFAULT, DEFAULT, DEFAULT, DEFAULT, 1.0);
+        this(DEFAULT);
     }
 
     public Integer getId() {
@@ -198,7 +208,7 @@ public class JobEntity implements Serializable {
         this.reviews = reviews;
     }
 
-    public Calendar getCreated() {
-        return created;
+    public Calendar created() {
+        return this.created;
     }
 }
