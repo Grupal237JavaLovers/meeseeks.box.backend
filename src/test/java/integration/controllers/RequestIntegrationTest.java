@@ -1,9 +1,10 @@
-package integration.controllers;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import meeseeks.box.MeeseeksBox;
+import meeseeks.box.domain.JobEntity;
 import meeseeks.box.domain.ProviderEntity;
 import meeseeks.box.domain.RequestEntity;
+import meeseeks.box.model.DateRange;
+import meeseeks.box.repository.JobRepository;
 import meeseeks.box.repository.ProviderRepository;
 import meeseeks.box.repository.RequestRepository;
 import org.hamcrest.core.Is;
@@ -14,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.annotation.DirtiesContext;
@@ -21,6 +23,11 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
+
+import java.util.Calendar;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -50,6 +57,9 @@ public class RequestIntegrationTest {
 
     @Autowired
     private ProviderRepository providerRepository;
+
+    @Autowired
+    private JobRepository jobRepository;
 
     private ProviderEntity provider;
 
@@ -103,5 +113,111 @@ public class RequestIntegrationTest {
         new AssertRequest(mockMvc).assertExpectedResultEquals(requestPath,
                 Unchecked.supplier(() -> content().json(mapper.writeValueAsString
                         (requestRepository.findOne(1)))));
+    }
+
+    @Test
+    public void whenGettingRequestsByDateInRange_ValidRange_ExpectRequests() throws Exception {
+        // given:
+        List<RequestEntity> requests = Stream.of(
+                new RequestEntity("test", true),
+                new RequestEntity("other", true),
+                new RequestEntity("title", true))
+                .peek(it -> it.setProvider(provider))
+                .map(it -> requestRepository.save(it))
+                .collect(Collectors.toList());
+        Calendar startDate = Calendar.getInstance();
+        Calendar endDate = Calendar.getInstance();
+        startDate.set(Calendar.DAY_OF_WEEK, -5);
+        endDate.set(Calendar.DAY_OF_WEEK, 5);
+        DateRange range = new DateRange(startDate, endDate);
+        // when:
+        RequestBuilder request = get("/request/find/between/2")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(range));
+        // then:
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                Unchecked.supplier(() -> content().json(
+                        mapper.writeValueAsString(requests.subList(0, 2)))));
+    }
+
+    @Test
+    public void whenGettingLatestRequestsForJob_JobExists_ExpectLatestRequests() throws Exception {
+        // given
+        JobEntity job = jobRepository.save(new JobEntity());
+        List<RequestEntity> requests = Stream.of(
+                new RequestEntity(provider, job, "test"),
+                new RequestEntity(provider, job, "message"),
+                new RequestEntity(provider, job, "testing"),
+                new RequestEntity(provider, job, "other"))
+                .map(it -> requestRepository.save(it))
+                .collect(Collectors.toList());
+        // when:
+        RequestBuilder request = get("/request/latest/job/" +
+                job.getId() + "/2").content("");
+        // then:
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                Unchecked.supplier(() -> content().json(
+                        mapper.writeValueAsString(requests.subList(0, 2)))));
+    }
+
+    @Test
+    public void whenGettingLatestRequestsForProvider_ProviderExists_ExpectLatestRequests() throws Exception {
+        // given
+        JobEntity job = jobRepository.save(new JobEntity());
+        List<RequestEntity> requests = Stream.of(
+                new RequestEntity(provider, job, "test"),
+                new RequestEntity(provider, job, "message"),
+                new RequestEntity(provider, job, "testing"),
+                new RequestEntity(provider, job, "other"))
+                .map(it -> requestRepository.save(it))
+                .collect(Collectors.toList());
+        // when:
+        RequestBuilder request = get("/request/latest/provider/" +
+                provider.getId() + "/2").content("");
+        // then:
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                Unchecked.supplier(() -> content().json(
+                        mapper.writeValueAsString(requests.subList(0, 2)))));
+    }
+
+    @Test
+    public void whenGettingLatestAcceptedRequestsForProvider_ExpectLatestAcceptedRequests() throws Exception {
+        // given
+        JobEntity job = jobRepository.save(new JobEntity());
+        List<RequestEntity> requests = Stream.of(
+                new RequestEntity(provider, job, "test"),
+                new RequestEntity(provider, job, "message"),
+                new RequestEntity(provider, job, "testing"),
+                new RequestEntity(provider, job, "other"))
+                .peek(it -> it.setAccepted(true))
+                .map(it -> requestRepository.save(it))
+                .collect(Collectors.toList());
+        // when:
+        RequestBuilder request = get("/request/latest/provider/accepted/" +
+                provider.getId() + "/3").content("");
+        // then:
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                Unchecked.supplier(() -> content().json(
+                        mapper.writeValueAsString(requests.subList(0, 3)))));
+    }
+
+    @Test
+    public void whenGettingLatestRequestsForCurrentProvider_ExpectLatestRequests() throws Exception {
+        // given
+        JobEntity job = jobRepository.save(new JobEntity());
+        List<RequestEntity> requests = Stream.of(
+                new RequestEntity(provider, job, "test"),
+                new RequestEntity(provider, job, "message"),
+                new RequestEntity(provider, job, "testing"),
+                new RequestEntity(provider, job, "other"))
+                .peek(it -> it.setAccepted(true))
+                .map(it -> requestRepository.save(it))
+                .collect(Collectors.toList());
+        // when:
+        RequestBuilder request = get("/request/get/all/2");
+        // then:
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                Unchecked.supplier(() -> content().json(
+                        mapper.writeValueAsString(requests.subList(0, 2)))));
     }
 }
