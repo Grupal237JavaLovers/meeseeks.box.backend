@@ -1,5 +1,4 @@
-package integration.controllers;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import meeseeks.box.MeeseeksBox;
 import meeseeks.box.domain.ConsumerEntity;
@@ -22,6 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 
+import java.io.Serializable;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -138,5 +138,40 @@ public class UserIntegrationTest {
         new AssertRequest(mockMvc).assertExpectedResultEquals(request,
                 Unchecked.supplier(() -> content().json(mapper
                         .writeValueAsString(expected))));
+    }
+
+    private class LoginModel implements Serializable {
+
+        @JsonProperty
+        final private String username;
+
+        @JsonProperty
+        final private String password;
+
+        LoginModel() {
+            this("", "");
+        }
+
+        LoginModel(final String username, final String password) {
+            this.username = username;
+            this.password = password;
+        }
+    }
+
+    @Test
+    public void whenUserLogging_UserExists_ExpectToken() throws Exception {
+        // TODO Solve This Test!
+        // given:
+        LoginModel model = new LoginModel(
+                consumer.getUsername(),
+                consumer.getPassword());
+        System.out.println(mapper.writeValueAsString(model));
+        // when:
+        RequestBuilder request = post("/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(model));
+        // then:
+//        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+//                Unchecked.supplier(() -> status().isOk()));
     }
 }

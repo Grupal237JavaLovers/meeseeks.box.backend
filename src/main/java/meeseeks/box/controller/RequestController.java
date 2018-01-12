@@ -1,5 +1,7 @@
 package meeseeks.box.controller;
 
+import meeseeks.box.domain.JobEntity;
+import meeseeks.box.domain.ProviderEntity;
 import meeseeks.box.domain.RequestEntity;
 import meeseeks.box.exception.NotFoundException;
 import meeseeks.box.model.DateRange;
@@ -77,9 +79,13 @@ public class RequestController {
     public List<RequestEntity> getLatestRequestsFromJob(
             @PathVariable("idJob") Integer id,
             @PathVariable("limit") Integer limit) {
-        return requestRepository.findLatestRequestsFromJob(jobRepository.findById(id)
-                        .orElseThrow(() -> new NotFoundException("Job Not Found!")),
-                new PageRequest(0, limit));
+        return requestRepository.findLatestRequestsFromJob(
+                getJobById(id), new PageRequest(0, limit));
+    }
+
+    private JobEntity getJobById(final Integer id) {
+        return jobRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Job Not Found!"));
     }
 
     @ResponseBody
@@ -89,8 +95,7 @@ public class RequestController {
             @PathVariable("idProvider") Integer id,
             @PathVariable("limit") Integer limit) {
         return requestRepository.findLatestRequestsForProvider(
-                providerRepository.findById(id).orElseThrow(() ->
-                        new NotFoundException("Provider Not Found")),
+                getProviderById(id),
                 new PageRequest(0, limit));
     }
 
@@ -100,8 +105,13 @@ public class RequestController {
     public List<RequestEntity> getLatestAcceptedRequestsForProvider(
             @PathVariable("idProvider") Integer id,
             @PathVariable("limit") Integer limit) {
-        return requestRepository.findLatestAcceptedRequestsForProvider(providerRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Provider Not Found!")), new PageRequest(0, limit));
+        return requestRepository.findLatestAcceptedRequestsForProvider(
+                getProviderById(id), new PageRequest(0, limit));
+    }
+
+    private ProviderEntity getProviderById(Integer id) {
+        return providerRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Provider Not Found"));
     }
 
     @ResponseBody
@@ -109,7 +119,8 @@ public class RequestController {
     @Secured({"ROLE_PROVIDER"})
     public List<RequestEntity> getAllRequestsForCurrentProvider(
             @PathVariable("limit") final Integer limit) {
-        return requestRepository.getRequestsForCurrentProvider(new PageRequest(0, limit));
+        return requestRepository.getRequestsForCurrentProvider(
+                new PageRequest(0, limit));
     }
 
     private RequestEntity findRequestById(final Integer id) {

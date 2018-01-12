@@ -1,5 +1,3 @@
-package integration.controllers;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import meeseeks.box.MeeseeksBox;
 import meeseeks.box.domain.*;
@@ -7,7 +5,8 @@ import meeseeks.box.repository.ConsumerRepository;
 import meeseeks.box.repository.JobRepository;
 import meeseeks.box.repository.ProviderRepository;
 import meeseeks.box.repository.ReviewRepository;
-import meeseeks.box.utils.ReviewBuilder;
+import org.jooq.lambda.Unchecked;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,17 +19,17 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.RequestBuilder;
 
-import java.util.function.Supplier;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * @author Tiron Andreea-Ecaterina
@@ -64,158 +63,144 @@ public class ReviewIntegrationTest {
     @Autowired
     private ReviewRepository reviewRepository;
 
+    private ProviderEntity provider;
+    private ConsumerEntity consumer;
+
+    @Before
+    public void setUp() {
+        provider = providerRepository.save(new ProviderEntity(
+                "provider", "test", "test@provider.com"));
+        consumer = consumerRepository.save(new ConsumerEntity(
+                "consumer", "test", "test@consumer.com"));
+    }
+
     @Test
-    public void isInsertingReviewForProvider() throws Exception {
+    public void whenInsertingReviewForProvider_ReviewValid_ExpectReviewInserted() throws Exception {
+        // given:
+        authenticateUser(consumer);
+        JobEntity job = new JobEntity();
+        job.setConsumer(consumer);
+        job = jobRepository.save(job);
+        ReviewEntity review = new ReviewEntity("test", 10);
         // when:
-        final String ID_JOB = "1";
-        final String ID_PROVIDER = "1";
-        ProviderEntity provider = makeProvider("provider", "password", "provider@test.com");
-        ConsumerEntity consumer = makeConsumer("consumer", "consumer@test.com");
-        JobEntity job = makeJob();
-        ReviewEntity review = makeReview("Text", 1);
-        String requestBody = mapper.writeValueAsString(review);
-        // preconditions:
-        providerRepository.save(provider);
-        consumerRepository.save(consumer);
-        jobRepository.save(job);
+        RequestBuilder request = post("/review/insert/"
+                + job.getId() + "/provider/" + provider.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(review));
         // then:
-        assertValidResultFrom(() -> post("/review/insert/" + ID_JOB + "/provider/" + ID_PROVIDER)
-                        .contentType(MediaType.APPLICATION_JSON).content(requestBody),
-                consumer, jsonPath("$.message", is("Text")), status().isOk());
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                () -> jsonPath("$.message", is("test")));
     }
 
     @Test
-    public void isInsertingReviewForConsumer() throws Exception {
-        // declarations:
-        final String ID_JOB = "1";
-        final String ID_CONSUMER = "2";
-        ConsumerEntity consumer = makeConsumer("consumer", "consumer@test.com");
-        ProviderEntity provider = makeProvider("provider", "password", "provider@test.com");
-        JobEntity job = makeJob();
-        ReviewEntity review = makeReview("Test", 1);
-        String reviewBody = mapper.writeValueAsString(review);
-        // preconditions
-        providerRepository.save(provider);
-        consumerRepository.save(consumer);
-        jobRepository.save(job);
+    public void whenInsertingReviewForConsumer_ReviewValid_ExpectReviewInserted() throws Exception {
+        // given:
+        authenticateUser(provider);
+        JobEntity job = new JobEntity();
+        job.setConsumer(consumer);
+        job = jobRepository.save(job);
+        ReviewEntity review = new ReviewEntity("test", 10);
+        // when:
+        RequestBuilder request = post("/review/insert/"
+                + job.getId() + "/consumer/" + consumer.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(review));
         // then:
-        assertValidResultFrom(() -> post("/review/insert/" + ID_JOB + "/consumer/" + ID_CONSUMER)
-                        .contentType(MediaType.APPLICATION_JSON).content(reviewBody),
-                provider, jsonPath("$.message", is("Test")), status().isOk());
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                () -> jsonPath("$.message", is("test")));
     }
 
     @Test
-    public void isUpdatingReviewForConsumer() throws Exception {
-        // declarations:
-        final String ID_REVIEW = "1";
-        ConsumerEntity consumer = makeConsumer("consumer", "consumer@test.com");
-        ProviderEntity provider = makeProvider("provider", "password", "provider@test.com");
-        JobEntity job = makeJob();
-        ReviewEntity review = makeReview("Test", 1);
-        // preconditions:
-        buildAndSaveReviewBasedOn(provider, consumer, job, review, true);
-        // then:
-        assertValidResultFrom(() -> post("/review/update/consumer/" + ID_REVIEW)
-                        .param("message", "NewTest"),
-                provider, jsonPath("$.message", is("NewTest")), status().isAccepted());
-    }
-
-    @Test
-    public void isUpdatingReviewForProvider() throws Exception {
-        // declarations:
-        final String ID_REVIEW = "1";
-        ProviderEntity provider = makeProvider("provider", "password", "provider@test.com");
-        ConsumerEntity consumer = makeConsumer("consumer", "consumer@test.com");
-        JobEntity job = makeJob();
-        ReviewEntity review = makeReview("Test", 1);
-        // preconditions:
-        buildAndSaveReviewBasedOn(provider, consumer, job, review, false);
-        // then:
-        assertValidResultFrom(() -> post("/review/update/provider/" + ID_REVIEW)
-                        .param("message", "NewTest"),
-                consumer, jsonPath("$.message", is("NewTest")), status().isAccepted());
-    }
-
-
-    @Test
-    public void isGettingLatestReviewsFromConsumer() throws Exception {
-        // declarations:
-        final String ID_CONSUMER = "1";
-        final String GET_LIMIT = "10";
-        final String RECEIVED = "false";
-        ProviderEntity provider = makeProvider("provider", "password", "provider@test.com");
-        ConsumerEntity consumer = makeConsumer("consumer", "consumer@test.com");
-        JobEntity job = makeJob();
-        ReviewEntity review = makeReview("Test", 1);
-        // preconditions:
-        buildAndSaveReviewBasedOn(provider, consumer, job, review, true);
-        // then:
-        assertValidResultFrom(() -> get("/review/latest/consumer/" + ID_CONSUMER + "/" + GET_LIMIT + "/" + RECEIVED),
-                consumer, jsonPath("$[0].id", is(1)), status().isOk());
-    }
-
-    @Test
-    public void isGettingLatestReviewsFromProvider() throws Exception {
-        // declarations:
-        final String ID_PROVIDER = "2";
-        final String GET_LIMIT = "10";
-        final String RECEIVED = "true";
-        ConsumerEntity consumer = makeConsumer("consumer", "consumer@test.com");
-        ProviderEntity provider = makeProvider("provider", "password", "provider@test.com");
-        JobEntity job = makeJob();
-        ReviewEntity review = makeReview("Test", 1);
-        // preconditions:
-        buildAndSaveReviewBasedOn(provider, consumer, job, review, true);
+    public void whenUpdatingReviewForConsumer_ReviewExists_ExpectReviewUpdated() throws Exception {
+        // given:
+        authenticateUser(provider);
+        JobEntity job = new JobEntity();
+        job.setConsumer(consumer);
+        job = jobRepository.save(job);
+        ReviewEntity review = new ReviewEntity("test", 10,
+                consumer, provider, false);
         reviewRepository.save(review);
+        // when:
+        RequestBuilder request = post("/review/update/consumer/" + review.getId())
+                .param("rating", "10")
+                .param("message", "testing");
         // then:
-        assertValidResultFrom(() -> get("/review/latest/provider/" + ID_PROVIDER + "/" + GET_LIMIT + "/" + RECEIVED),
-                provider, jsonPath("$[0].id", is(1)), status().isOk());
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                () -> jsonPath("$.message", is("testing")));
     }
 
-    private ReviewEntity makeReview(final String message, final Integer rating) {
-        return new ReviewEntity(message, rating);
+    @Test
+    public void whenUpdatingReviewForProvider_ReviewExists_ExpectReviewUpdated() throws Exception {
+        // given:
+        authenticateUser(consumer);
+        JobEntity job = new JobEntity();
+        job.setConsumer(consumer);
+        job = jobRepository.save(job);
+        ReviewEntity review = new ReviewEntity("test", 10,
+                consumer, provider, true);
+        reviewRepository.save(review);
+        // when:
+        RequestBuilder request = post("/review/update/provider/" + review.getId())
+                .param("rating", "10")
+                .param("message", "testing");
+        // then:
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                () -> jsonPath("$.message", is("testing")));
     }
 
-    private void buildAndSaveReviewBasedOn(final ProviderEntity provider,
-                                           final ConsumerEntity consumer,
-                                           final JobEntity job,
-                                           final ReviewEntity review,
-                                           final Boolean received) {
-        reviewRepository.save(new ReviewBuilder(review)
-                .setConsumer(consumerRepository.save(consumer))
-                .setProvider(providerRepository.save(provider))
-                .setJob(jobRepository.save(job))
-                .setRecievedByProvider(received).build());
+    @Test
+    public void whenGettingLatestReviewsForConsumer_ReviewsExist_ExpectReviews() throws Exception {
+        // given:
+        authenticateUser(consumer);
+        JobEntity job = new JobEntity();
+        job.setConsumer(consumer);
+        job = jobRepository.save(job);
+        List<ReviewEntity> reviews = Stream.of(
+                new ReviewEntity("test", 10,
+                        consumer, provider, false),
+                new ReviewEntity("double", 10,
+                        consumer, provider, false),
+                new ReviewEntity("message", 10,
+                        consumer, provider, false))
+                .map(it -> reviewRepository.save(it))
+                .collect(Collectors.toList());
+        // when:
+        RequestBuilder request = get("/review/latest/consumer/" +
+                consumer.getId()+ "/2/true").content("");
+        // then:
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                Unchecked.supplier(() -> content()
+                        .json(mapper.writeValueAsString(reviews.subList(0, 2)))));
     }
 
-    private void assertValidResultFrom(final Supplier<MockHttpServletRequestBuilder> method,
-                                       final UserEntity user,
-                                       final ResultMatcher matcher,
-                                       final ResultMatcher status) throws Exception {
-        mockMvc.perform(method.get()
-                .principal(new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())))
-                .andDo(print())
-                .andExpect(status)
-                .andExpect(matcher);
+    @Test
+    public void whenGettingLatestReviewsFromProvider_ProviderExists_ExpectLatestReviews() throws Exception {
+        // given:
+        authenticateUser(provider);
+        JobEntity job = new JobEntity();
+        job.setConsumer(consumer);
+        job = jobRepository.save(job);
+        List<ReviewEntity> reviews = Stream.of(
+                new ReviewEntity("test", 10,
+                        consumer, provider, true),
+                new ReviewEntity("double", 10,
+                        consumer, provider, true),
+                new ReviewEntity("message", 10,
+                        consumer, provider, true))
+                .map(it -> reviewRepository.save(it))
+                .collect(Collectors.toList());
+        // when:
+        RequestBuilder request = get("/review/latest/provider/" +
+                provider.getId()+ "/2/true").content("");
+        // then:
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                Unchecked.supplier(() -> content()
+                        .json(mapper.writeValueAsString(reviews.subList(0, 2)))));
     }
 
-    private ConsumerEntity makeConsumer(final String username, final String email) {
-        ConsumerEntity consumer = new ConsumerEntity(email, username);
-        SecurityContextHolder.getContext()
-                .setAuthentication(new UsernamePasswordAuthenticationToken(consumer,
-                        null, consumer.getAuthorities()));
-        return consumer;
-    }
-
-    private JobEntity makeJob() {
-        return new JobEntity();
-    }
-
-    private ProviderEntity makeProvider(final String username, final String password, final String email) {
-        ProviderEntity provider = new ProviderEntity(username, password, email);
-        SecurityContextHolder.getContext()
-                .setAuthentication(new UsernamePasswordAuthenticationToken(provider,
-                        null, provider.getAuthorities()));
-        return provider;
+    private void authenticateUser(final UserEntity user) {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user, null,
+                        user.getAuthorities()));
     }
 }
