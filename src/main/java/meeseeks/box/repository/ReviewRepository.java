@@ -21,21 +21,22 @@ import java.util.List;
 public interface ReviewRepository extends BaseCrudRepository<ReviewEntity, Integer> {
 
     @Query("select r from ReviewEntity r where r.provider=?1 and r.receivedByProvider=?2 order by r.date desc")
-    List<ReviewEntity> findLatestReviewsProvider(final @NotNull ProviderEntity provider, boolean receivedByProvider, Pageable pageable);
+    List<ReviewEntity> findLatestReviewsProvider(
+            final ProviderEntity provider, boolean receivedByProvider, Pageable pageable);
 
     @Query("select r from ReviewEntity r where r.consumer=?1 and r.receivedByProvider!=?2 order by r.date desc")
-    List<ReviewEntity> findLatestReviewsConsumer(final @NotNull ConsumerEntity consumer, boolean receivedByProvider, Pageable pageable);
+    List<ReviewEntity> findLatestReviewsConsumer(
+            final ConsumerEntity consumer, boolean receivedByProvider, Pageable pageable);
 
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query("update ReviewEntity review set review.rating = ?2, review.message = ?3 " +
-            "where review.provider=?#{principal} and review.id = ?1 and review.receivedByProvider = true")
+            "where review.provider=?#{principal} and review.id = ?1 and review.receivedByProvider = false")
     Integer updateReviewForConsumer(final Integer id, final Integer rating, final String message);
 
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query("update ReviewEntity review set review.rating = ?2, review.message = ?3 " +
-            "where review.consumer=?#{principal} and review.id = ?1 and review.receivedByProvider = false")
+            "where review.consumer=?#{principal} and review.id = ?1 and review.receivedByProvider = true")
     Integer updateReviewForProvider(final Integer id, final Integer rating, final String message);
-
 }

@@ -1,5 +1,3 @@
-package integration.controllers;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import meeseeks.box.MeeseeksBox;
 import meeseeks.box.domain.ConsumerEntity;

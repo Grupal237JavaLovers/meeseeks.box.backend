@@ -1,4 +1,3 @@
-package integration.controllers;
 
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;

@@ -1,6 +1,6 @@
 package meeseeks.box.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hibernate.annotations.CreationTimestamp;
@@ -33,6 +33,8 @@ public class ReviewEntity implements Serializable {
     @Column(name = "date")
     @CreationTimestamp
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonFormat(shape = JsonFormat.Shape.STRING,
+            pattern = "dd-MM-yyyy hh:mm")
     private Calendar date;
 
     @Column(name = "rating")
@@ -43,7 +45,6 @@ public class ReviewEntity implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Boolean receivedByProvider;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, targetEntity = ConsumerEntity.class)
     @JoinColumn(name = "id_consumer")
     private ConsumerEntity consumer;
@@ -61,8 +62,20 @@ public class ReviewEntity implements Serializable {
     }
 
     public ReviewEntity(final String message, final Integer rating) {
+        this(message, rating, null, null, false);
+    }
+
+    public ReviewEntity(
+            final String message,
+            final Integer rating,
+            final ConsumerEntity consumer,
+            final ProviderEntity provider,
+            final Boolean receivedByProvider) {
         this.message = message;
         this.rating = rating;
+        this.consumer = consumer;
+        this.provider = provider;
+        this.receivedByProvider = receivedByProvider;
     }
 
     public Integer getId() {

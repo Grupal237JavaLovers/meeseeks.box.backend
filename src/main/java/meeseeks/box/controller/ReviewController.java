@@ -37,10 +37,11 @@ public class ReviewController {
     private final JobRepository jobRepository;
 
     @Autowired
-    public ReviewController(final ReviewRepository reviewRepository,
-                            final ProviderRepository providerRepository,
-                            final ConsumerRepository consumerRepository,
-                            final JobRepository jobRepository) {
+    public ReviewController(
+            final ReviewRepository reviewRepository,
+            final ProviderRepository providerRepository,
+            final ConsumerRepository consumerRepository,
+            final JobRepository jobRepository) {
         this.reviewRepository = reviewRepository;
         this.providerRepository = providerRepository;
         this.consumerRepository = consumerRepository;
@@ -50,25 +51,27 @@ public class ReviewController {
     @ResponseBody
     @Secured({"ROLE_CONSUMER"})
     @PostMapping("/insert/{job}/provider/{id}")
-    public ReviewEntity insertReviewForProvider(@PathVariable("job") final Integer idJob,
-                                                @PathVariable("id") final Integer idProvider,
-                                                @RequestBody @Valid ReviewEntity review,
-                                                @AuthenticationPrincipal @ApiIgnore ConsumerEntity consumer) {
-        review = new ReviewBuilder(review)
-                .setProvider(getProviderById(idProvider))
-                .setConsumer(getConsumerById(consumer.getId()))
-                .setJob(getJobById(idJob))
-                .setRecievedByProvider(true).build();
-        return reviewRepository.save(review);
+    public ResponseEntity<ReviewEntity> insertReviewForProvider(
+            @PathVariable("job") final Integer idJob,
+            @PathVariable("id") final Integer idProvider,
+            @RequestBody @Valid ReviewEntity review,
+            @AuthenticationPrincipal @ApiIgnore ConsumerEntity consumer) {
+        return new ResponseEntity<>(
+                reviewRepository.save(new ReviewBuilder(review)
+                        .setProvider(getProviderById(idProvider))
+                        .setConsumer(getConsumerById(consumer.getId()))
+                        .setJob(getJobById(idJob))
+                        .setRecievedByProvider(true).build()), HttpStatus.OK);
     }
 
     @ResponseBody
     @Secured({"ROLE_PROVIDER"})
     @PostMapping("/insert/{job}/consumer/{id}")
-    public ReviewEntity insertReviewForConsumer(@PathVariable("job") final Integer idJob,
-                                                @PathVariable("id") final Integer idConsumer,
-                                                @RequestBody @Valid ReviewEntity review,
-                                                @AuthenticationPrincipal @ApiIgnore ProviderEntity provider) {
+    public ReviewEntity insertReviewForConsumer(
+            @PathVariable("job") final Integer idJob,
+            @PathVariable("id") final Integer idConsumer,
+            @RequestBody @Valid ReviewEntity review,
+            @AuthenticationPrincipal @ApiIgnore ProviderEntity provider) {
         review = new ReviewBuilder(review)
                 .setProvider(getProviderById(provider.getId()))
                 .setConsumer(getConsumerById(idConsumer))
@@ -80,41 +83,49 @@ public class ReviewController {
     @ResponseBody
     @Secured("ROLE_PROVIDER")
     @PostMapping("/update/consumer/{id}")
-    public ResponseEntity<ReviewEntity> updateReviewForConsumer(@PathVariable("id") final Integer id,
-                                                                @RequestParam(required = false, value = "rating") final Integer rating,
-                                                                @RequestParam(required = false, value = "message") final String message) {
+    public ResponseEntity<ReviewEntity> updateReviewForConsumer(
+            @PathVariable("id") final Integer id,
+            @RequestParam(required = false, value = "rating") final Integer rating,
+            @RequestParam(required = false, value = "message") final String message) {
         return updateReviewBasedOn(id, rating, message, reviewRepository::updateReviewForConsumer);
     }
 
     @ResponseBody
     @Secured("ROLE_CONSUMER")
     @PostMapping("/update/provider/{id}")
-    public ResponseEntity<ReviewEntity> updateReviewForProvider(@PathVariable("id") final Integer id,
-                                                                @RequestParam(required = false, value = "rating") final Integer rating,
-                                                                @RequestParam(required = false, value = "message") final String message) {
-        return updateReviewBasedOn(id, rating, message, reviewRepository::updateReviewForProvider);
+    public ResponseEntity<ReviewEntity> updateReviewForProvider(
+            @PathVariable("id") final Integer id,
+            @RequestParam(required = false, value = "rating") final Integer rating,
+            @RequestParam(required = false, value = "message") final String message) {
+        return updateReviewBasedOn(id, rating, message,
+                reviewRepository::updateReviewForProvider);
     }
 
     @ResponseBody
     @Secured({"ROLE_PROVIDER", "ROLE_CONSUMER"})
     @GetMapping("/latest/consumer/{id}/{limit}/{received}")
-    public List<ReviewEntity> getLatestReviewsConsumer(@PathVariable("id") final Integer id,
-                                                       @PathVariable("limit") final Integer limit,
-                                                       @PathVariable("received") final Boolean received) throws NotFoundException {
-        return reviewRepository.findLatestReviewsConsumer(getConsumerById(id), received, new PageRequest(0, limit));
+    public List<ReviewEntity> getLatestReviewsConsumer
+            (@PathVariable("id") final Integer id,
+             @PathVariable("limit") final Integer limit,
+             @PathVariable("received") final Boolean received) throws NotFoundException {
+        return reviewRepository.findLatestReviewsConsumer(getConsumerById(id),
+                received, new PageRequest(0, limit));
     }
 
     @ResponseBody
     @Secured({"ROLE_PROVIDER", "ROLE_CONSUMER"})
     @GetMapping("/latest/provider/{id}/{limit}/{received}")
-    public List<ReviewEntity> getLatestReviewsProvider(@PathVariable("id") final Integer id,
-                                                       @PathVariable("limit") final Integer limit,
-                                                       @PathVariable("received") final Boolean received) throws NotFoundException {
-        return reviewRepository.findLatestReviewsProvider(getProviderById(id), received, new PageRequest(0, limit));
+    public List<ReviewEntity> getLatestReviewsProvider(
+            @PathVariable("id") final Integer id,
+            @PathVariable("limit") final Integer limit,
+            @PathVariable("received") final Boolean received) throws NotFoundException {
+        return reviewRepository.findLatestReviewsProvider(getProviderById(id),
+                received, new PageRequest(0, limit));
     }
 
-    private ResponseEntity<ReviewEntity> updateReviewBasedOn(final Integer id, final Integer rating, final String message,
-                                                             final TriFunction<Integer, Integer, String, Integer> getter) {
+    private ResponseEntity<ReviewEntity> updateReviewBasedOn(
+            final Integer id, final Integer rating, final String message,
+            final TriFunction<Integer, Integer, String, Integer> getter) {
         ReviewEntity review = getReviewById(id);
         Integer finalRating = rating != null ? rating : review.getRating();
         String finalMessage = message != null ? message : review.getMessage();

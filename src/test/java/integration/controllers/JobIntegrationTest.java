@@ -1,5 +1,3 @@
-package integration.controllers;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import meeseeks.box.MeeseeksBox;
 import meeseeks.box.domain.*;
@@ -8,6 +6,7 @@ import meeseeks.box.repository.ConsumerRepository;
 import meeseeks.box.repository.JobRepository;
 import meeseeks.box.repository.ProviderRepository;
 import meeseeks.box.repository.RequestRepository;
+import org.apache.commons.lang.RandomStringUtils;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsNull;
 import org.jooq.lambda.Unchecked;
@@ -239,8 +238,39 @@ public class JobIntegrationTest {
                 .content("");
         // then:
         new AssertRequest(mockMvc).assertExpectedResultEquals(request,
-                Unchecked.supplier(() -> content().json(mapper.writeValueAsString(expected))));
+                Unchecked.supplier(() -> content()
+                        .json(mapper.writeValueAsString(expected))));
     }
+
+    @Test
+    public void whenSearchingJobsByCriteria_JobsExist_ExpectLatestJobs()
+            throws Exception {
+        // given:
+        authenticateUser(provider);
+        List<JobEntity> jobs = insertJobsIntroRepository();
+        List<JobEntity> expected = jobs.subList(0, 1);
+        // when:
+        RequestBuilder request = get("/job/search/Test/5");
+        // then:
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                Unchecked.supplier(() -> content()
+                        .json(mapper.writeValueAsString(expected))));
+    }
+
+    @Test
+    public void whenGettingJobById_JobsExist_ExpectJob()
+            throws Exception {
+        // given:
+        authenticateUser(provider);
+        JobEntity job = jobRepository.save(new JobEntity("test"));
+        // when:
+        RequestBuilder request = get("/job/" + job.getId());
+        // then:
+        new AssertRequest(mockMvc).assertExpectedResultEquals(request,
+                Unchecked.supplier(() -> content()
+                        .json(mapper.writeValueAsString(job))));
+    }
+
 
     private List<JobEntity> insertJobsIntroRepository() {
         return Stream.of(makeJobModel(new JobEntity("Test")),
@@ -260,10 +290,10 @@ public class JobIntegrationTest {
 
     private JobModel makeJobModel(final JobEntity job) {
         AvailabilityEntity availability = new AvailabilityEntity("Monday",
-                new Time(new Random().nextInt(1000000)),
-                new Time(new Random().nextInt(1000000)));
+                new Time(new Random().nextInt(100000000)),
+                new Time(new Random().nextInt(100000000)));
         CategoryEntity category = new CategoryEntity(
-                Integer.toString(new Random().nextInt(100000)));
+                RandomStringUtils.random(200, true, true));
         return new JobModel(job, singletonList(availability), category);
     }
 }

@@ -15,7 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Nicoleta Fecioru
@@ -120,7 +121,7 @@ public class JobController {
     @ResponseBody
     @GetMapping("/categories")
     @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})
-    public Iterable<CategoryEntity> getAllCategories(){
+    public Iterable<CategoryEntity> getAllCategories() {
         return categoryRepository.findAll();
     }
 
@@ -157,17 +158,10 @@ public class JobController {
 
     @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})
     @ResponseBody
-    @GetMapping("/find/expiration_before/{date}/{limit}")
-    public List<JobEntity> getLatestJobsByExpirationDateBefore(@PathVariable("date") final Calendar date,
-                                                               @PathVariable("limit") final Integer limit) {
-        return jobRepository.findLatestByExpirationBefore(date, new PageRequest(0, limit));
-    }
-
-    @Secured({"ROLE_CONSUMER", "ROLE_PROVIDER"})
-    @ResponseBody
     @GetMapping("/search/{criteria}/{limit}")
-    public List<JobEntity> getAllJobsBySearchCriteria(@PathVariable("criteria") final String criteria,
-                                                      @PathVariable("limit") final Integer limit) {
+    public List<JobEntity> getAllJobsBySearchCriteria(
+            @PathVariable("criteria") final String criteria,
+            @PathVariable("limit") final Integer limit) {
         if (criteria.equals("null")) {
             return jobRepository.findAllByNameContaining("", new PageRequest(0, limit));
         }
@@ -180,15 +174,5 @@ public class JobController {
     public List<JobEntity> getLatestJobsByType(@PathVariable("type") final String type,
                                                @PathVariable("limit") final Integer limit) {
         return jobRepository.findLatestByType(type, new PageRequest(0, limit));
-    }
-
-    private ProviderEntity getProviderById(final Integer id) {
-        return providerRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Provider not found"));
-    }
-
-    private ConsumerEntity getConsumerById(final Integer id) {
-        return consumerRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Consumer not found"));
     }
 }

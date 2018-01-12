@@ -1,6 +1,6 @@
 package meeseeks.box.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -30,6 +30,8 @@ public class RequestEntity implements Serializable {
     @Column(name = "date")
     @CreationTimestamp
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonFormat(shape = JsonFormat.Shape.STRING,
+            pattern = "dd-MM-yyyy hh:mm")
     private Calendar date;
 
     @Column(name = "message")
